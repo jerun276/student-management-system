@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,6 +42,31 @@ public class AdminService {
         user.setEnabled(true);
         userRepository.save(user);
     }
+
+    public UserDto findUserById(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+        return mapToUserDto(user);
+    }
+
+    @Transactional
+    public void updateUser(UserDto userDto) { // Now takes the single DTO
+        User user = userRepository.findById(userDto.getId())
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userDto.getId()));
+
+        Optional<User> existingUserWithSameUsername = userRepository.findByUsername(userDto.getUsername());
+        if (existingUserWithSameUsername.isPresent() && !existingUserWithSameUsername.get().getId().equals(user.getId())) {
+            throw new IllegalStateException("Username '" + userDto.getUsername() + "' is already taken.");
+        }
+
+        user.setUsername(userDto.getUsername()); // <-- ALLOW USERNAME UPDATE
+        user.setEmail(userDto.getEmail());
+        user.setRole(userDto.getRole());
+        user.setEnabled(userDto.isEnabled());
+
+        userRepository.save(user);
+    }
+
 
     private UserDto mapToUserDto(User user) {
         UserDto userDto = new UserDto();

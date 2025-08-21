@@ -42,7 +42,7 @@
                         <td><span class="badge" th:classappend="${user.enabled} ? 'badge-success' : 'badge-error'"
                                   th:text="${user.enabled} ? 'Enabled' : 'Disabled'"></span></td>
                         <td>
-                            <button class="btn btn-ghost btn-sm">Edit</button>
+                            <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="btn btn-ghost btn-sm">Edit</a>
                         </td>
                     </tr>
                     </tbody>
