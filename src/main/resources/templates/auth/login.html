@@ -10,76 +10,86 @@
 
 <body class="bg-surface min-h-screen flex items-center justify-center p-4">
 
-    <!-- Login Card Component -->
-    <div class="card w-full max-w-sm bg-base-100 shadow-xl">
-        <div class="card-body">
-            <h2 class="card-title text-2xl justify-center mb-4">Welcome Back</h2>
+<!-- Login Card Component -->
+<div class="card w-full max-w-sm bg-base-100 shadow-xl">
+    <div class="card-body">
+        <h2 class="card-title text-2xl justify-center mb-4">Welcome Back</h2>
 
-            <!-- Login Error Message -->
-            <div th:if="${param.error}" class="alert alert-error shadow-sm mb-4">
-                <div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>Invalid username or password.</span>
-                </div>
+        <!-- Login Error Message -->
+        <div th:if="${param.error}" class="alert alert-error shadow-sm mb-4">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Invalid username or password.</span>
             </div>
-
-            <!-- Logout Success Message -->
-            <div th:if="${param.logout}" class="alert alert-success shadow-sm mb-4">
-                <div>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none"
-                        viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span>You have been logged out successfully.</span>
-                </div>
-            </div>
-
-            <!-- Login Form -->
-            <!-- IMPORTANT: th:action="@{/login}" automatically adds CSRF protection -->
-            <form th:action="@{/login}" method="post" class="space-y-4">
-
-                <!-- Username Input -->
-                <div class="form-control">
-                    <label class="label" for="username">
-                        <span class="label-text">Username</span>
-                    </label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username"
-                        class="input input-bordered w-full" required autofocus />
-                </div>
-
-                <!-- Password Input -->
-                <div class="form-control">
-                    <label class="label" for="password">
-                        <span class="label-text">Password</span>
-                    </label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password"
-                        class="input input-bordered w-full" required />
-                </div>
-
-                <!-- Remember Me (Optional) -->
-                <div class="form-control flex-row items-center gap-2">
-                    <input type="checkbox" id="remember-me" name="remember-me" class="checkbox checkbox-primary" />
-                    <label for="remember-me" class="label-text cursor-pointer">Remember me</label>
-                </div>
-
-                <!-- Submit Button -->
-                <div class="card-actions justify-end mt-4">
-                    <button type="submit" class="btn btn-primary w-full">Sign In</button>
-                </div>
-            </form>
-
-            <div class="divider text-sm">New Here?</div>
-
-            <!-- Link to Registration Page -->
-            <a th:href="@{/register}" class="btn btn-outline w-full">Create an Account</a>
-
         </div>
+
+        <!-- Logout Success Message -->
+        <div th:if="${param.logout}" class="alert alert-success shadow-sm mb-4">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>You have been logged out successfully.</span>
+            </div>
+        </div>
+        <div th:if="${param.registrationSuccess}" class="alert alert-success shadow-sm mb-4">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current flex-shrink-0 h-6 w-6" fill="none"
+                     viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span>Registration successful! Please sign in.</span>
+            </div>
+        </div>
+
+        <!-- Login Form -->
+        <!-- IMPORTANT: th:action="@{/login}" automatically adds CSRF protection -->
+        <form th:action="@{/login}" method="post" class="space-y-4">
+
+            <!-- Username Input -->
+            <div class="form-control">
+                <label class="label" for="username">
+                    <span class="label-text">Username</span>
+                </label>
+                <input type="text" id="username" name="username" placeholder="Enter your username"
+                       class="input input-bordered w-full" required autofocus/>
+            </div>
+
+            <!-- Password Input -->
+            <div class="form-control">
+                <label class="label" for="password">
+                    <span class="label-text">Password</span>
+                </label>
+                <input type="password" id="password" name="password" placeholder="Enter your password"
+                       class="input input-bordered w-full" required/>
+            </div>
+
+            <!-- Remember Me (Optional) -->
+            <div class="form-control flex-row items-center gap-2">
+                <input type="checkbox" id="remember-me" name="remember-me" class="checkbox checkbox-primary"/>
+                <label for="remember-me" class="label-text cursor-pointer">Remember me</label>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="card-actions justify-end mt-4">
+                <button type="submit" class="btn btn-primary w-full">Sign In</button>
+            </div>
+        </form>
+
+        <div class="divider text-sm">New Here?</div>
+
+        <!-- Link to Registration Page -->
+        <a th:href="@{/register}" class="btn btn-outline w-full">Create an Account</a>
+
     </div>
+</div>
 
 </body>
 
