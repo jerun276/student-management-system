@@ -90,6 +90,19 @@ public class DataInitializer implements CommandLineRunner {
         teacher.setEmail("teacher@school.com");
         teacher.setRole(Role.ROLE_TEACHER);
         userRepository.save(teacher);
+
+        // Create a Parent User
+        User parent = new User();
+        parent.setUsername("parent");
+        parent.setPassword(passwordEncoder.encode("parent123"));
+        parent.setEmail("parent@school.com");
+        parent.setRole(Role.ROLE_PARENT);
+        userRepository.save(parent);
+
+        student.setParent(parent);
+        userRepository.save(student);
+
+        System.out.println("Sample users including parent-child link created successfully!");
     }
 
     private void createTimetableData() {

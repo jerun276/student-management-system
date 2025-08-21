@@ -2,10 +2,19 @@ package com.student_management_system.user_management.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import lombok.EqualsAndHashCode;
+
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
-@Data
+@Getter
+@Setter
+@ToString
+@EqualsAndHashCode
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,5 +27,14 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    // TODO: Add relationships to Student, Teacher profiles etc.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private User parent;
+
+    @OneToMany(mappedBy = "parent")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<User> children;
 }
