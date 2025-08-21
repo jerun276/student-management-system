@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Select Attendance</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container mx-auto p-4">
+    <div class="card bg-base-100 shadow-xl max-w-lg mx-auto">
+        <div class="card-body">
+            <h2 class="card-title">Take Attendance</h2>
+            <form th:action="@{/teacher/attendance/mark}" method="get" class="space-y-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Select Subject</span></label>
+                    <select name="subjectId" class="select select-bordered" required>
+                        <option th:each="subject : ${subjects}" th:value="${subject.id}"
+                                th:text="${subject.name}"></option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Select Date</span></label>
+                    <input type="date" name="date" class="input input-bordered"
+                           th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required/>
+                </div>
+                <div class="card-actions justify-end">
+                    <button type="submit" class="btn btn-primary">Proceed</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

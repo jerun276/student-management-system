@@ -26,6 +26,11 @@ public class Assignment {
 
     private LocalDate dueDate;
 
+    private String grade;
+
+    @Lob
+    private String feedback;
+
     @Enumerated(EnumType.STRING)
     private AssignmentStatus status;
 
