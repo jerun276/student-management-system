@@ -1,18 +1,85 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
 
 <head>
     <meta charset="UTF-8">
-    <title>Student Management System</title>
+    <title>Welcome to Student Management System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
 <body class="bg-surface">
-    <div class="container mx-auto p-4">
-        <h1 class="text-3xl font-bold text-primary">Student Management System</h1>
-        <p class="mt-2">Welcome to the Student Management System.</p>
-        <p class="mt-2">Please <a th:href="@{/login}">login</a> to access the system.</p>
-    </div>
+<!-- 1. Replace this div with the header fragment -->
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+
+    <!-- Hero Section -->
+    <section class="text-center my-12 md:my-20">
+        <h1 class="text-4xl md:text-6xl font-bold text-primary">A Seamless Digital Campus Experience</h1>
+        <p class="text-lg md:text-xl mt-4 max-w-3xl mx-auto text-gray-600">
+            Empowering students, teachers, and administrators with a unified platform for learning, communication,
+            and management.
+        </p>
+        <div class="mt-8">
+            <a th:href="@{/login}" class="btn btn-primary btn-lg">Get Started</a>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="my-16">
+        <div class="text-center">
+            <h2 class="text-3xl font-bold mb-8">Features For Everyone</h2>
+        </div>
+        <!-- Add w-full to ensure the grid can use the full width of the container -->
+        <div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+
+            <!-- Card for Students -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h3 class="card-title text-secondary">For Students</h3>
+                    <!-- Make sure the list has some top margin -->
+                    <ul class="list-disc list-inside space-y-2 mt-2">
+                        <li>View personalized timetables</li>
+                        <li>Submit assignments online</li>
+                        <li>Receive instant grade notifications</li>
+                        <li>Access study materials anytime</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Card for Teachers -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h3 class="card-title text-secondary">For Teachers</h3>
+                    <ul class="list-disc list-inside space-y-2 mt-2">
+                        <li>Mark student attendance digitally</li>
+                        <li>Enter and manage student marks</li>
+                        <li>Upload study materials and resources</li>
+                        <li>Communicate directly with parents</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Card for Admins & Staff -->
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h3 class="card-title text-secondary">For Administration</h3>
+                    <ul class="list-disc list-inside space-y-2 mt-2">
+                        <li>Manage all user accounts and roles</li>
+                        <li>Generate insightful school-wide reports</li>
+                        <li>Handle fee payments and send reminders</li>
+                        <li>Manage school events and facilities</li>
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </section>
+</main>
+
+<!-- 2. Replace this div with the footer fragment -->
+<div th:replace="~{fragments/footer :: footer}"></div>
+
 </body>
 
 </html>
