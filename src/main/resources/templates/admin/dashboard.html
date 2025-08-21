@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">User Management</h1>
+        <label for="create-user-modal" class="btn btn-primary">Create New User</label>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+
+    <!-- Users Table Card -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}">1</td>
+                        <td th:text="${user.username}">admin</td>
+                        <td th:text="${user.email}">admin@school.com</td>
+                        <td><span class="badge badge-primary" th:text="${user.role.name().replace('ROLE_', '')}"></span>
+                        </td>
+                        <td><span class="badge" th:classappend="${user.enabled} ? 'badge-success' : 'badge-error'"
+                                  th:text="${user.enabled} ? 'Enabled' : 'Disabled'"></span></td>
+                        <td>
+                            <button class="btn btn-ghost btn-sm">Edit</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Create User Modal -->
+<input type="checkbox" id="create-user-modal" class="modal-toggle"/>
+<div class="modal">
+    <div class="modal-box w-auto max-w-lg">
+        <h3 class="font-bold text-lg">Create New User</h3>
+        <form th:action="@{/admin/users/create}" th:object="${newUser}" method="post" class="space-y-4 py-4">
+
+            <div class="form-control">
+                <label class="label"><span class="label-text">Username</span></label>
+                <input type="text" th:field="*{username}" class="input input-bordered"/>
+                <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
+            </div>
+
+            <div class="form-control">
+                <label class="label"><span class="label-text">Email</span></label>
+                <input type="email" th:field="*{email}" class="input input-bordered"/>
+                <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
+            </div>
+
+            <div class="form-control">
+                <label class="label"><span class="label-text">Password</span></label>
+                <input type="password" th:field="*{password}" class="input input-bordered"/>
+                <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+            </div>
+
+            <div class="form-control">
+                <label class="label"><span class="label-text">Role</span></label>
+                <select th:field="*{role}" class="select select-bordered">
+                    <option th:each="role : ${allRoles}" th:value="${role}"
+                            th:text="${role.name().replace('ROLE_', '')}"></option>
+                </select>
+                <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('role')}" th:errors="*{role}"></p>
+            </div>
+
+            <div class="modal-action">
+                <label for="create-user-modal" class="btn btn-ghost">Cancel</label>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </form>
+    </div>
+    <!-- This part makes it so you can click outside the modal to close it -->
+    <label class="modal-backdrop" for="create-user-modal">Close</label>
+</div>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>
