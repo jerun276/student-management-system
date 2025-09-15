@@ -44,6 +44,13 @@
                         </td>
                         <td th:text="${entry.subject.name}">Mathematics</td>
                         <td th:text="${entry.subject.teacherName}">Mr. Smith</td>
+                        <td class="font-bold">
+                            <a th:href="@{/student/materials/subject/{id}(id=${entry.subject.id})}"
+                               class="link link-primary"
+                               th:text="${entry.subject.name}">
+                                Mathematics
+                            </a>
+                        </td>
                     </tr>
                     </tbody>
                 </table>

@@ -11,8 +11,16 @@ import com.student_management_system.teacher.repository.AttendanceRecordReposito
 import com.student_management_system.user_management.model.Role;
 import com.student_management_system.user_management.model.User;
 import com.student_management_system.user_management.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.student_management_system.common.service.FileStorageService;
+import com.student_management_system.teacher.model.StudyMaterial;
+import com.student_management_system.teacher.repository.StudyMaterialRepository;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDateTime;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -30,13 +38,17 @@ public class TeacherService {
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
     private final AttendanceRecordRepository attendanceRecordRepository;
+    private final StudyMaterialRepository studyMaterialRepository; // <-- ADD
+    private final FileStorageService fileStorageService; // <-- ADD
 
     public TeacherService(AssignmentRepository assignmentRepository, SubjectRepository subjectRepository,
-                          UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository) {
+                          UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService) {
         this.assignmentRepository = assignmentRepository;
         this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
         this.attendanceRecordRepository = attendanceRecordRepository;
+        this.studyMaterialRepository = studyMaterialRepository;
+        this.fileStorageService = fileStorageService;
     }
 
     // For now, we get all submitted assignments. Later, we can filter by teacher.
@@ -111,5 +123,33 @@ public class TeacherService {
 
             attendanceRecordRepository.save(record);
         }
+    }
+
+    // NEW METHOD: Handle the file upload and save the metadata
+    @Transactional
+    public void uploadStudyMaterial(String title, String description, Long subjectId, MultipartFile file) {
+        // 1. Store the file on disk
+        String fileName = fileStorageService.storeFile(file);
+
+        // 2. Get the current teacher user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User teacher = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+
+        // 3. Get the subject
+        Subject subject = subjectRepository.findById(subjectId)
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        // 4. Create and save the StudyMaterial entity
+        StudyMaterial studyMaterial = new StudyMaterial();
+        studyMaterial.setTitle(title);
+        studyMaterial.setDescription(description);
+        studyMaterial.setFileName(fileName);
+        studyMaterial.setSubject(subject);
+        studyMaterial.setUploadedBy(teacher);
+        studyMaterial.setUploadDate(LocalDateTime.now());
+
+        studyMaterialRepository.save(studyMaterial);
     }
 }

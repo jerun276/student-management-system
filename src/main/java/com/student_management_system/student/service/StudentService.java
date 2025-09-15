@@ -10,6 +10,8 @@ import com.student_management_system.student.repository.AssignmentRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
+import com.student_management_system.teacher.model.StudyMaterial;
+import com.student_management_system.teacher.repository.StudyMaterialRepository;
 
 import java.time.LocalDateTime;
 
@@ -23,11 +25,13 @@ public class StudentService {
     private final TimetableEntryRepository timetableEntryRepository;
     private final UserRepository userRepository;
     private final AssignmentRepository assignmentRepository;
+    private final StudyMaterialRepository studyMaterialRepository;
 
-    public StudentService(TimetableEntryRepository timetableEntryRepository, UserRepository userRepository, AssignmentRepository assignmentRepository) {
+    public StudentService(TimetableEntryRepository timetableEntryRepository, UserRepository userRepository, AssignmentRepository assignmentRepository, StudyMaterialRepository studyMaterialRepository) {
         this.timetableEntryRepository = timetableEntryRepository;
         this.userRepository = userRepository;
         this.assignmentRepository = assignmentRepository;
+        this.studyMaterialRepository = studyMaterialRepository;
     }
 
     public List<TimetableEntry> getStudentTimetable() {
@@ -81,5 +85,9 @@ public class StudentService {
         assignment.setStatus(AssignmentStatus.SUBMITTED);
 
         assignmentRepository.save(assignment);
+    }
+
+    public List<StudyMaterial> getStudyMaterialsForSubject(Long subjectId) {
+        return studyMaterialRepository.findBySubjectId(subjectId);
     }
 }
