@@ -32,7 +32,8 @@
                     </p>
                     <div class="card-actions justify-end mt-2">
                         <!-- Placeholder for future reply functionality -->
-                        <button class="btn btn-primary btn-sm" disabled>Reply</button>
+                        <a th:href="@{/teacher/messages/{id}/reply(id=${msg.id})}"
+                           class="btn btn-primary btn-sm">Reply</a>
                     </div>
                 </div>
             </div>
