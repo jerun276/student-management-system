@@ -16,6 +16,10 @@ import com.student_management_system.staff.model.Event;
 import com.student_management_system.staff.repository.EventRepository;
 import com.student_management_system.staff.model.EventRegistration;
 import com.student_management_system.staff.repository.EventRegistrationRepository;
+import com.student_management_system.staff.model.Booking;
+import com.student_management_system.staff.model.Facility;
+import com.student_management_system.staff.repository.BookingRepository;
+import com.student_management_system.staff.repository.FacilityRepository;
 import com.student_management_system.user_management.model.User;
 
 import java.time.LocalDateTime;
@@ -35,13 +39,17 @@ public class StaffService {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
     private final EventRegistrationRepository eventRegistrationRepository;
+    private final FacilityRepository facilityRepository;
+    private final BookingRepository bookingRepository;
 
-    public StaffService(FeeRepository feeRepository, PaymentRepository paymentRepository, UserRepository userRepository, EventRepository eventRepository, EventRegistrationRepository eventRegistrationRepository) {
+    public StaffService(FeeRepository feeRepository, PaymentRepository paymentRepository, UserRepository userRepository, EventRepository eventRepository, EventRegistrationRepository eventRegistrationRepository, FacilityRepository facilityRepository, BookingRepository bookingRepository) {
         this.feeRepository = feeRepository;
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
         this.eventRepository = eventRepository;
         this.eventRegistrationRepository = eventRegistrationRepository;
+        this.facilityRepository = facilityRepository;
+        this.bookingRepository = bookingRepository;
     }
 
     public List<Fee> getAllFees() {
@@ -157,5 +165,37 @@ public class StaffService {
         registration.setRegistrationDate(LocalDateTime.now());
 
         eventRegistrationRepository.save(registration);
+    }
+
+    public List<Facility> getAllFacilities() {
+        return facilityRepository.findAll();
+    }
+
+    public List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
+    }
+
+    public Facility createFacility(Facility facility) {
+        return facilityRepository.save(facility);
+    }
+
+    @Transactional
+    public Booking createBooking(Booking booking, User bookedBy) {
+        // 1. Check for scheduling conflicts
+        List<Booking> overlappingBookings = bookingRepository.findOverlappingBookings(
+                booking.getFacility().getId(), booking.getStartTime(), booking.getEndTime());
+
+        if (!overlappingBookings.isEmpty()) {
+            throw new IllegalStateException("The selected time slot is already booked for this facility.");
+        }
+
+        // 2. Check that end time is after start time
+        if (!booking.getEndTime().isAfter(booking.getStartTime())) {
+            throw new IllegalStateException("Booking end time must be after the start time.");
+        }
+
+        // 3. Set the user who is booking and save
+        booking.setBookedBy(bookedBy);
+        return bookingRepository.save(booking);
     }
 }
