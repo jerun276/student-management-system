@@ -7,56 +7,63 @@
 
 <body>
 
-    <!-- 
-  th:fragment="header" defines this block as a reusable component named "header".
-  We will add the xmlns:sec namespace to enable security tags.
+<!--
+th:fragment="header" defines this block as a reusable component named "header".
+We will add the xmlns:sec namespace to enable security tags.
 -->
-    <header th:fragment="header" class="bg-base-100 shadow-md">
-        <div class="navbar container mx-auto">
+<header th:fragment="header" class="bg-base-100 shadow-md">
+    <div class="navbar container mx-auto">
 
-            <!-- Left Side: Brand/Logo -->
-            <div class="navbar-start">
-                <a th:href="@{/}" class="btn btn-ghost text-xl">
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                        stroke="currentColor" class="w-6 h-6 text-primary">
-                        <path stroke-linecap="round" stroke-linejoin="round"
-                            d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-2.072-1.036A48.222 48.222 0 0112 2.25c4.142 0 8.132.663 11.758 1.86l-2.072 1.036m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5z" />
-                    </svg>
-                    <span class="font-bold">SchoolSys</span>
-                </a>
+        <!-- Left Side: Brand/Logo -->
+        <div class="navbar-start">
+            <a th:href="@{/}" class="btn btn-ghost text-xl">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                     stroke="currentColor" class="w-6 h-6 text-primary">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-2.072-1.036A48.222 48.222 0 0112 2.25c4.142 0 8.132.663 11.758 1.86l-2.072 1.036m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
+                </svg>
+                <span class="font-bold">SchoolSys</span>
+            </a>
+        </div>
+
+        <!-- Right Side: Dynamic Links based on Authentication -->
+        <div class="navbar-end gap-2">
+
+            <!-- === ANONYMOUS (LOGGED OUT) USERS === -->
+            <div sec:authorize="isAnonymous()">
+                <a th:href="@{/login}" class="btn btn-outline btn-primary">Login</a>
+                <a th:href="@{/register}" class="btn btn-primary">Register</a>
             </div>
 
-            <!-- Right Side: Dynamic Links based on Authentication -->
-            <div class="navbar-end gap-2">
-
-                <!-- === ANONYMOUS (LOGGED OUT) USERS === -->
-                <div sec:authorize="isAnonymous()">
-                    <a th:href="@{/login}" class="btn btn-outline btn-primary">Login</a>
-                    <a th:href="@{/register}" class="btn btn-primary">Register</a>
-                </div>
-
-                <!-- === AUTHENTICATED (LOGGED IN) USERS === -->
-                <div sec:authorize="isAuthenticated()" class="flex items-center gap-4">
+            <!-- === AUTHENTICATED (LOGGED IN) USERS === -->
+            <div sec:authorize="isAuthenticated()" class="flex items-center gap-4">
                     <span class="font-semibold">Welcome, <span sec:authentication="name"
-                            class="text-primary">user</span>!</span>
+                                                               class="text-primary">user</span>!</span>
 
-                    <!-- Dynamic Dashboard Link based on Role -->
-                    <a th:href="@{/student/dashboard}" sec:authorize="hasRole('STUDENT')" class="btn btn-ghost">My
-                        Dashboard</a>
-                    <a th:href="@{/teacher/dashboard}" sec:authorize="hasRole('TEACHER')" class="btn btn-ghost">My
-                        Dashboard</a>
-                    <a th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMIN')" class="btn btn-ghost">My
-                        Dashboard</a>
-                    <!-- Add other roles here -->
+                <!-- Dynamic Dashboard Link based on Role -->
+                <a th:href="@{/student/dashboard}" sec:authorize="hasRole('STUDENT')" class="btn btn-ghost">My
+                    Dashboard</a>
+                <a th:href="@{/teacher/dashboard}" sec:authorize="hasRole('TEACHER')" class="btn btn-ghost">My
+                    Dashboard</a>
+                <a th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMIN')" class="btn btn-ghost">My
+                    Dashboard</a>
+                <a th:href="@{/staff/dashboard}" sec:authorize="hasRole('STAFF')" class="btn btn-ghost">My
+                    Dashboard</a>
+                <a th:href="@{/parent/dashboard}" sec:authorize="hasRole('PARENT')" class="btn btn-ghost">My
+                    Dashboard</a>
+                <!-- Add other roles here -->
 
-                    <!-- Logout Button (must be a form for CSRF protection) -->
-                    <form th:action="@{/logout}" method="post">
-                        <button type="submit" class="btn btn-outline">Logout</button>
-                    </form>
-                </div>
+                <a th:href="@{/teacher/messages}" sec:authorize="hasRole('TEACHER')" class="btn btn-ghost">Messages</a>
+                <a th:href="@{/parent/messages}" sec:authorize="hasRole('PARENT')" class="btn btn-ghost">Messages</a>
+
+                <!-- Logout Button (must be a form for CSRF protection) -->
+                <form th:action="@{/logout}" method="post">
+                    <button type="submit" class="btn btn-outline">Logout</button>
+                </form>
             </div>
         </div>
-    </header>
+    </div>
+</header>
 
 </body>
 

@@ -1,6 +1,7 @@
 package com.student_management_system.parent.service;
 
 import com.student_management_system.parent.dto.ChildDataDto;
+import com.student_management_system.student.model.Assignment;
 import com.student_management_system.student.repository.AssignmentRepository;
 import com.student_management_system.teacher.repository.AttendanceRecordRepository;
 import com.student_management_system.user_management.model.User;
@@ -9,6 +10,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.student_management_system.student.model.Assignment;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,5 +51,15 @@ public class ParentService {
         String currentUsername = authentication.getName();
         return userRepository.findByUsernameWithChildren(currentUsername)
                 .orElseThrow(() -> new IllegalStateException("Current user not found"));
+    }
+
+    // Get a list of all unique teachers for the parent's children
+    @Transactional(readOnly = true)
+    public Set<User> getTeachersForChildren() {
+        User parent = getCurrentUser();
+        return parent.getChildren().stream()
+                .flatMap(child -> child.getAssignments().stream())
+                .map(Assignment::getTeacher)
+                .collect(Collectors.toSet());
     }
 }

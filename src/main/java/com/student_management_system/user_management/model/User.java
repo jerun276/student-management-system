@@ -1,5 +1,6 @@
 package com.student_management_system.user_management.model;
 
+import com.student_management_system.student.model.Assignment;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.EqualsAndHashCode;
 
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -37,4 +39,9 @@ public class User {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<User> children;
+
+    @OneToMany(mappedBy = "user")
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<Assignment> assignments;
 }
