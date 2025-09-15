@@ -27,6 +27,8 @@ public class Fee {
 
     @Enumerated(EnumType.STRING)
     private FeeStatus status;
+    private LocalDate lastReminderSent;
+
 
     @OneToMany(mappedBy = "fee", cascade = CascadeType.ALL)
     private List<Payment> payments;

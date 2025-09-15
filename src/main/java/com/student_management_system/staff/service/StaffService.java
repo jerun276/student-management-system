@@ -13,6 +13,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -87,5 +89,24 @@ public class StaffService {
         String currentUsername = authentication.getName();
         return userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new IllegalStateException("Current user not found"));
+    }
+
+    @Transactional
+    public void sendFeeReminder(Long feeId) {
+        Fee fee = findFeeById(feeId);
+
+        // A simple check to ensure we don't send reminders for paid fees
+        if (fee.getStatus() == FeeStatus.PAID) {
+            throw new IllegalStateException("Cannot send a reminder for a fully paid fee.");
+        }
+
+        // The core logic: update the date and save.
+        fee.setLastReminderSent(LocalDate.now());
+
+        feeRepository.save(fee);
+
+        // In a real-world application, this is where you would trigger an email or SMS service.
+        // For now, we'll just log it to the console.
+        System.out.println("Reminder sent for Fee ID: " + feeId + " to Student: " + fee.getStudent().getUsername());
     }
 }

@@ -27,6 +27,7 @@
                         <th>Amount Paid</th>
                         <th>Balance Due</th>
                         <th>Due Date</th>
+                        <th>Last Reminder Sent</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -41,6 +42,9 @@
                         <td class="font-bold"
                             th:text="'$' + ${#numbers.formatDecimal(fee.totalAmount - fee.amountPaid, 1, 'COMMA', 2, 'POINT')}"></td>
                         <td th:text="${#temporals.format(fee.dueDate, 'dd-MMM-yyyy')}"></td>
+                        <td th:text="${fee.lastReminderSent != null ? #temporals.format(fee.lastReminderSent, 'dd-MMM-yyyy') : 'N/A'}">
+                            15-Aug-2025
+                        </td>
                         <td>
                                 <span class="badge"
                                       th:classappend="${fee.status.name() == 'PAID'} ? 'badge-success' : (${fee.status.name() == 'PARTIALLY_PAID'} ? 'badge-warning' : 'badge-error')"
@@ -53,6 +57,10 @@
                                class="btn btn-primary btn-sm">
                                 Record Payment
                             </a>
+                            <form th:action="@{/staff/fees/{id}/send-reminder(id=${fee.id})}" method="post"
+                                  th:if="${fee.status.name() != 'PAID'}">
+                                <button type="submit" class="btn btn-outline btn-sm">Reminder</button>
+                            </form>
                             <button th:if="${fee.status.name() == 'PAID'}" class="btn btn-sm btn-success" disabled>Paid
                                 in Full
                             </button>
