@@ -13,6 +13,11 @@ import com.student_management_system.student.repository.AssignmentRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
+import com.student_management_system.staff.model.Fee;
+import com.student_management_system.staff.model.FeeStatus;
+import com.student_management_system.staff.repository.FeeRepository;
+
+import java.math.BigDecimal;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -26,18 +31,20 @@ public class DataInitializer implements CommandLineRunner {
     private final SubjectRepository subjectRepository;
     private final TimetableEntryRepository timetableEntryRepository;
     private final AssignmentRepository assignmentRepository;
+    private final FeeRepository feeRepository;
 
     public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder,
-                           SubjectRepository subjectRepository, TimetableEntryRepository timetableEntryRepository, AssignmentRepository assignmentRepository) {
+                           SubjectRepository subjectRepository, TimetableEntryRepository timetableEntryRepository, AssignmentRepository assignmentRepository, FeeRepository feeRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.subjectRepository = subjectRepository;
         this.timetableEntryRepository = timetableEntryRepository;
         this.assignmentRepository = assignmentRepository;
+        this.feeRepository = feeRepository;
     }
 
     @Override
-    public void run(String... args) throws Exception {
+    public void run(String... args) {
         // Only run this if the user table is empty to avoid creating duplicate users on
         // every restart
         if (userRepository.count() == 0) {
@@ -63,13 +70,19 @@ public class DataInitializer implements CommandLineRunner {
         } else {
             System.out.println("Assignment already exist in the DB, skipping data initialization.");
         }
+
+        if (feeRepository.count() == 0) {
+            createStaffAndFees();
+        }
+
     }
 
     private void createUsers() {
+        System.out.println("No users found in DB, creating sample users...");
+
         // Create an Admin User
         User admin = new User();
         admin.setUsername("admin");
-        // IMPORTANT: Always encode passwords before saving!
         admin.setPassword(passwordEncoder.encode("admin123"));
         admin.setEmail("admin@school.com");
         admin.setRole(Role.ROLE_ADMIN);
@@ -171,5 +184,32 @@ public class DataInitializer implements CommandLineRunner {
         assignmentRepository.save(assignment2);
 
         System.out.println("Sample assignments created.");
+    }
+
+    private void createStaffAndFees() {
+        System.out.println("Creating sample staff user and fees...");
+
+        // Create Staff User
+        User staff = new User();
+        staff.setUsername("staff");
+        staff.setPassword(passwordEncoder.encode("staff123"));
+        staff.setEmail("staff@school.com");
+        staff.setRole(Role.ROLE_STAFF);
+        userRepository.save(staff);
+
+        User student = userRepository.findByUsername("student").orElse(null);
+        if (student == null) return;
+
+        Fee annualFee = new Fee();
+        annualFee.setTitle("Annual Tuition Fee 2025");
+        annualFee.setStudent(student);
+        annualFee.setTotalAmount(new BigDecimal("5000.00"));
+        annualFee.setAmountPaid(new BigDecimal("1000.00"));
+        annualFee.setDueDate(LocalDate.now().plusMonths(1));
+        annualFee.setStatus(FeeStatus.PARTIALLY_PAID);
+
+        feeRepository.save(annualFee);
+
+        System.out.println("Sample staff and fees created.");
     }
 }

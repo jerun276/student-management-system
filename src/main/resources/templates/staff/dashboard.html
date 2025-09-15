@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Staff Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Fee Management</h1>
+        <!-- Placeholder for future "Assign New Fee" button -->
+        <button class="btn btn-primary" disabled>Assign New Fee</button>
+    </div>
+
+    <!-- Fees Table Card -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Fee Title</th>
+                        <th>Total Amount</th>
+                        <th>Amount Paid</th>
+                        <th>Balance Due</th>
+                        <th>Due Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="fee : ${fees}">
+                        <td th:text="${fee.student.username}">student_username</td>
+                        <td th:text="${fee.title}">Annual Tuition Fee 2025</td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(fee.totalAmount, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(fee.amountPaid, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <!-- Calculate balance on the fly -->
+                        <td class="font-bold"
+                            th:text="'$' + ${#numbers.formatDecimal(fee.totalAmount - fee.amountPaid, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td th:text="${#temporals.format(fee.dueDate, 'dd-MMM-yyyy')}"></td>
+                        <td>
+                                <span class="badge"
+                                      th:classappend="${fee.status.name() == 'PAID'} ? 'badge-success' : (${fee.status.name() == 'PARTIALLY_PAID'} ? 'badge-warning' : 'badge-error')"
+                                      th:text="${fee.status.name().replace('_', ' ')}">
+                                </span>
+                        </td>
+                        <td>
+                            <a th:href="@{/staff/fees/{id}/record-payment(id=${fee.id})}"
+                               th:if="${fee.status.name() != 'PAID'}"
+                               class="btn btn-primary btn-sm">
+                                Record Payment
+                            </a>
+                            <button th:if="${fee.status.name() == 'PAID'}" class="btn btn-sm btn-success" disabled>Paid
+                                in Full
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

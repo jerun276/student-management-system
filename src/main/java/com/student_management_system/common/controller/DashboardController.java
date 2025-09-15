@@ -10,9 +10,4 @@ public class DashboardController {
     public String principalDashboard() {
         return "principal/dashboard";
     }
-
-    @GetMapping("/staff/dashboard")
-    public String staffDashboard() {
-        return "staff/dashboard";
-    }
 }
