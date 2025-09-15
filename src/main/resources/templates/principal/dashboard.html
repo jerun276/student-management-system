@@ -20,24 +20,27 @@
                 <span>No graded assignment data is available to generate a report yet.</span>
             </div>
 
-            <div th:if="${!performanceReport.isEmpty()}" class="overflow-x-auto mt-4">
-                <table class="table w-full">
-                    <thead>
-                    <tr>
-                        <th>Subject</th>
-                        <th>Graded Assignments</th>
-                        <th>Average Grade</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="report : ${performanceReport}">
-                        <td class="font-bold" th:text="${report.subjectName}">Mathematics</td>
-                        <td th:text="${report.gradedAssignmentsCount}">50</td>
-                        <td th:text="${#numbers.formatDecimal(report.averageGrade, 1, 2) + '%'}">88.50%</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+            <!--            <div th:if="${!performanceReport.isEmpty()}" class="overflow-x-auto mt-4">-->
+            <!--                <table class="table w-full">-->
+            <!--                    <thead>-->
+            <!--                    <tr>-->
+            <!--                        <th>Subject</th>-->
+            <!--                        <th>Graded Assignments</th>-->
+            <!--                        <th>Average Grade</th>-->
+            <!--                    </tr>-->
+            <!--                    </thead>-->
+            <!--                    <tbody>-->
+            <!--                    <tr th:each="report : ${performanceReport}">-->
+            <!--                        <td class="font-bold" th:text="${report.subjectName}">Mathematics</td>-->
+            <!--                        <td th:text="${report.gradedAssignmentsCount}">50</td>-->
+            <!--                        <td th:text="${#numbers.formatDecimal(report.averageGrade, 1, 2) + '%'}">88.50%</td>-->
+            <!--                    </tr>-->
+            <!--                    </tbody>-->
+            <!--                </table>-->
+            <!--            </div>-->
+
+            <div id="react-performance-chart"></div>
+
         </div>
     </div>
 
@@ -160,6 +163,8 @@
     <!-- Placeholder for other reports -->
 
 </main>
+<script type="module" src="/react-build/main.js"></script>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

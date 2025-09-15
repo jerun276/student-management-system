@@ -1,0 +1,8 @@
+{
+  "src/main/react/main.jsx": {
+    "file": "main.js",
+    "name": "main",
+    "src": "src/main/react/main.jsx",
+    "isEntry": true
+  }
+}
