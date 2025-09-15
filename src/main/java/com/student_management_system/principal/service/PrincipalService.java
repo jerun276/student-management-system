@@ -12,8 +12,15 @@ import com.student_management_system.user_management.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Collections;
 import java.time.LocalDateTime;
+
+import com.student_management_system.principal.dto.TeacherPerformanceDto;
+import com.student_management_system.user_management.model.Role;
+import com.student_management_system.user_management.model.User;
+
+import java.util.ArrayList;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -100,5 +107,46 @@ public class PrincipalService {
         announcement.setPublishedDate(LocalDateTime.now());
 
         announcementRepository.save(announcement);
+    }
+
+    // Generate the Teacher Performance Report
+    public List<TeacherPerformanceDto> getTeacherPerformanceReport() {
+        // 1. Get all teachers
+        List<User> teachers = userRepository.findByRole(Role.ROLE_TEACHER);
+
+        // 2. Get all assignments
+        List<Assignment> allAssignments = assignmentRepository.findAll();
+
+        List<TeacherPerformanceDto> report = new ArrayList<>();
+
+        // 3. For each teacher, calculate their stats
+        for (User teacher : teachers) {
+            TeacherPerformanceDto dto = new TeacherPerformanceDto();
+            dto.setTeacherName(teacher.getUsername());
+
+            // Filter assignments for the current teacher
+            List<Assignment> teacherAssignments = allAssignments.stream()
+                    .filter(a -> a.getTeacher() != null && a.getTeacher().getId().equals(teacher.getId()))
+                    .collect(Collectors.toList());
+
+            long totalAssigned = teacherAssignments.size();
+            long gradedCount = teacherAssignments.stream()
+                    .filter(a -> a.getStatus() == AssignmentStatus.GRADED)
+                    .count();
+
+            dto.setTotalAssignmentsAssigned(totalAssigned);
+            dto.setAssignmentsGraded(gradedCount);
+
+            if (totalAssigned > 0) {
+                double completionRate = ((double) gradedCount / totalAssigned) * 100.0;
+                dto.setGradingCompletionRate(completionRate);
+            } else {
+                dto.setGradingCompletionRate(0.0);
+            }
+
+            report.add(dto);
+        }
+
+        return report;
     }
 }

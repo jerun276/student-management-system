@@ -43,4 +43,8 @@ public class Assignment {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "teacher_id")
+    private User teacher;
 }

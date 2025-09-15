@@ -41,7 +41,7 @@
         </div>
     </div>
 
-    <!-- NEW: Announcements Management Card (US14) -->
+    <!-- Announcements Management Card (US14) -->
     <div class="card bg-base-100 shadow-xl mt-6">
         <div class="card-body">
             <h2 class="card-title">Manage Announcements</h2>
@@ -77,6 +77,47 @@
             </div>
         </div>
     </div>
+
+    <!-- Teacher Performance Report Card (US15) -->
+    <div class="card bg-base-100 shadow-xl mt-6">
+        <div class="card-body">
+            <h2 class="card-title">Teacher Performance Report</h2>
+            <p class="text-sm">An overview of assignment grading by teachers.</p>
+
+            <div th:if="${teacherPerformanceReport.isEmpty()}" class="alert alert-info mt-4">
+                <span>No teacher performance data is available yet.</span>
+            </div>
+
+            <div th:if="${!teacherPerformanceReport.isEmpty()}" class="overflow-x-auto mt-4">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Teacher</th>
+                        <th>Assignments Assigned</th>
+                        <th>Assignments Graded</th>
+                        <th>Grading Completion</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="report : ${teacherPerformanceReport}">
+                        <td class="font-bold" th:text="${report.teacherName}">teacher_username</td>
+                        <td th:text="${report.totalAssignmentsAssigned}">10</td>
+                        <td th:text="${report.assignmentsGraded}">8</td>
+                        <td>
+                            <div class="flex items-center gap-2">
+                                <progress class="progress progress-primary w-56"
+                                          th:value="${report.gradingCompletionRate}"
+                                          max="100"></progress>
+                                <span th:text="${#numbers.formatDecimal(report.gradingCompletionRate, 1, 1) + '%'}">80.0%</span>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Placeholder for other reports -->
 
 </main>

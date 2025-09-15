@@ -23,6 +23,7 @@ public class PrincipalDashboardController {
     public String showDashboard(Model model) {
         model.addAttribute("announcements", principalService.getAllAnnouncements());
         model.addAttribute("performanceReport", principalService.getSubjectPerformanceReport());
+        model.addAttribute("teacherPerformanceReport", principalService.getTeacherPerformanceReport());
         return "principal/dashboard";
     }
 

@@ -168,10 +168,11 @@ public class DataInitializer implements CommandLineRunner {
         System.out.println("Creating sample assignments...");
 
         User student = userRepository.findByUsername("student").orElse(null);
+        User teacher = userRepository.findByUsername("teacher").orElse(null);
         Subject math = subjectRepository.findAll().stream()
                 .filter(s -> s.getName().equals("Mathematics")).findFirst().orElse(null);
 
-        if (student == null || math == null) return;
+        if (student == null || math == null || teacher == null) return;
 
         Assignment assignment1 = new Assignment();
         assignment1.setTitle("Algebra Homework 1");
@@ -180,6 +181,7 @@ public class DataInitializer implements CommandLineRunner {
         assignment1.setStatus(AssignmentStatus.PENDING);
         assignment1.setSubject(math);
         assignment1.setUser(student);
+        assignment1.setTeacher(teacher);
         assignmentRepository.save(assignment1);
 
         Assignment assignment2 = new Assignment();
@@ -189,6 +191,7 @@ public class DataInitializer implements CommandLineRunner {
         assignment2.setStatus(AssignmentStatus.PENDING);
         assignment2.setSubject(math);
         assignment2.setUser(student);
+        assignment2.setTeacher(teacher);
         assignmentRepository.save(assignment2);
 
         System.out.println("Sample assignments created.");
