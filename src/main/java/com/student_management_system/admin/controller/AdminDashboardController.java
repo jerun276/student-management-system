@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/admin")
@@ -90,6 +91,27 @@ public class AdminDashboardController {
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "An unexpected error occurred.");
             return "redirect:/admin/dashboard";
+        }
+
+        return "redirect:/admin/dashboard";
+    }
+
+    // Process the password reset form submission
+    @PostMapping("/users/{id}/reset-password")
+    public String resetPassword(@PathVariable Long id,
+                                @RequestParam String newPassword,
+                                RedirectAttributes redirectAttributes) {
+
+        if (newPassword == null || newPassword.length() < 8) {
+            redirectAttributes.addFlashAttribute("passwordError", "Password must be at least 8 characters long.");
+            return "redirect:/admin/users/" + id + "/edit";
+        }
+
+        try {
+            adminService.resetPassword(id, newPassword);
+            redirectAttributes.addFlashAttribute("successMessage", "Password reset successfully!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
 
         return "redirect:/admin/dashboard";

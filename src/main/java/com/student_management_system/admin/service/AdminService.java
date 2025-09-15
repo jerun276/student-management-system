@@ -67,6 +67,17 @@ public class AdminService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public void resetPassword(Long userId, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+
+        // Encode the new password before saving
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.save(user);
+    }
+
 
     private UserDto mapToUserDto(User user) {
         UserDto userDto = new UserDto();
