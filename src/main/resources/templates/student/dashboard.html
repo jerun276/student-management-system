@@ -58,6 +58,7 @@
         </div>
     </div>
 
+    <!-- My Assignment Card -->
     <div class="card bg-base-100 shadow-xl mt-6">
         <div class="card-body">
             <h2 class="card-title">My Assignments</h2>
@@ -110,6 +111,19 @@
             </div>
         </div>
     </div>
+
+    <!-- Events Card -->
+    <div class="card bg-base-100 shadow-xl mt-6">
+        <div class="card-body">
+            <h2 class="card-title">School Events</h2>
+            <p>Browse and register for upcoming school events, workshops, and competitions.</p>
+            <div class="card-actions justify-end">
+                <a th:href="@{/student/events}" class="btn btn-primary">View Events</a>
+            </div>
+        </div>
+    </div>
+
+</main>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>

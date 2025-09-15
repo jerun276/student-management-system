@@ -12,6 +12,13 @@ import com.student_management_system.user_management.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+import com.student_management_system.staff.model.Event;
+import com.student_management_system.staff.repository.EventRepository;
+import com.student_management_system.staff.model.EventRegistration;
+import com.student_management_system.staff.repository.EventRegistrationRepository;
+import com.student_management_system.user_management.model.User;
+
+import java.time.LocalDateTime;
 
 import java.time.LocalDate;
 
@@ -26,11 +33,15 @@ public class StaffService {
     private final FeeRepository feeRepository;
     private final PaymentRepository paymentRepository;
     private final UserRepository userRepository;
+    private final EventRepository eventRepository;
+    private final EventRegistrationRepository eventRegistrationRepository;
 
-    public StaffService(FeeRepository feeRepository, PaymentRepository paymentRepository, UserRepository userRepository) {
+    public StaffService(FeeRepository feeRepository, PaymentRepository paymentRepository, UserRepository userRepository, EventRepository eventRepository, EventRegistrationRepository eventRegistrationRepository) {
         this.feeRepository = feeRepository;
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
+        this.eventRepository = eventRepository;
+        this.eventRegistrationRepository = eventRegistrationRepository;
     }
 
     public List<Fee> getAllFees() {
@@ -108,5 +119,43 @@ public class StaffService {
         // In a real-world application, this is where you would trigger an email or SMS service.
         // For now, we'll just log it to the console.
         System.out.println("Reminder sent for Fee ID: " + feeId + " to Student: " + fee.getStudent().getUsername());
+    }
+
+    public List<Event> getAllEvents() {
+        return eventRepository.findAll();
+    }
+
+    public Event createEvent(Event event) {
+        return eventRepository.save(event);
+    }
+
+    public Event findEventById(Long eventId) {
+        return eventRepository.findById(eventId)
+                .orElseThrow(() -> new RuntimeException("Event not found with id: " + eventId));
+    }
+
+    // Handle a student's registration
+    @Transactional
+    public void registerStudentForEvent(Long eventId, User student) {
+        Event event = findEventById(eventId);
+
+        // Check if the event is full
+        if (event.getRegistrations() != null && event.getRegistrations().size() >= event.getMaxAttendees()) {
+            throw new IllegalStateException("This event is already full.");
+        }
+
+        // Check if the student is already registered
+        boolean alreadyRegistered = event.getRegistrations() != null && event.getRegistrations().stream()
+                .anyMatch(reg -> reg.getStudent().getId().equals(student.getId()));
+        if (alreadyRegistered) {
+            throw new IllegalStateException("You are already registered for this event.");
+        }
+
+        EventRegistration registration = new EventRegistration();
+        registration.setEvent(event);
+        registration.setStudent(student);
+        registration.setRegistrationDate(LocalDateTime.now());
+
+        eventRegistrationRepository.save(registration);
     }
 }

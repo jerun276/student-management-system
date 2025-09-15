@@ -12,6 +12,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.access.AccessDeniedException;
 import com.student_management_system.teacher.model.StudyMaterial;
 import com.student_management_system.teacher.repository.StudyMaterialRepository;
+import com.student_management_system.staff.model.Event;
+import com.student_management_system.staff.repository.EventRepository;
 
 import java.time.LocalDateTime;
 
@@ -26,12 +28,15 @@ public class StudentService {
     private final UserRepository userRepository;
     private final AssignmentRepository assignmentRepository;
     private final StudyMaterialRepository studyMaterialRepository;
+    private final EventRepository eventRepository;
 
-    public StudentService(TimetableEntryRepository timetableEntryRepository, UserRepository userRepository, AssignmentRepository assignmentRepository, StudyMaterialRepository studyMaterialRepository) {
+
+    public StudentService(TimetableEntryRepository timetableEntryRepository, UserRepository userRepository, AssignmentRepository assignmentRepository, StudyMaterialRepository studyMaterialRepository, EventRepository eventRepository) {
         this.timetableEntryRepository = timetableEntryRepository;
         this.userRepository = userRepository;
         this.assignmentRepository = assignmentRepository;
         this.studyMaterialRepository = studyMaterialRepository;
+        this.eventRepository = eventRepository;
     }
 
     public List<TimetableEntry> getStudentTimetable() {
@@ -89,5 +94,9 @@ public class StudentService {
 
     public List<StudyMaterial> getStudyMaterialsForSubject(Long subjectId) {
         return studyMaterialRepository.findBySubjectId(subjectId);
+    }
+
+    public List<Event> getAllEvents() {
+        return eventRepository.findAll();
     }
 }
