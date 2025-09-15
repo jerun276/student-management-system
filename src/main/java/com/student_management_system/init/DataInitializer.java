@@ -115,6 +115,14 @@ public class DataInitializer implements CommandLineRunner {
         student.setParent(parent);
         userRepository.save(student);
 
+        // Create a Principal User
+        User principal = new User();
+        principal.setUsername("principal");
+        principal.setPassword(passwordEncoder.encode("principal123"));
+        principal.setEmail("principal@school.com");
+        principal.setRole(Role.ROLE_PRINCIPAL);
+        userRepository.save(principal);
+
         System.out.println("Sample users including parent-child link created successfully!");
     }
 

@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Principal Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+<main class="container mx-auto p-4">
+    <h1 class="text-3xl font-bold text-primary mb-6">Principal's Dashboard</h1>
+
+    <!-- Academic Performance Report (US13) -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Academic Performance Report</h2>
+            <p class="text-sm">An overview of the average grades for numeric-graded assignments across all subjects.</p>
+
+            <div th:if="${performanceReport.isEmpty()}" class="alert alert-info mt-4">
+                <span>No graded assignment data is available to generate a report yet.</span>
+            </div>
+
+            <div th:if="${!performanceReport.isEmpty()}" class="overflow-x-auto mt-4">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Graded Assignments</th>
+                        <th>Average Grade</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="report : ${performanceReport}">
+                        <td class="font-bold" th:text="${report.subjectName}">Mathematics</td>
+                        <td th:text="${report.gradedAssignmentsCount}">50</td>
+                        <td th:text="${#numbers.formatDecimal(report.averageGrade, 1, 2) + '%'}">88.50%</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Placeholder for other reports -->
+
+</main>
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

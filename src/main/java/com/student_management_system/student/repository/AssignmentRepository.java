@@ -15,4 +15,6 @@ public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     List<Assignment> findByUserOrderByDueDateAsc(User user);
 
     List<Assignment> findByStatusOrderBySubmissionDateDesc(AssignmentStatus status);
+
+    List<Assignment> findByStatus(AssignmentStatus status);
 }
