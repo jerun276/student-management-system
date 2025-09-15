@@ -41,6 +41,42 @@
         </div>
     </div>
 
+    <!-- NEW: Announcements Management Card (US14) -->
+    <div class="card bg-base-100 shadow-xl mt-6">
+        <div class="card-body">
+            <h2 class="card-title">Manage Announcements</h2>
+
+            <!-- Form to create a new announcement -->
+            <form th:action="@{/principal/announcements/create}" method="post" class="space-y-4 mt-2">
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Title</span></label>
+                    <input type="text" name="title" class="input input-bordered" required/>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Content</span></label>
+                    <textarea name="content" class="textarea textarea-bordered h-24" required></textarea>
+                </div>
+                <div class="card-actions justify-end">
+                    <button type="submit" class="btn btn-primary">Publish Announcement</button>
+                </div>
+            </form>
+
+            <div class="divider">Published Announcements</div>
+            <!-- List of past announcements -->
+            <div th:if="${announcements == null or announcements.isEmpty()}">
+                <p>No announcements have been published yet.</p>
+            </div>
+            <div th:if="${announcements != null and !announcements.isEmpty()}"
+                 class="space-y-4 max-h-96 overflow-y-auto">
+                <div th:each="announcement : ${announcements}" class="p-4 border rounded-lg">
+                    <h3 class="font-bold" th:text="${announcement.title}"></h3>
+                    <p class="text-xs text-gray-500"
+                       th:text="'Published on ' + ${#temporals.format(announcement.publishedDate, 'dd-MMM-yyyy HH:mm')}"></p>
+                    <p class="mt-2 text-sm" th:text="${announcement.content}"></p>
+                </div>
+            </div>
+        </div>
+    </div>
     <!-- Placeholder for other reports -->
 
 </main>

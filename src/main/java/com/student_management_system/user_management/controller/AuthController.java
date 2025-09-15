@@ -9,19 +9,25 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import com.student_management_system.common.service.PublicService;
+
 
 @Controller
 public class AuthController {
 
     private final UserService userService;
+    private final PublicService publicService;
 
     // Inject the UserService
-    public AuthController(UserService userService) {
+    public AuthController(UserService userService, PublicService publicService) {
         this.userService = userService;
+        this.publicService = publicService;
     }
 
     @GetMapping("/")
-    public String home() {
+    public String home(Model model) {
+        publicService.getLatestAnnouncement().ifPresent(announcement ->
+                model.addAttribute("latestAnnouncement", announcement));
         return "index";
     }
 

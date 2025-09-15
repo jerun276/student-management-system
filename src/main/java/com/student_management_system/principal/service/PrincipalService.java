@@ -5,6 +5,15 @@ import com.student_management_system.student.model.Assignment;
 import com.student_management_system.student.model.AssignmentStatus;
 import com.student_management_system.student.repository.AssignmentRepository;
 import org.springframework.stereotype.Service;
+import com.student_management_system.principal.model.Announcement;
+import com.student_management_system.principal.repository.AnnouncementRepository;
+import com.student_management_system.user_management.model.User;
+import com.student_management_system.user_management.repository.UserRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.transaction.annotation.Transactional;
+import java.util.Collections;
+import java.time.LocalDateTime;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -16,9 +25,13 @@ import java.util.stream.Collectors;
 public class PrincipalService {
 
     private final AssignmentRepository assignmentRepository;
+    private final AnnouncementRepository announcementRepository;
+    private final UserRepository userRepository;
 
-    public PrincipalService(AssignmentRepository assignmentRepository) {
+    public PrincipalService(AssignmentRepository assignmentRepository, AnnouncementRepository announcementRepository, UserRepository userRepository) {
         this.assignmentRepository = assignmentRepository;
+        this.announcementRepository = announcementRepository;
+        this.userRepository = userRepository;
     }
 
     public List<SubjectPerformanceDto> getSubjectPerformanceReport() {
@@ -63,5 +76,29 @@ public class PrincipalService {
         }
         // Calculate the average, scaling to 2 decimal places.
         return totalScore.divide(new BigDecimal(validGradesCount), 2, RoundingMode.HALF_UP);
+    }
+
+    public List<Announcement> getAllAnnouncements() {
+        List<Announcement> announcements = announcementRepository.findAllByOrderByPublishedDateDesc();
+        if (announcements == null) {
+            return Collections.emptyList();
+        }
+        return announcements;
+    }
+
+    @Transactional
+    public void createAnnouncement(String title, String content) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User principal = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Current principal not found"));
+
+        Announcement announcement = new Announcement();
+        announcement.setTitle(title);
+        announcement.setContent(content);
+        announcement.setPublishedBy(principal);
+        announcement.setPublishedDate(LocalDateTime.now());
+
+        announcementRepository.save(announcement);
     }
 }
