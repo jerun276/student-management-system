@@ -118,6 +118,45 @@
         </div>
     </div>
 
+    <!-- Budget Approval Card (US16) -->
+    <div class="card bg-base-100 shadow-xl mt-6">
+        <div class="card-body">
+            <h2 class="card-title">Pending Budget Requests</h2>
+            <div th:if="${pendingRequests.isEmpty()}" class="alert alert-info mt-4">
+                <span>No budget requests are currently pending approval.</span>
+            </div>
+            <div th:if="${!pendingRequests.isEmpty()}" class="overflow-x-auto mt-4">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Requester</th>
+                        <th>Title</th>
+                        <th>Amount</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="req : ${pendingRequests}">
+                        <td th:text="${req.requester.username}"></td>
+                        <td th:text="${req.title}"></td>
+                        <td th:text="'$' + ${#numbers.formatDecimal(req.amount, 1, 'COMMA', 2, 'POINT')}"></td>
+                        <td th:text="${#temporals.format(req.requestDate, 'dd-MMM-yyyy')}"></td>
+                        <td class="flex gap-2">
+                            <form th:action="@{/principal/budget/{id}/approve(id=${req.id})}" method="post">
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+                            <form th:action="@{/principal/budget/{id}/reject(id=${req.id})}" method="post">
+                                <button type="submit" class="btn btn-error btn-sm">Reject</button>
+                            </form>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
     <!-- Placeholder for other reports -->
 
 </main>

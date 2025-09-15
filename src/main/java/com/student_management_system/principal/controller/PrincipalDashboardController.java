@@ -3,10 +3,7 @@ package com.student_management_system.principal.controller;
 import com.student_management_system.principal.service.PrincipalService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -24,6 +21,7 @@ public class PrincipalDashboardController {
         model.addAttribute("announcements", principalService.getAllAnnouncements());
         model.addAttribute("performanceReport", principalService.getSubjectPerformanceReport());
         model.addAttribute("teacherPerformanceReport", principalService.getTeacherPerformanceReport());
+        model.addAttribute("pendingRequests", principalService.getPendingBudgetRequests());
         return "principal/dashboard";
     }
 
@@ -38,6 +36,20 @@ public class PrincipalDashboardController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to publish announcement.");
         }
+        return "redirect:/principal/dashboard";
+    }
+
+    @PostMapping("/budget/{id}/approve")
+    public String approveBudgetRequest(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        principalService.approveBudgetRequest(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Request approved!");
+        return "redirect:/principal/dashboard";
+    }
+
+    @PostMapping("/budget/{id}/reject")
+    public String rejectBudgetRequest(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        principalService.rejectBudgetRequest(id);
+        redirectAttributes.addFlashAttribute("successMessage", "Request rejected.");
         return "redirect:/principal/dashboard";
     }
 }

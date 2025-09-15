@@ -19,6 +19,9 @@ import java.time.LocalDateTime;
 import com.student_management_system.principal.dto.TeacherPerformanceDto;
 import com.student_management_system.user_management.model.Role;
 import com.student_management_system.user_management.model.User;
+import com.student_management_system.common.model.BudgetRequest;
+import com.student_management_system.common.model.RequestStatus;
+import com.student_management_system.common.repository.BudgetRequestRepository;
 
 import java.util.ArrayList;
 
@@ -34,11 +37,13 @@ public class PrincipalService {
     private final AssignmentRepository assignmentRepository;
     private final AnnouncementRepository announcementRepository;
     private final UserRepository userRepository;
+    private final BudgetRequestRepository budgetRequestRepository;
 
-    public PrincipalService(AssignmentRepository assignmentRepository, AnnouncementRepository announcementRepository, UserRepository userRepository) {
+    public PrincipalService(AssignmentRepository assignmentRepository, AnnouncementRepository announcementRepository, UserRepository userRepository, BudgetRequestRepository budgetRequestRepository) {
         this.assignmentRepository = assignmentRepository;
         this.announcementRepository = announcementRepository;
         this.userRepository = userRepository;
+        this.budgetRequestRepository = budgetRequestRepository;
     }
 
     public List<SubjectPerformanceDto> getSubjectPerformanceReport() {
@@ -148,5 +153,26 @@ public class PrincipalService {
         }
 
         return report;
+    }
+
+    // For budget approval
+    public List<BudgetRequest> getPendingBudgetRequests() {
+        return budgetRequestRepository.findByStatusOrderByRequestDateDesc(RequestStatus.PENDING);
+    }
+
+    @Transactional
+    public void approveBudgetRequest(Long requestId) {
+        BudgetRequest request = budgetRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+        request.setStatus(RequestStatus.APPROVED);
+        budgetRequestRepository.save(request);
+    }
+
+    @Transactional
+    public void rejectBudgetRequest(Long requestId) {
+        BudgetRequest request = budgetRequestRepository.findById(requestId)
+                .orElseThrow(() -> new RuntimeException("Request not found"));
+        request.setStatus(RequestStatus.REJECTED);
+        budgetRequestRepository.save(request);
     }
 }

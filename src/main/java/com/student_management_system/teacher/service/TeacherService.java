@@ -19,6 +19,11 @@ import com.student_management_system.common.service.FileStorageService;
 import com.student_management_system.teacher.model.StudyMaterial;
 import com.student_management_system.teacher.repository.StudyMaterialRepository;
 import org.springframework.web.multipart.MultipartFile;
+import com.student_management_system.common.model.BudgetRequest;
+import com.student_management_system.common.model.RequestStatus;
+import com.student_management_system.common.repository.BudgetRequestRepository;
+
+import java.math.BigDecimal;
 
 import java.time.LocalDateTime;
 
@@ -38,17 +43,19 @@ public class TeacherService {
     private final SubjectRepository subjectRepository;
     private final UserRepository userRepository;
     private final AttendanceRecordRepository attendanceRecordRepository;
-    private final StudyMaterialRepository studyMaterialRepository; // <-- ADD
-    private final FileStorageService fileStorageService; // <-- ADD
+    private final StudyMaterialRepository studyMaterialRepository;
+    private final FileStorageService fileStorageService;
+    private final BudgetRequestRepository budgetRequestRepository;
 
     public TeacherService(AssignmentRepository assignmentRepository, SubjectRepository subjectRepository,
-                          UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService) {
+                          UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService, BudgetRequestRepository budgetRequestRepository) {
         this.assignmentRepository = assignmentRepository;
         this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
         this.attendanceRecordRepository = attendanceRecordRepository;
         this.studyMaterialRepository = studyMaterialRepository;
         this.fileStorageService = fileStorageService;
+        this.budgetRequestRepository = budgetRequestRepository;
     }
 
     // For now, we get all submitted assignments. Later, we can filter by teacher.
@@ -125,7 +132,7 @@ public class TeacherService {
         }
     }
 
-    // NEW METHOD: Handle the file upload and save the metadata
+    // Handle the file upload and save the metadata
     @Transactional
     public void uploadStudyMaterial(String title, String description, Long subjectId, MultipartFile file) {
         // 1. Store the file on disk
@@ -151,5 +158,22 @@ public class TeacherService {
         studyMaterial.setUploadDate(LocalDateTime.now());
 
         studyMaterialRepository.save(studyMaterial);
+    }
+
+    // Submit a budget request
+    public void submitBudgetRequest(String title, String description, BigDecimal amount) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User teacher = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+
+        BudgetRequest request = new BudgetRequest();
+        request.setTitle(title);
+        request.setDescription(description);
+        request.setAmount(amount);
+        request.setRequester(teacher);
+        request.setRequestDate(LocalDate.now());
+        request.setStatus(RequestStatus.PENDING);
+
+        budgetRequestRepository.save(request);
     }
 }

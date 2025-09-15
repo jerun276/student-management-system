@@ -68,6 +68,29 @@
             </div>
         </div>
     </div>
+    <!-- Budget Request Card -->
+    <div class="card bg-base-100 shadow-xl mt-6">
+        <div class="card-body">
+            <h2 class="card-title">Submit Budget Request</h2>
+            <form th:action="@{/teacher/budget/request}" method="post" class="space-y-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Request Title</span></label>
+                    <input type="text" name="title" class="input input-bordered" required/>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Description</span></label>
+                    <textarea name="description" class="textarea textarea-bordered h-20"></textarea>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Amount ($)</span></label>
+                    <input type="number" step="0.01" name="amount" class="input input-bordered" required/>
+                </div>
+                <div class="card-actions justify-end">
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>

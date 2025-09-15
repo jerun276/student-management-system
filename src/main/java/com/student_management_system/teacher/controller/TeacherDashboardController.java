@@ -10,6 +10,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.math.BigDecimal;
+
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
 import java.util.List;
 
 @Controller
@@ -42,6 +47,20 @@ public class TeacherDashboardController {
             @RequestParam String grade,
             @RequestParam String feedback) {
         teacherService.gradeAssignment(id, grade, feedback);
+        return "redirect:/teacher/dashboard";
+    }
+
+    @PostMapping("/budget/request")
+    public String submitBudgetRequest(@RequestParam String title,
+                                      @RequestParam String description,
+                                      @RequestParam BigDecimal amount,
+                                      RedirectAttributes redirectAttributes) {
+        try {
+            teacherService.submitBudgetRequest(title, description, amount);
+            redirectAttributes.addFlashAttribute("successMessage", "Budget request submitted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to submit request.");
+        }
         return "redirect:/teacher/dashboard";
     }
 }
