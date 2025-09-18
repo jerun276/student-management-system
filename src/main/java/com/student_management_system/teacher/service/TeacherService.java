@@ -22,6 +22,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.student_management_system.common.model.BudgetRequest;
 import com.student_management_system.common.model.RequestStatus;
 import com.student_management_system.common.repository.BudgetRequestRepository;
+import com.student_management_system.teacher.dto.AssignmentDto;
+import com.student_management_system.teacher.dto.GradeDto;
+import com.student_management_system.teacher.model.Grade;
+import com.student_management_system.teacher.model.GradeType;
+import com.student_management_system.teacher.repository.GradeRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 
@@ -46,9 +53,12 @@ public class TeacherService {
     private final StudyMaterialRepository studyMaterialRepository;
     private final FileStorageService fileStorageService;
     private final BudgetRequestRepository budgetRequestRepository;
+    private final GradeRepository gradeRepository;
 
     public TeacherService(AssignmentRepository assignmentRepository, SubjectRepository subjectRepository,
-                          UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService, BudgetRequestRepository budgetRequestRepository) {
+                          UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, 
+                          StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService, 
+                          BudgetRequestRepository budgetRequestRepository, GradeRepository gradeRepository) {
         this.assignmentRepository = assignmentRepository;
         this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
@@ -56,6 +66,7 @@ public class TeacherService {
         this.studyMaterialRepository = studyMaterialRepository;
         this.fileStorageService = fileStorageService;
         this.budgetRequestRepository = budgetRequestRepository;
+        this.gradeRepository = gradeRepository;
     }
 
     // For now, we get all submitted assignments. Later, we can filter by teacher.
@@ -175,5 +186,141 @@ public class TeacherService {
         request.setStatus(RequestStatus.PENDING);
 
         budgetRequestRepository.save(request);
+    }
+
+    // ===== ASSIGNMENT CRUD OPERATIONS =====
+
+    /**
+     * Get all assignments created by a specific teacher
+     */
+    public List<Assignment> getAssignmentsByTeacher(String teacherUsername) {
+        User teacher = userRepository.findByUsername(teacherUsername)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        return assignmentRepository.findByTeacherOrderByDueDateDesc(teacher);
+    }
+
+    /**
+     * Get subjects assigned to a specific teacher
+     */
+    public List<Subject> getSubjectsByTeacher(String teacherUsername) {
+        User teacher = userRepository.findByUsername(teacherUsername)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        // For now, return all subjects. In a real system, you'd have teacher-subject relationships
+        return subjectRepository.findAll();
+    }
+
+    /**
+     * Create a new assignment
+     */
+    @Transactional
+    public Assignment createAssignment(AssignmentDto assignmentDto, String teacherUsername) {
+        User teacher = userRepository.findByUsername(teacherUsername)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        
+        Subject subject = subjectRepository.findById(assignmentDto.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        Assignment assignment = new Assignment();
+        assignment.setTitle(assignmentDto.getTitle());
+        assignment.setDescription(assignmentDto.getDescription());
+        assignment.setDueDate(assignmentDto.getDueDate());
+        assignment.setSubject(subject);
+        assignment.setTeacher(teacher);
+        assignment.setStatus(AssignmentStatus.PENDING); // Default status
+
+        return assignmentRepository.save(assignment);
+    }
+
+    /**
+     * Get assignment by ID with teacher verification
+     */
+    public Assignment getAssignmentById(Long assignmentId, String teacherUsername) {
+        User teacher = userRepository.findByUsername(teacherUsername)
+                .orElseThrow(() -> new RuntimeException("Teacher not found"));
+        
+        Assignment assignment = assignmentRepository.findById(assignmentId)
+                .orElseThrow(() -> new RuntimeException("Assignment not found"));
+        
+        // Verify that this teacher owns the assignment
+        if (!assignment.getTeacher().getId().equals(teacher.getId())) {
+            throw new RuntimeException("Access denied: You don't have permission to access this assignment");
+        }
+        
+        return assignment;
+    }
+
+    /**
+     * Update an existing assignment
+     */
+    @Transactional
+    public Assignment updateAssignment(Long assignmentId, AssignmentDto assignmentDto, String teacherUsername) {
+        Assignment assignment = getAssignmentById(assignmentId, teacherUsername);
+        
+        Subject subject = subjectRepository.findById(assignmentDto.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        assignment.setTitle(assignmentDto.getTitle());
+        assignment.setDescription(assignmentDto.getDescription());
+        assignment.setDueDate(assignmentDto.getDueDate());
+        assignment.setSubject(subject);
+
+        return assignmentRepository.save(assignment);
+    }
+
+    /**
+     * Delete an assignment
+     */
+    @Transactional
+    public void deleteAssignment(Long assignmentId, String teacherUsername) {
+        Assignment assignment = getAssignmentById(assignmentId, teacherUsername);
+        
+        // Check if assignment has submissions
+        List<Assignment> submissions = getSubmissionsByAssignment(assignmentId);
+        if (!submissions.isEmpty()) {
+            throw new RuntimeException("Cannot delete assignment with existing submissions");
+        }
+        
+        assignmentRepository.delete(assignment);
+    }
+
+    /**
+     * Get submissions for a specific assignment
+     */
+    public List<Assignment> getSubmissionsByAssignment(Long assignmentId) {
+        return assignmentRepository.findByIdAndStatus(assignmentId, AssignmentStatus.SUBMITTED);
+    }
+
+    /**
+     * Convert Assignment entity to DTO
+     */
+    public AssignmentDto convertToDto(Assignment assignment) {
+        AssignmentDto dto = new AssignmentDto();
+        dto.setId(assignment.getId());
+        dto.setTitle(assignment.getTitle());
+        dto.setDescription(assignment.getDescription());
+        dto.setDueDate(assignment.getDueDate());
+        dto.setSubjectId(assignment.getSubject().getId());
+        dto.setSubjectName(assignment.getSubject().getName());
+        return dto;
+    }
+
+    /**
+     * Publish an assignment (make it visible to students)
+     */
+    @Transactional
+    public void publishAssignment(Long assignmentId, String teacherUsername) {
+        Assignment assignment = getAssignmentById(assignmentId, teacherUsername);
+        assignment.setStatus(AssignmentStatus.PENDING);
+        assignmentRepository.save(assignment);
+    }
+
+    /**
+     * Unpublish an assignment (hide from students)
+     */
+    @Transactional
+    public void unpublishAssignment(Long assignmentId, String teacherUsername) {
+        Assignment assignment = getAssignmentById(assignmentId, teacherUsername);
+        // You might want to add a DRAFT status to AssignmentStatus enum
+        assignmentRepository.save(assignment);
     }
 }

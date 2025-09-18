@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Create Assignment - Teacher Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+
+<body class="bg-surface">
+    <!-- Header -->
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <main class="container mx-auto p-4">
+        <div class="flex items-center mb-6">
+            <a th:href="@{/teacher/assignments}" class="btn btn-ghost mr-4">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Back to Assignments
+            </a>
+            <h1 class="text-3xl font-bold text-primary">Create New Assignment</h1>
+        </div>
+
+        <!-- Error Messages -->
+        <div th:if="${errorMessage}" class="alert alert-error mb-4">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- Assignment Form -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <form th:action="@{/teacher/assignments/create}" th:object="${assignmentDto}" method="post">
+                    
+                    <!-- Title Field -->
+                    <div class="form-control w-full mb-4">
+                        <label class="label" for="title">
+                            <span class="label-text font-semibold">Assignment Title *</span>
+                        </label>
+                        <input type="text" 
+                               th:field="*{title}" 
+                               id="title"
+                               class="input input-bordered w-full"
+                               th:classappend="${#fields.hasErrors('title')} ? 'input-error' : ''"
+                               placeholder="Enter assignment title">
+                        <div th:if="${#fields.hasErrors('title')}" class="label">
+                            <span class="label-text-alt text-error" th:errors="*{title}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Subject Field -->
+                    <div class="form-control w-full mb-4">
+                        <label class="label" for="subjectId">
+                            <span class="label-text font-semibold">Subject *</span>
+                        </label>
+                        <select th:field="*{subjectId}" 
+                                id="subjectId"
+                                class="select select-bordered w-full"
+                                th:classappend="${#fields.hasErrors('subjectId')} ? 'select-error' : ''">
+                            <option value="">Select a subject</option>
+                            <option th:each="subject : ${subjects}" 
+                                    th:value="${subject.id}" 
+                                    th:text="${subject.name}"></option>
+                        </select>
+                        <div th:if="${#fields.hasErrors('subjectId')}" class="label">
+                            <span class="label-text-alt text-error" th:errors="*{subjectId}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Due Date Field -->
+                    <div class="form-control w-full mb-4">
+                        <label class="label" for="dueDate">
+                            <span class="label-text font-semibold">Due Date *</span>
+                        </label>
+                        <input type="date" 
+                               th:field="*{dueDate}" 
+                               id="dueDate"
+                               class="input input-bordered w-full"
+                               th:classappend="${#fields.hasErrors('dueDate')} ? 'input-error' : ''"
+                               th:min="${#temporals.format(T(java.time.LocalDate).now(), 'yyyy-MM-dd')}">
+                        <div th:if="${#fields.hasErrors('dueDate')}" class="label">
+                            <span class="label-text-alt text-error" th:errors="*{dueDate}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Description Field -->
+                    <div class="form-control w-full mb-4">
+                        <label class="label" for="description">
+                            <span class="label-text font-semibold">Description *</span>
+                        </label>
+                        <textarea th:field="*{description}" 
+                                  id="description"
+                                  class="textarea textarea-bordered h-32"
+                                  th:classappend="${#fields.hasErrors('description')} ? 'textarea-error' : ''"
+                                  placeholder="Provide detailed instructions for the assignment..."></textarea>
+                        <div th:if="${#fields.hasErrors('description')}" class="label">
+                            <span class="label-text-alt text-error" th:errors="*{description}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Maximum Marks Field -->
+                    <div class="form-control w-full mb-4">
+                        <label class="label" for="maxMarks">
+                            <span class="label-text font-semibold">Maximum Marks</span>
+                        </label>
+                        <input type="number" 
+                               th:field="*{maxMarks}" 
+                               id="maxMarks"
+                               class="input input-bordered w-full"
+                               th:classappend="${#fields.hasErrors('maxMarks')} ? 'input-error' : ''"
+                               min="1" max="1000" value="100">
+                        <div th:if="${#fields.hasErrors('maxMarks')}" class="label">
+                            <span class="label-text-alt text-error" th:errors="*{maxMarks}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Instructions Field -->
+                    <div class="form-control w-full mb-4">
+                        <label class="label" for="instructions">
+                            <span class="label-text font-semibold">Additional Instructions</span>
+                        </label>
+                        <textarea th:field="*{instructions}" 
+                                  id="instructions"
+                                  class="textarea textarea-bordered h-24"
+                                  placeholder="Any additional instructions or requirements..."></textarea>
+                    </div>
+
+                    <!-- Late Submission Options -->
+                    <div class="form-control mb-4">
+                        <label class="label cursor-pointer">
+                            <span class="label-text font-semibold">Allow Late Submissions</span>
+                            <input type="checkbox" 
+                                   th:field="*{allowLateSubmission}" 
+                                   class="checkbox checkbox-primary">
+                        </label>
+                    </div>
+
+                    <div th:if="*{allowLateSubmission}" class="form-control w-full mb-4">
+                        <label class="label" for="latePenaltyPercent">
+                            <span class="label-text font-semibold">Late Penalty (%)</span>
+                        </label>
+                        <input type="number" 
+                               th:field="*{latePenaltyPercent}" 
+                               id="latePenaltyPercent"
+                               class="input input-bordered w-full"
+                               min="0" max="100" value="0">
+                        <div class="label">
+                            <span class="label-text-alt">Percentage to deduct for late submissions</span>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="card-actions justify-end mt-6">
+                        <a th:href="@{/teacher/assignments}" class="btn btn-ghost">Cancel</a>
+                        <button type="submit" class="btn btn-primary">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                            Create Assignment
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script>
+        // Auto-expand textareas
+        document.querySelectorAll('textarea').forEach(textarea => {
+            textarea.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = this.scrollHeight + 'px';
+            });
+        });
+
+        // Show/hide late penalty field based on checkbox
+        const allowLateCheckbox = document.getElementById('allowLateSubmission');
+        const latePenaltyField = document.querySelector('[th\\:if="*{allowLateSubmission}"]');
+        
+        if (allowLateCheckbox && latePenaltyField) {
+            allowLateCheckbox.addEventListener('change', function() {
+                latePenaltyField.style.display = this.checked ? 'block' : 'none';
+            });
+        }
+    </script>
+</body>
+
+</html>

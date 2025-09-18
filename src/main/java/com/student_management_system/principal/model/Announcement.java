@@ -23,4 +23,16 @@ public class Announcement {
     @ManyToOne
     @JoinColumn(name = "published_by_id")
     private User publishedBy; // The principal who created it
+    
+    private boolean isActive = true; // For archiving functionality
+    
+    private boolean isPinned = false; // For pinning important announcements
+    
+    private String category = "General"; // Category for filtering
+    
+    private String priority = "NORMAL"; // LOW, NORMAL, HIGH, URGENT
+    
+    private LocalDateTime expiryDate; // Optional expiry date
+    
+    private LocalDateTime lastModifiedDate; // Track when last updated
 }
