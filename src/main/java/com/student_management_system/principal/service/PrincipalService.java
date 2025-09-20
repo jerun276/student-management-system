@@ -18,7 +18,6 @@ import java.time.LocalDateTime;
 
 import com.student_management_system.principal.dto.TeacherPerformanceDto;
 import com.student_management_system.user_management.model.Role;
-import com.student_management_system.user_management.model.User;
 import com.student_management_system.common.model.BudgetRequest;
 import com.student_management_system.common.model.RequestStatus;
 import com.student_management_system.common.repository.BudgetRequestRepository;

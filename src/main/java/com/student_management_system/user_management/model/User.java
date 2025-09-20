@@ -2,7 +2,8 @@ package com.student_management_system.user_management.model;
 
 import com.student_management_system.student.model.Assignment;
 import jakarta.persistence.*;
-import lombok.Data;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -17,6 +18,8 @@ import java.util.Set;
 @Setter
 @ToString
 @EqualsAndHashCode
+@SQLDelete(sql = "UPDATE users SET deleted = true WHERE id = ?")
+@Where(clause = "deleted = false")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +28,7 @@ public class User {
     private String password;
     private String email;
     private boolean enabled = true;
+    private boolean deleted = false;
 
     @Enumerated(EnumType.STRING)
     private Role role;

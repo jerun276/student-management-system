@@ -1,4 +1,4 @@
-package com.student_management_system.parent.controller;
+package com.student_management_system.principal.controller;
 
 import com.student_management_system.common.service.MessageService;
 import com.student_management_system.parent.dto.ComposeMessageDto;
@@ -25,7 +25,8 @@ public class ParentMessageController {
     private final MessageService messageService;
     private final UserRepository userRepository;
 
-    public ParentMessageController(ParentService parentService, MessageService messageService, UserRepository userRepository) {
+    public ParentMessageController(ParentService parentService, MessageService messageService,
+            UserRepository userRepository) {
         this.parentService = parentService;
         this.messageService = messageService;
         this.userRepository = userRepository;
@@ -50,12 +51,13 @@ public class ParentMessageController {
     // This method handles the form submission for sending a new message
     @PostMapping("/send")
     public String sendMessage(@Valid @ModelAttribute("composeMessage") ComposeMessageDto composeMessageDto,
-                              BindingResult bindingResult,
-                              RedirectAttributes redirectAttributes) {
+            BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
 
         if (bindingResult.hasErrors()) {
             // If there are errors, pass them back to the view
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.composeMessage", bindingResult);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.composeMessage",
+                    bindingResult);
             redirectAttributes.addFlashAttribute("composeMessage", composeMessageDto);
             return "redirect:/parent/messages";
         }
@@ -65,7 +67,8 @@ public class ParentMessageController {
             User recipient = userRepository.findById(composeMessageDto.getRecipientId())
                     .orElseThrow(() -> new RuntimeException("Recipient not found"));
 
-            messageService.sendMessage(sender, recipient, composeMessageDto.getSubject(), composeMessageDto.getContent());
+            messageService.sendMessage(sender, recipient, composeMessageDto.getSubject(),
+                    composeMessageDto.getContent());
             redirectAttributes.addFlashAttribute("successMessage", "Message sent successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to send message: " + e.getMessage());

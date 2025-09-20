@@ -1,8 +1,6 @@
 package com.student_management_system.teacher.controller;
 
-import com.student_management_system.student.model.Subject;
 import com.student_management_system.teacher.service.TeacherService;
-import com.student_management_system.user_management.model.User;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDate;
-import java.util.List;
 import java.util.Map;
 
 @Controller

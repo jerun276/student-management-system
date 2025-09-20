@@ -20,14 +20,12 @@ import com.student_management_system.staff.model.Booking;
 import com.student_management_system.staff.model.Facility;
 import com.student_management_system.staff.repository.BookingRepository;
 import com.student_management_system.staff.repository.FacilityRepository;
-import com.student_management_system.user_management.model.User;
 
 import java.time.LocalDateTime;
 
 import java.time.LocalDate;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 import java.util.List;
 
@@ -42,7 +40,9 @@ public class StaffService {
     private final FacilityRepository facilityRepository;
     private final BookingRepository bookingRepository;
 
-    public StaffService(FeeRepository feeRepository, PaymentRepository paymentRepository, UserRepository userRepository, EventRepository eventRepository, EventRegistrationRepository eventRegistrationRepository, FacilityRepository facilityRepository, BookingRepository bookingRepository) {
+    public StaffService(FeeRepository feeRepository, PaymentRepository paymentRepository, UserRepository userRepository,
+            EventRepository eventRepository, EventRegistrationRepository eventRegistrationRepository,
+            FacilityRepository facilityRepository, BookingRepository bookingRepository) {
         this.feeRepository = feeRepository;
         this.paymentRepository = paymentRepository;
         this.userRepository = userRepository;
@@ -63,7 +63,8 @@ public class StaffService {
     }
 
     private void updateFeeStatus(Fee fee) {
-        // compareTo returns 0 if they are equal, -1 if first is less, 1 if first is greater
+        // compareTo returns 0 if they are equal, -1 if first is less, 1 if first is
+        // greater
         int comparison = fee.getAmountPaid().compareTo(fee.getTotalAmount());
 
         if (comparison >= 0) {
@@ -96,7 +97,8 @@ public class StaffService {
         BigDecimal newAmountPaid = fee.getAmountPaid().add(paymentDto.getAmount());
         fee.setAmountPaid(newAmountPaid);
 
-        // 6. Automatically recalculate and update the Fee's status (UNPAID, PARTIALLY_PAID, PAID).
+        // 6. Automatically recalculate and update the Fee's status (UNPAID,
+        // PARTIALLY_PAID, PAID).
         updateFeeStatus(fee);
 
         // 7. Save the updated Fee entity back to the database.
@@ -124,7 +126,8 @@ public class StaffService {
 
         feeRepository.save(fee);
 
-        // In a real-world application, this is where you would trigger an email or SMS service.
+        // In a real-world application, this is where you would trigger an email or SMS
+        // service.
         // For now, we'll just log it to the console.
         System.out.println("Reminder sent for Fee ID: " + feeId + " to Student: " + fee.getStudent().getUsername());
     }
