@@ -2,6 +2,7 @@ package com.student_management_system.user_management.service;
 
 import com.student_management_system.user_management.dto.EditProfileDto;
 import com.student_management_system.user_management.dto.UserProfileDto;
+import com.student_management_system.user_management.dto.PasswordChangeDto;
 import com.student_management_system.user_management.dto.UserRegistrationDto;
 import com.student_management_system.user_management.model.Role;
 import com.student_management_system.user_management.model.User;
@@ -62,6 +63,26 @@ public class UserService {
         user.setDateOfBirth(editProfileDto.getDateOfBirth());
         user.setAddress(editProfileDto.getAddress());
         user.setPhoneNumber(editProfileDto.getPhoneNumber());
+
+        userRepository.save(user);
+    }
+
+    public void updateUserPassword(String username, PasswordChangeDto passwordChangeDto) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        // 1. Check if the current password is correct
+        if (!passwordEncoder.matches(passwordChangeDto.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalStateException("Incorrect current password");
+        }
+
+        // 2. Check if the new passwords match
+        if (!passwordChangeDto.getNewPassword().equals(passwordChangeDto.getConfirmNewPassword())) {
+            throw new IllegalStateException("New passwords do not match");
+        }
+
+        // 3. Encode and set the new password
+        user.setPassword(passwordEncoder.encode(passwordChangeDto.getNewPassword()));
 
         userRepository.save(user);
     }

@@ -2,6 +2,7 @@ package com.student_management_system.user_management.controller;
 
 import com.student_management_system.user_management.service.UserService;
 import com.student_management_system.user_management.dto.EditProfileDto;
+import com.student_management_system.user_management.dto.PasswordChangeDto;
 import com.student_management_system.user_management.dto.UserProfileDto;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -43,8 +44,15 @@ public class UserProfileController {
             return "redirect:/login";
         }
 
-        EditProfileDto editProfileDto = userService.getEditProfileDto(principal.getName());
-        model.addAttribute("editProfileDto", editProfileDto);
+        // For the profile update form
+        if (!model.containsAttribute("editProfileDto")) {
+            model.addAttribute("editProfileDto", userService.getEditProfileDto(principal.getName()));
+        }
+
+        // For the password change form
+        if (!model.containsAttribute("passwordChangeDto")) {
+            model.addAttribute("passwordChangeDto", new PasswordChangeDto());
+        }
 
         return "user/profile-edit";
     }
@@ -71,5 +79,33 @@ public class UserProfileController {
         }
 
         return "redirect:/profile";
+    }
+
+    @PostMapping("/change-password")
+    public String changePassword(@Valid @ModelAttribute("passwordChangeDto") PasswordChangeDto passwordChangeDto,
+                                 BindingResult bindingResult,
+                                 Principal principal,
+                                 RedirectAttributes redirectAttributes) {
+
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
+        if (bindingResult.hasErrors()) {
+            // Add the DTO and BindingResult to flash attributes to be available after redirect
+            redirectAttributes.addFlashAttribute("passwordChangeDto", passwordChangeDto);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.passwordChangeDto", bindingResult);
+            // Redirect back to the edit page to show errors
+            return "redirect:/profile/edit";
+        }
+
+        try {
+            userService.updateUserPassword(principal.getName(), passwordChangeDto);
+            redirectAttributes.addFlashAttribute("successMessage", "Password changed successfully!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/profile/edit"; // Redirect back to the edit page
     }
 }
