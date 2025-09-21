@@ -28,6 +28,7 @@
                         <th>Username</th>
                         <th>Email</th>
                         <th>Role</th>
+                        <th>NIC</th>
                         <th>Status</th>
                         <th>Actions</th>
                     </tr>
@@ -39,6 +40,7 @@
                         <td th:text="${user.email}">admin@school.com</td>
                         <td><span class="badge badge-primary" th:text="${user.role.name().replace('ROLE_', '')}"></span>
                         </td>
+                        <td th:text="${user.nic}"></td>
                         <td><span class="badge" th:classappend="${user.enabled} ? 'badge-success' : 'badge-error'"
                                   th:text="${user.enabled} ? 'Enabled' : 'Disabled'"></span></td>
                         <td>
@@ -75,9 +77,27 @@
             </div>
 
             <div class="form-control">
+                <label class="label"><span class="label-text">First Name</span></label>
+                <input type="text" th:field="*{firstName}" class="input input-bordered"/>
+                <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></p>
+            </div>
+
+            <div class="form-control">
+                <label class="label"><span class="label-text">Last Name</span></label>
+                <input type="text" th:field="*{lastName}" class="input input-bordered"/>
+                <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></p>
+            </div>
+
+            <div class="form-control">
                 <label class="label"><span class="label-text">Password</span></label>
                 <input type="password" th:field="*{password}" class="input input-bordered"/>
                 <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+            </div>
+
+            <div class="form-control">
+                <label class="label"><span class="label-text">NIC</span></label>
+                <input type="text" th:field="*{nic}" class="input input-bordered"/>
+                <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('nic')}" th:errors="*{nic}"></p>
             </div>
 
             <div class="form-control">

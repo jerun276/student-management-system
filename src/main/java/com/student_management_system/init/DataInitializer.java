@@ -83,32 +83,52 @@ public class DataInitializer implements CommandLineRunner {
         // Create an Admin User
         User admin = new User();
         admin.setUsername("admin");
-        admin.setPassword(passwordEncoder.encode("admin123"));
+        admin.setFirstName("Admin");
+        admin.setLastName("User");
         admin.setEmail("admin@school.com");
+        admin.setDateOfBirth(LocalDate.of(1980, 1, 1));
+        admin.setAddress("123 Admin Way");
+        admin.setPhoneNumber("555-0101");
+        admin.setPassword(passwordEncoder.encode("admin123"));
         admin.setRole(Role.ROLE_ADMIN);
         userRepository.save(admin);
 
         // Create a Student User
         User student = new User();
         student.setUsername("student");
-        student.setPassword(passwordEncoder.encode("student123"));
+        student.setFirstName("Student");
+        student.setLastName("User");
         student.setEmail("student@school.com");
+        student.setDateOfBirth(LocalDate.of(2005, 5, 10));
+        student.setAddress("456 Student St");
+        student.setPhoneNumber("555-0102");
+        student.setPassword(passwordEncoder.encode("student123"));
         student.setRole(Role.ROLE_STUDENT);
         userRepository.save(student);
 
         // Create a Teacher User
         User teacher = new User();
         teacher.setUsername("teacher");
-        teacher.setPassword(passwordEncoder.encode("teacher123"));
+        teacher.setFirstName("Teacher");
+        teacher.setLastName("User");
         teacher.setEmail("teacher@school.com");
+        teacher.setDateOfBirth(LocalDate.of(1985, 3, 15));
+        teacher.setAddress("789 Teacher Ave");
+        teacher.setPhoneNumber("555-0103");
+        teacher.setPassword(passwordEncoder.encode("teacher123"));
         teacher.setRole(Role.ROLE_TEACHER);
         userRepository.save(teacher);
 
         // Create a Parent User
         User parent = new User();
         parent.setUsername("parent");
-        parent.setPassword(passwordEncoder.encode("parent123"));
+        parent.setFirstName("Parent");
+        parent.setLastName("User");
         parent.setEmail("parent@school.com");
+        parent.setDateOfBirth(LocalDate.of(1975, 8, 20));
+        parent.setAddress("456 Student St");
+        parent.setPhoneNumber("555-0104");
+        parent.setPassword(passwordEncoder.encode("parent123"));
         parent.setRole(Role.ROLE_PARENT);
         userRepository.save(parent);
 
@@ -118,8 +138,13 @@ public class DataInitializer implements CommandLineRunner {
         // Create a Principal User
         User principal = new User();
         principal.setUsername("principal");
-        principal.setPassword(passwordEncoder.encode("principal123"));
+        principal.setFirstName("Principal");
+        principal.setLastName("User");
         principal.setEmail("principal@school.com");
+        principal.setDateOfBirth(LocalDate.of(1970, 2, 25));
+        principal.setAddress("1 School Rd");
+        principal.setPhoneNumber("555-0105");
+        principal.setPassword(passwordEncoder.encode("principal123"));
         principal.setRole(Role.ROLE_PRINCIPAL);
         userRepository.save(principal);
 
@@ -203,8 +228,13 @@ public class DataInitializer implements CommandLineRunner {
         // Create Staff User
         User staff = new User();
         staff.setUsername("staff");
-        staff.setPassword(passwordEncoder.encode("staff123"));
+        staff.setFirstName("Staff");
+        staff.setLastName("User");
         staff.setEmail("staff@school.com");
+        staff.setDateOfBirth(LocalDate.of(1990, 6, 30));
+        staff.setAddress("321 Staff Blvd");
+        staff.setPhoneNumber("555-0106");
+        staff.setPassword(passwordEncoder.encode("staff123"));
         staff.setRole(Role.ROLE_STAFF);
         userRepository.save(staff);
 

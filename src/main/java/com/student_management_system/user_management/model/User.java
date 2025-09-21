@@ -2,6 +2,7 @@ package com.student_management_system.user_management.model;
 
 import com.student_management_system.student.model.Assignment;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Pattern;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 import lombok.Getter;
@@ -9,6 +10,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.EqualsAndHashCode;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -26,7 +28,15 @@ public class User {
     private Long id;
     private String username;
     private String password;
+    private String firstName;
+    private String lastName;
     private String email;
+    private LocalDate dateOfBirth;
+    private String address;
+    private String phoneNumber;
+
+    @Pattern(regexp = "^([0-9]{9}[vV]|[0-9]{12})$", message = "NIC format is invalid")
+    private String nic;
     private boolean enabled = true;
     private boolean deleted = false;
 

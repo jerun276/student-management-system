@@ -40,6 +40,8 @@ We will add the xmlns:sec namespace to enable security tags.
                     <span class="font-semibold">Welcome, <span sec:authentication="name"
                                                                class="text-primary">user</span>!</span>
 
+                    <a th:href="@{/profile}" class="btn btn-ghost">My Profile</a>
+
                 <!-- Dynamic Dashboard Link based on Role -->
                 <a th:href="@{/student/dashboard}" sec:authorize="hasRole('STUDENT')" class="btn btn-ghost">My
                     Dashboard</a>

@@ -36,9 +36,12 @@ public class AdminService {
         }
         User user = new User();
         user.setUsername(createUserDto.getUsername());
+        user.setFirstName(createUserDto.getFirstName());
+        user.setLastName(createUserDto.getLastName());
         user.setEmail(createUserDto.getEmail());
         user.setPassword(passwordEncoder.encode(createUserDto.getPassword()));
         user.setRole(createUserDto.getRole());
+        user.setNic(createUserDto.getNic());
         user.setEnabled(true);
         userRepository.save(user);
     }
@@ -60,7 +63,13 @@ public class AdminService {
         }
 
         user.setUsername(userDto.getUsername()); // <-- ALLOW USERNAME UPDATE
+        user.setFirstName(userDto.getFirstName());
+        user.setLastName(userDto.getLastName());
         user.setEmail(userDto.getEmail());
+        user.setDateOfBirth(userDto.getDateOfBirth());
+        user.setAddress(userDto.getAddress());
+        user.setPhoneNumber(userDto.getPhoneNumber());
+        user.setNic(userDto.getNic());
         user.setRole(userDto.getRole());
         user.setEnabled(userDto.isEnabled());
 
@@ -88,7 +97,13 @@ public class AdminService {
         UserDto userDto = new UserDto();
         userDto.setId(user.getId());
         userDto.setUsername(user.getUsername());
+        userDto.setFirstName(user.getFirstName());
+        userDto.setLastName(user.getLastName());
         userDto.setEmail(user.getEmail());
+        userDto.setDateOfBirth(user.getDateOfBirth());
+        userDto.setAddress(user.getAddress());
+        userDto.setPhoneNumber(user.getPhoneNumber());
+        userDto.setNic(user.getNic());
         userDto.setRole(user.getRole());
         userDto.setEnabled(user.isEnabled());
         return userDto;

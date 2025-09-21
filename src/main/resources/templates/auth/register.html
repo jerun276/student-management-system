@@ -37,6 +37,41 @@
                 <p th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="text-error text-xs mt-1"></p>
             </div>
 
+            <!-- First Name Input -->
+            <div class="form-control">
+                <label class="label" for="firstName"><span class="label-text">First Name</span></label>
+                <input type="text" id="firstName" th:field="*{firstName}" class="input input-bordered w-full" />
+                <p th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}" class="text-error text-xs mt-1"></p>
+            </div>
+
+            <!-- Last Name Input -->
+            <div class="form-control">
+                <label class="label" for="lastName"><span class="label-text">Last Name</span></label>
+                <input type="text" id="lastName" th:field="*{lastName}" class="input input-bordered w-full" />
+                <p th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}" class="text-error text-xs mt-1"></p>
+            </div>
+
+            <!-- Date of Birth Input -->
+            <div class="form-control">
+                <label class="label" for="dateOfBirth"><span class="label-text">Date of Birth</span></label>
+                <input type="date" id="dateOfBirth" th:field="*{dateOfBirth}" class="input input-bordered w-full" />
+                <p th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}" class="text-error text-xs mt-1"></p>
+            </div>
+
+            <!-- Address Input -->
+            <div class="form-control">
+                <label class="label" for="address"><span class="label-text">Address</span></label>
+                <input type="text" id="address" th:field="*{address}" class="input input-bordered w-full" />
+                <p th:if="${#fields.hasErrors('address')}" th:errors="*{address}" class="text-error text-xs mt-1"></p>
+            </div>
+
+            <!-- Phone Number Input -->
+            <div class="form-control">
+                <label class="label" for="phoneNumber"><span class="label-text">Phone Number</span></label>
+                <input type="text" id="phoneNumber" th:field="*{phoneNumber}" class="input input-bordered w-full" />
+                <p th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}" class="text-error text-xs mt-1"></p>
+            </div>
+
             <!-- Password Input -->
             <div class="form-control">
                 <label class="label" for="password"><span class="label-text">Password</span></label>
