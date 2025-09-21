@@ -49,3 +49,6 @@ build/
 
 # Other
 .DS_Store
+
+# MD
+*.md
