@@ -1,6 +1,7 @@
 package com.student_management_system.user_management.model;
 
 import com.student_management_system.student.model.Assignment;
+import com.student_management_system.student.model.Subject;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Pattern;
 import org.hibernate.annotations.SQLDelete;
@@ -58,4 +59,21 @@ public class User {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Assignment> assignments;
+
+    // LEGACY: Keep for backward compatibility during transition
+    @ManyToMany
+    @JoinTable(
+        name = "student_subject_enrollment",
+        joinColumns = @JoinColumn(name = "student_id"),
+        inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Subject> enrolledSubjects;
+    
+    // NEW: Link to enrollments for the new academic structure
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<com.student_management_system.common.model.Enrollment> enrollments;
 }

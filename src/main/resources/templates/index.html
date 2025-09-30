@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <title>Welcome to Student Management System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
+    <script src="https://unpkg.com/animejs@3.2.1/lib/anime.min.js"></script>
 </head>
 
 <body class="bg-surface">
@@ -56,7 +57,7 @@
                 </div>
 
                 <!-- Card for Teachers -->
-                <div data-tilt data-tilt-scale="1.1" class="card bg-base-100 shadow-xl">
+                <div data-tilt data-tilt-scale="1.1" data-tilt-glare data-tilt-max-glare="0.8" class="card bg-base-100 shadow-xl">
                     <div class="card-body">
                         <h3 class="card-title text-secondary">For Teachers</h3>
                         <ul class="list-disc list-inside space-y-2 mt-2">
@@ -69,7 +70,7 @@
                 </div>
 
                 <!-- Card for Admins & Staff -->
-                <div data-tilt data-tilt-scale="1.1" class="card bg-base-100 shadow-xl">
+                <div data-tilt data-tilt-scale="1.1" data-tilt-glare data-tilt-max-glare="0.8" class="card bg-base-100 shadow-xl">
                     <div class="card-body">
                         <h3 class="card-title text-secondary">For Administration</h3>
                         <ul class="list-disc list-inside space-y-2 mt-2">
@@ -89,6 +90,7 @@
     <div th:replace="~{fragments/footer :: footer}"></div>
     <!-- Tilt effect script (local, no CDN) -->
     <script th:src="@{/js/vanilla-tilt.js}"></script>
+    <script th:src="@{/node_modules/animejs/lib/anime.min.js}"></script>
 </body>
 
 </html>

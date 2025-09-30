@@ -54,7 +54,6 @@
         <div class="card-body">
             <h2 class="card-title">Manage Study Materials</h2>
             <p>Upload new resources like notes, worksheets, and presentations for your students.</p>
-            <div class="card-actions justify-end">
                 <a th:href="@{/teacher/materials/upload}" class="btn btn-primary">Upload Material</a>
             </div>
         </div>
@@ -68,6 +67,18 @@
             </div>
         </div>
     </div>
+
+    <!-- Create Assignment Card -->
+    <div class="card bg-base-100 shadow-xl mt-6">
+        <div class="card-body">
+            <h2 class="card-title">Create New Assignment</h2>
+            <p>Create and assign new homework, quizzes, or projects to your students.</p>
+            <div class="card-actions justify-end">
+                <a th:href="@{/teacher/assignments/create}" class="btn btn-primary">Create Assignment</a>
+            </div>
+        </div>
+    </div>
+
     <!-- Budget Request Card -->
     <div class="card bg-base-100 shadow-xl mt-6">
         <div class="card-body">
@@ -79,7 +90,7 @@
                 </div>
                 <div class="form-control">
                     <label class="label"><span class="label-text">Description</span></label>
-                    <textarea name="description" class="textarea textarea-bordered h-20"></textarea>
+{{ ... }}
                 </div>
                 <div class="form-control">
                     <label class="label"><span class="label-text">Amount ($)</span></label>

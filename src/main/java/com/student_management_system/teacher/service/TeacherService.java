@@ -22,6 +22,12 @@ import org.springframework.web.multipart.MultipartFile;
 import com.student_management_system.common.model.BudgetRequest;
 import com.student_management_system.common.model.RequestStatus;
 import com.student_management_system.common.repository.BudgetRequestRepository;
+import com.student_management_system.teacher.dto.AssignmentCreationDto;
+
+// NEW: Import new academic structure
+import com.student_management_system.common.model.Course;
+import com.student_management_system.common.repository.CourseRepository;
+import com.student_management_system.common.repository.EnrollmentRepository;
 
 import java.math.BigDecimal;
 
@@ -30,6 +36,7 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,9 +49,16 @@ public class TeacherService {
     private final StudyMaterialRepository studyMaterialRepository;
     private final FileStorageService fileStorageService;
     private final BudgetRequestRepository budgetRequestRepository;
+    
+    // NEW: Academic structure repositories
+    private final CourseRepository courseRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
     public TeacherService(AssignmentRepository assignmentRepository, SubjectRepository subjectRepository,
-                          UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService, BudgetRequestRepository budgetRequestRepository) {
+                          UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, 
+                          StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService, 
+                          BudgetRequestRepository budgetRequestRepository, CourseRepository courseRepository,
+                          EnrollmentRepository enrollmentRepository) {
         this.assignmentRepository = assignmentRepository;
         this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
@@ -52,6 +66,8 @@ public class TeacherService {
         this.studyMaterialRepository = studyMaterialRepository;
         this.fileStorageService = fileStorageService;
         this.budgetRequestRepository = budgetRequestRepository;
+        this.courseRepository = courseRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     // For now, we get all submitted assignments. Later, we can filter by teacher.
@@ -164,12 +180,54 @@ public class TeacherService {
 
         BudgetRequest request = new BudgetRequest();
         request.setTitle(title);
-        request.setDescription(description);
         request.setAmount(amount);
         request.setRequester(teacher);
         request.setRequestDate(LocalDate.now());
         request.setStatus(RequestStatus.PENDING);
 
         budgetRequestRepository.save(request);
+    }
+
+    @Transactional
+    public void createAssignment(AssignmentCreationDto dto) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User teacher = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+
+        Subject subject = subjectRepository.findById(dto.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        // NEW: Get students through Course-based enrollment system
+        List<Course> teacherCourses = courseRepository.findActiveByTeacher(teacher);
+        Set<User> students = new java.util.HashSet<>();
+        
+        // Find courses for this subject taught by this teacher
+        for (Course course : teacherCourses) {
+            if (course.getSubject().getId().equals(subject.getId())) {
+                // Get students enrolled in this course's classroom
+                List<User> courseStudents = enrollmentRepository.findStudentsByClassroom(course.getClassroom());
+                students.addAll(courseStudents);
+            }
+        }
+        
+        // Note: Legacy subject.getEnrolledStudents() removed in favor of Course-based system
+
+        if (students.isEmpty()) {
+            throw new IllegalStateException("No students are enrolled in this subject. Cannot create assignments.");
+        }
+
+        // Create an assignment for each student
+        for (User student : students) {
+            Assignment assignment = new Assignment();
+            assignment.setTitle(dto.getTitle());
+            assignment.setDescription(dto.getDescription());
+            assignment.setDueDate(dto.getDueDate());
+            assignment.setSubject(subject);
+            assignment.setUser(student);
+            assignment.setTeacher(teacher);
+            assignment.setStatus(AssignmentStatus.ASSIGNED);
+
+            assignmentRepository.save(assignment);
+        }
     }
 }

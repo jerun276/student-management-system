@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Create Assignment</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="max-w-2xl mx-auto">
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-2xl">Create New Assignment</h2>
+                <form th:action="@{/teacher/assignments/create}" th:object="${assignment}" method="post" class="space-y-4 mt-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Title</span></label>
+                        <input type="text" th:field="*{title}" class="input input-bordered"/>
+                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></p>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Description</span></label>
+                        <textarea th:field="*{description}" class="textarea textarea-bordered h-24"></textarea>
+                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></p>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Due Date</span></label>
+                        <input type="date" th:field="*{dueDate}" class="input input-bordered"/>
+                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('dueDate')}" th:errors="*{dueDate}"></p>
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">Subject</span></label>
+                        <select th:field="*{subjectId}" class="select select-bordered">
+                            <option value="">Select Subject</option>
+                            <option th:each="subject : ${subjects}" th:value="${subject.id}" th:text="${subject.name}"></option>
+                        </select>
+                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('subjectId')}" th:errors="*{subjectId}"></p>
+                    </div>
+                    <div class="card-actions justify-end mt-6">
+                        <a th:href="@{/teacher/dashboard}" class="btn btn-ghost">Cancel</a>
+                        <button type="submit" class="btn btn-primary">Create Assignment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

@@ -49,6 +49,7 @@ public class UserService {
         dto.setDateOfBirth(user.getDateOfBirth());
         dto.setAddress(user.getAddress());
         dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setNic(user.getNic());
 
         return dto;
     }
@@ -63,6 +64,7 @@ public class UserService {
         user.setDateOfBirth(editProfileDto.getDateOfBirth());
         user.setAddress(editProfileDto.getAddress());
         user.setPhoneNumber(editProfileDto.getPhoneNumber());
+        user.setNic(editProfileDto.getNic());
 
         userRepository.save(user);
     }

@@ -2,6 +2,7 @@ package com.student_management_system.user_management.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -26,4 +27,7 @@ public class EditProfileDto {
     private String address;
 
     private String phoneNumber;
+
+    @Pattern(regexp = "^([0-9]{9}[vV]|[0-9]{12})$", message = "NIC format is invalid")
+    private String nic;
 }

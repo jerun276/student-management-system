@@ -51,6 +51,11 @@
                         <input type="text" th:field="*{phoneNumber}" class="input input-bordered"/>
                         <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></p>
                     </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">NIC</span></label>
+                        <input type="text" th:field="*{nic}" class="input input-bordered"/>
+                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('nic')}" th:errors="*{nic}"></p>
+                    </div>
                     <div class="card-actions justify-end mt-6">
                         <a th:href="@{/profile}" class="btn btn-ghost">Cancel</a>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
