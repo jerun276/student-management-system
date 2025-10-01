@@ -4,13 +4,102 @@
     <meta charset="UTF-8">
     <title>Student Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-</head>
 <body class="bg-surface">
 
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold text-primary">My Dashboard</h1>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">My Dashboard</h1>
+        <div class="flex gap-2">
+            <a th:href="@{/student/courses}" class="btn btn-outline btn-primary">My Courses</a>
+            <a th:href="@{/student/materials}" class="btn btn-ghost">Study Materials</a>
+        </div>
+    </div>
+
+    <!-- Student Info Card -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="card-title">My Academic Information</h2>
+                    <div class="grid grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <span class="font-semibold">Classroom:</span>
+                            <span th:text="${currentEnrollment?.classroom?.fullName ?: 'Not Enrolled'}" class="ml-2">Grade 10-A (English Medium)</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold">Academic Year:</span>
+                            <span th:text="${currentEnrollment?.academicYear?.name ?: 'N/A'}" class="ml-2">2024-2025</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold">Class Teacher:</span>
+                            <span th:text="${currentEnrollment?.classroom?.classTeacher?.firstName + ' ' + currentEnrollment?.classroom?.classTeacher?.lastName ?: 'Not Assigned'}" class="ml-2">John Smith</span>
+                        </div>
+                        <div>
+                            <span class="font-semibold">Total Courses:</span>
+                            <span th:text="${myCourses?.size() ?: 0}" class="ml-2 badge badge-primary">5</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="stat">
+                        <div class="stat-title">Enrollment Status</div>
+                        <div class="stat-value text-sm" 
+                             th:classappend="${currentEnrollment?.active} ? 'text-success' : 'text-error'"
+                             th:text="${currentEnrollment?.active} ? 'Active' : 'Inactive'">Active</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat bg-base-100 shadow">
+            <div class="stat-title">My Courses</div>
+            <div class="stat-value text-primary" th:text="${myCourses?.size() ?: 0}">5</div>
+            <div class="stat-desc">This semester</div>
+        </div>
+        <div class="stat bg-base-100 shadow">
+            <div class="stat-title">Pending Assignments</div>
+            <div class="stat-value text-warning" th:text="${#lists.size(assignments.?[status.name() == 'ASSIGNED'])}">3</div>
+            <div class="stat-desc">Due soon</div>
+        </div>
+        <div class="stat bg-base-100 shadow">
+            <div class="stat-title">Completed</div>
+            <div class="stat-value text-success" th:text="${#lists.size(assignments.?[status.name() == 'GRADED'])}">12</div>
+            <div class="stat-desc">Assignments</div>
+        </div>
+        <div class="stat bg-base-100 shadow">
+            <div class="stat-title">Average Grade</div>
+            <div class="stat-value text-info">B+</div>
+            <div class="stat-desc">This semester</div>
+        </div>
+    </div>
+
+    <!-- My Courses Overview -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title">My Courses</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div th:each="course : ${myCourses}" class="card bg-base-200 shadow">
+                    <div class="card-body p-4">
+                        <h3 class="font-bold" th:text="${course.subject.name}">Mathematics</h3>
+                        <p class="text-sm opacity-70" th:text="${course.subject.code}">MATH</p>
+                        <p class="text-sm" th:text="'Teacher: ' + ${course.teacher.firstName + ' ' + course.teacher.lastName}">Teacher: John Smith</p>
+                        <div class="card-actions justify-end mt-2">
+                            <a th:href="@{/student/courses/{id}(id=${course.id})}" class="btn btn-xs btn-primary">View</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${myCourses == null or myCourses.isEmpty()}" class="text-center py-8">
+                <p class="text-lg opacity-70">No courses enrolled</p>
+                <p class="text-sm opacity-50">Please contact administration for enrollment</p>
+            </div>
+        </div>
+    </div>
 
     <!-- Timetable Card -->
     <div class="card bg-base-100 shadow-xl mt-6">
@@ -42,15 +131,8 @@
                         <td th:text="${#temporals.format(entry.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(entry.endTime, 'HH:mm')}">
                             09:00 - 10:00
                         </td>
-                        <td th:text="${entry.subject.name}">Mathematics</td>
-                        <td th:text="${entry.subject.teacherName}">Mr. Smith</td>
-                        <td class="font-bold">
-                            <a th:href="@{/student/materials/subject/{id}(id=${entry.subject.id})}"
-                               class="link link-primary"
-                               th:text="${entry.subject.name}">
-                                Mathematics
-                            </a>
-                        </td>
+                        <td th:text="${entry.effectiveSubject.name}">Mathematics</td>
+                        <td th:text="${entry.teacher?.firstName + ' ' + entry.teacher?.lastName}">Mr. Smith</td>
                     </tr>
                     </tbody>
                 </table>

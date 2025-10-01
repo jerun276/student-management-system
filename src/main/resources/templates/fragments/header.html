@@ -53,6 +53,8 @@ We will add the xmlns:sec namespace to enable security tags.
                     Dashboard</a>
                 <a th:href="@{/parent/dashboard}" sec:authorize="hasRole('PARENT')" class="btn btn-ghost">My
                     Dashboard</a>
+                <a th:href="@{/principal/dashboard}" sec:authorize="hasRole('PRINCIPAL')" class="btn btn-ghost">My
+                    Dashboard</a>
                 <!-- Add other roles here -->
 
                 <a th:href="@{/teacher/messages}" sec:authorize="hasRole('TEACHER')" class="btn btn-ghost">Messages</a>

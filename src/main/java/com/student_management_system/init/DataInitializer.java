@@ -43,7 +43,6 @@ public class DataInitializer implements CommandLineRunner {
     private final AcademicYearRepository academicYearRepository;
     private final GradeLevelRepository gradeLevelRepository;
     private final ClassroomRepository classroomRepository;
-    private final EnrollmentRepository enrollmentRepository;
     private final CourseRepository courseRepository;
     private final AcademicYearService academicYearService;
     private final EnrollmentService enrollmentService;
@@ -52,9 +51,8 @@ public class DataInitializer implements CommandLineRunner {
             SubjectRepository subjectRepository, TimetableEntryRepository timetableEntryRepository,
             AssignmentRepository assignmentRepository, FeeRepository feeRepository,
             AcademicYearRepository academicYearRepository, GradeLevelRepository gradeLevelRepository,
-            ClassroomRepository classroomRepository, EnrollmentRepository enrollmentRepository,
-            CourseRepository courseRepository, AcademicYearService academicYearService,
-            EnrollmentService enrollmentService) {
+            ClassroomRepository classroomRepository, CourseRepository courseRepository, 
+            AcademicYearService academicYearService, EnrollmentService enrollmentService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.subjectRepository = subjectRepository;
@@ -64,7 +62,6 @@ public class DataInitializer implements CommandLineRunner {
         this.academicYearRepository = academicYearRepository;
         this.gradeLevelRepository = gradeLevelRepository;
         this.classroomRepository = classroomRepository;
-        this.enrollmentRepository = enrollmentRepository;
         this.courseRepository = courseRepository;
         this.academicYearService = academicYearService;
         this.enrollmentService = enrollmentService;

@@ -2,6 +2,7 @@ package com.student_management_system.teacher.model;
 
 import com.student_management_system.student.model.Subject;
 import com.student_management_system.user_management.model.User;
+import com.student_management_system.common.model.Course;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -21,6 +22,11 @@ public class StudyMaterial {
     @ManyToOne
     @JoinColumn(name = "subject_id")
     private Subject subject;
+
+    // NEW: Course-based relationship for the new academic structure
+    @ManyToOne
+    @JoinColumn(name = "course_id")
+    private Course course;
 
     @ManyToOne
     @JoinColumn(name = "uploaded_by_id")

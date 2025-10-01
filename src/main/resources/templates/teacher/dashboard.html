@@ -10,7 +10,75 @@
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold text-primary">Teacher Dashboard</h1>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Teacher Dashboard</h1>
+        <div class="flex gap-2">
+            <a th:href="@{/teacher/courses}" class="btn btn-outline btn-primary">My Courses</a>
+            <a th:href="@{/teacher/assignments/create}" class="btn btn-primary">Create Assignment</a>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+        <div class="stat bg-base-100 shadow">
+            <div class="stat-title">My Courses</div>
+            <div class="stat-value text-primary" th:text="${myCourses?.size() ?: 0}">5</div>
+            <div class="stat-desc">Active courses</div>
+        </div>
+        <div class="stat bg-base-100 shadow">
+            <div class="stat-title">Students</div>
+            <div class="stat-value text-secondary" th:text="${totalStudents ?: 0}">125</div>
+            <div class="stat-desc">Across all courses</div>
+        </div>
+        <div class="stat bg-base-100 shadow">
+            <div class="stat-title">Pending Grades</div>
+            <div class="stat-value text-warning" th:text="${submittedAssignments?.size() ?: 0}">8</div>
+            <div class="stat-desc">Awaiting review</div>
+        </div>
+        <div class="stat bg-base-100 shadow">
+            <div class="stat-title">Academic Year</div>
+            <div class="stat-value text-info" th:text="${currentAcademicYear?.name ?: 'Not Set'}">2024-2025</div>
+            <div class="stat-desc">Current year</div>
+        </div>
+    </div>
+
+    <!-- My Courses Overview -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title">My Courses</h2>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>Classroom</th>
+                        <th>Students</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="course : ${myCourses}">
+                        <td>
+                            <div class="font-bold" th:text="${course.subject.name}">Mathematics</div>
+                            <div class="text-sm opacity-50" th:text="${course.subject.code}">MATH</div>
+                        </td>
+                        <td th:text="${course.classroom.fullName}">Grade 10-A (English Medium)</td>
+                        <td>
+                            <span class="badge badge-info" th:text="${course.classroom.enrollments?.size() ?: 0} + ' students'">25 students</span>
+                        </td>
+                        <td>
+                            <div class="flex gap-1">
+                                <a th:href="@{/teacher/courses/{id}/attendance(id=${course.id})}" class="btn btn-sm btn-outline">Attendance</a>
+                                <a th:href="@{/teacher/courses/{id}/assignments(id=${course.id})}" class="btn btn-sm btn-ghost">Assignments</a>
+                                <a th:href="@{/teacher/courses/{id}/materials(id=${course.id})}" class="btn btn-sm btn-ghost">Materials</a>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 
     <!-- Assignments to Grade Card -->
     <div class="card bg-base-100 shadow-xl mt-6">

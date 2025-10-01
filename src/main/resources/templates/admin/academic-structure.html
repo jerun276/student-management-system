@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Academic Structure Management</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Academic Structure Management</h1>
+        <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-primary">Create New</label>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <li><a href="#academic-year-modal">Academic Year</a></li>
+                <li><a href="#grade-level-modal">Grade Level</a></li>
+                <li><a href="#classroom-modal">Classroom</a></li>
+                <li><a href="#course-modal">Course</a></li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+
+    <!-- Academic Years Section -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title">Academic Years</h2>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Start Date</th>
+                        <th>End Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="year : ${academicYears}">
+                        <td th:text="${year.name}">2024-2025</td>
+                        <td th:text="${#temporals.format(year.startDate, 'dd-MMM-yyyy')}">01-Sep-2024</td>
+                        <td th:text="${#temporals.format(year.endDate, 'dd-MMM-yyyy')}">31-Aug-2025</td>
+                        <td>
+                            <span class="badge" th:classappend="${year.active} ? 'badge-success' : 'badge-neutral'"
+                                  th:text="${year.active} ? 'Active' : 'Inactive'"></span>
+                        </td>
+                        <td>
+                            <button th:if="${!year.active}" 
+                                    th:onclick="'setActiveYear(' + ${year.id} + ')'"
+                                    class="btn btn-sm btn-primary">Set Active</button>
+                            <button class="btn btn-sm btn-ghost">Edit</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Grade Levels Section -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title">Grade Levels</h2>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Level</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Classrooms</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="grade : ${gradeLevels}">
+                        <td th:text="${grade.level}">10</td>
+                        <td th:text="${grade.name}">Grade 10</td>
+                        <td th:text="${grade.description}">Senior secondary</td>
+                        <td>
+                            <span class="badge badge-info" th:text="${classroomCounts[grade.id]} + ' classes'">0 classes</span>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-ghost">Edit</button>
+                            <a th:href="@{/admin/classrooms?gradeId={id}(id=${grade.id})}" 
+                               class="btn btn-sm btn-outline">View Classes</a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Classrooms Section -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title">Current Academic Year Classrooms</h2>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Grade</th>
+                        <th>Section</th>
+                        <th>Medium</th>
+                        <th>Class Teacher</th>
+                        <th>Enrollment</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="classroom : ${classrooms}" th:if="${classroom.academicYear.active}">
+                        <td th:text="${classroom.gradeLevel.name}">Grade 10</td>
+                        <td th:text="${classroom.name}">A</td>
+                        <td>
+                            <span class="badge badge-primary" th:text="${classroom.medium}">ENGLISH</span>
+                        </td>
+                        <td th:text="${classroom.classTeacher?.firstName + ' ' + classroom.classTeacher?.lastName}">John Smith</td>
+                        <td>
+                            <span class="badge badge-info" 
+                                  th:text="'0/' + ${classroom.maxStudents}">0/35</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/classroom/{id}/students(id=${classroom.id})}" 
+                               class="btn btn-sm btn-outline">Students</a>
+                            <button class="btn btn-sm btn-ghost">Edit</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Section -->
+    <div class="stats shadow mb-6">
+        <div class="stat">
+            <div class="stat-title">Total Students</div>
+            <div class="stat-value" th:text="${totalStudents}">1,200</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Total Teachers</div>
+            <div class="stat-value" th:text="${totalTeachers}">85</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Active Classrooms</div>
+            <div class="stat-value" th:text="${#lists.size(classrooms)}">24</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Current Academic Year</div>
+            <div class="stat-value text-lg" th:text="${currentYear?.name ?: 'None Set'}">2024-2025</div>
+        </div>
+    </div>
+</main>
+
+<!-- Academic Year Modal -->
+<div id="academic-year-modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">Create Academic Year</h3>
+        <form method="post" th:action="@{/admin/academic-year/create}" class="space-y-4 py-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text">Name (e.g., 2024-2025)</span></label>
+                <input type="text" name="name" class="input input-bordered" required/>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Start Date</span></label>
+                <input type="date" name="startDate" class="input input-bordered" required/>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">End Date</span></label>
+                <input type="date" name="endDate" class="input input-bordered" required/>
+            </div>
+            <div class="modal-action">
+                <a href="#" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Grade Level Modal -->
+<div id="grade-level-modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">Create Grade Level</h3>
+        <form method="post" th:action="@{/admin/grade-level/create}" class="space-y-4 py-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text">Level (Numeric)</span></label>
+                <input type="number" name="level" class="input input-bordered" min="1" max="13" required/>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Name (e.g., Grade 10)</span></label>
+                <input type="text" name="name" class="input input-bordered" required/>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Description</span></label>
+                <textarea name="description" class="textarea textarea-bordered"></textarea>
+            </div>
+            <div class="modal-action">
+                <a href="#" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Classroom Modal -->
+<div id="classroom-modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">Create Classroom</h3>
+        <form method="post" th:action="@{/admin/classroom/create}" class="space-y-4 py-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text">Section Name (e.g., A, B, C)</span></label>
+                <input type="text" name="name" class="input input-bordered" required/>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Grade Level</span></label>
+                <select name="gradeLevelId" class="select select-bordered" required>
+                    <option value="">Select Grade Level</option>
+                    <option th:each="grade : ${gradeLevels}" 
+                            th:value="${grade.id}" 
+                            th:text="${grade.name}">Grade 10</option>
+                </select>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Academic Year</span></label>
+                <select name="academicYearId" class="select select-bordered" required>
+                    <option value="">Select Academic Year</option>
+                    <option th:each="year : ${academicYears}" 
+                            th:value="${year.id}" 
+                            th:text="${year.name}"
+                            th:selected="${year.active}">2024-2025</option>
+                </select>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Medium of Instruction</span></label>
+                <select name="medium" class="select select-bordered" required>
+                    <option value="">Select Medium</option>
+                    <option th:each="medium : ${mediumValues}" 
+                            th:value="${medium}" 
+                            th:text="${medium}">ENGLISH</option>
+                </select>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Maximum Students</span></label>
+                <input type="number" name="maxStudents" class="input input-bordered" 
+                       min="1" max="50" value="35" required/>
+            </div>
+            <div class="modal-action">
+                <a href="#" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-primary">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function setActiveYear(yearId) {
+    if (confirm('Are you sure you want to set this as the active academic year?')) {
+        fetch('/admin/academic-year/' + yearId + '/activate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(() => {
+            location.reload();
+        });
+    }
+}
+</script>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

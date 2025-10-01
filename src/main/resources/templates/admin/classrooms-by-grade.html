@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle}">Classrooms by Grade</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary" th:text="${pageTitle}">Classrooms - Grade 10</h1>
+            <p class="text-sm text-gray-600" th:if="${gradeLevel}" th:text="'Level ' + ${gradeLevel.level} + ' - ' + ${gradeLevel.description}">Level 10 - Senior Secondary</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="/admin/academic-structure" class="btn btn-outline">← Back to Academic Structure</a>
+            <button class="btn btn-primary" onclick="document.getElementById('classroom-modal').showModal()">+ Add Classroom</button>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+
+    <!-- Classrooms Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" th:if="${not #lists.isEmpty(classrooms)}">
+        <div th:each="classroom : ${classrooms}" class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title" th:text="${classroom.fullName}">Grade 10-A (English Medium) - 2024-2025</h2>
+                
+                <div class="stats stats-vertical shadow">
+                    <div class="stat">
+                        <div class="stat-title">Enrolled Students</div>
+                        <div class="stat-value text-primary" th:text="${enrollmentCounts[classroom.id]}">25</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-title">Available Spots</div>
+                        <div class="stat-value text-secondary" th:text="${availableSpots[classroom.id]}">10</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-title">Capacity</div>
+                        <div class="stat-value text-accent" th:text="${classroom.maxStudents}">35</div>
+                    </div>
+                </div>
+
+                <div class="mt-4">
+                    <div class="badge badge-primary" th:text="${classroom.medium}">ENGLISH</div>
+                    <div class="badge badge-outline ml-2" th:text="${classroom.academicYear.name}">2024-2025</div>
+                </div>
+
+                <div class="mt-4" th:if="${classroom.classTeacher}">
+                    <p class="text-sm text-gray-600">Class Teacher:</p>
+                    <p class="font-semibold" th:text="${classroom.classTeacher.firstName + ' ' + classroom.classTeacher.lastName}">John Smith</p>
+                </div>
+
+                <div class="card-actions justify-end mt-4">
+                    <a th:href="@{/admin/classroom/{id}/students(id=${classroom.id})}" 
+                       class="btn btn-sm btn-primary">View Students</a>
+                    <button class="btn btn-sm btn-outline">Edit</button>
+                    <button class="btn btn-sm btn-ghost">Assign Teacher</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div th:if="${#lists.isEmpty(classrooms)}" class="text-center py-12">
+        <div class="text-6xl text-gray-300 mb-4">🏫</div>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">No Classrooms Found</h3>
+        <p class="text-gray-500 mb-4" th:text="${gradeLevel != null ? 'No classrooms have been created for ' + gradeLevel.name + ' yet.' : 'No classrooms have been created yet.'}">
+            No classrooms have been created for this grade level yet.
+        </p>
+        <button class="btn btn-primary" onclick="document.getElementById('classroom-modal').showModal()">
+            Create First Classroom
+        </button>
+    </div>
+</main>
+
+<!-- Classroom Creation Modal -->
+<dialog id="classroom-modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg">Create New Classroom</h3>
+        <form method="post" th:action="@{/admin/classroom/create}" class="space-y-4 py-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text">Section Name (e.g., A, B, C)</span></label>
+                <input type="text" name="name" class="input input-bordered" required/>
+            </div>
+            
+            <div class="form-control" th:if="${gradeLevel}">
+                <label class="label"><span class="label-text">Grade Level</span></label>
+                <input type="hidden" name="gradeLevelId" th:value="${gradeLevel.id}"/>
+                <input type="text" th:value="${gradeLevel.name}" class="input input-bordered" readonly/>
+            </div>
+            
+            <div class="form-control" th:unless="${gradeLevel}">
+                <label class="label"><span class="label-text">Grade Level</span></label>
+                <select name="gradeLevelId" class="select select-bordered" required>
+                    <option value="">Select Grade Level</option>
+                    <option th:each="grade : ${gradeLevels}" 
+                            th:value="${grade.id}" 
+                            th:text="${grade.name}">Grade 10</option>
+                </select>
+            </div>
+            
+            <div class="form-control">
+                <label class="label"><span class="label-text">Academic Year</span></label>
+                <select name="academicYearId" class="select select-bordered" required>
+                    <option value="">Select Academic Year</option>
+                    <option th:each="year : ${academicYears}" 
+                            th:value="${year.id}" 
+                            th:text="${year.name}"
+                            th:selected="${year.active}">2024-2025</option>
+                </select>
+            </div>
+            
+            <div class="form-control">
+                <label class="label"><span class="label-text">Medium of Instruction</span></label>
+                <select name="medium" class="select select-bordered" required>
+                    <option value="">Select Medium</option>
+                    <option th:each="medium : ${mediumValues}" 
+                            th:value="${medium}" 
+                            th:text="${medium}">ENGLISH</option>
+                </select>
+            </div>
+            
+            <div class="form-control">
+                <label class="label"><span class="label-text">Maximum Students</span></label>
+                <input type="number" name="maxStudents" class="input input-bordered" 
+                       min="1" max="50" value="35" required/>
+            </div>
+            
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('classroom-modal').close()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Classroom</button>
+            </div>
+        </form>
+    </div>
+</dialog>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Enrollment Management</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Enrollment Management</h1>
+        <div class="flex gap-2">
+            <a th:href="@{/admin/dashboard}" class="btn btn-ghost">← Back to Dashboard</a>
+            <label for="enroll-student-modal" class="btn btn-primary">Enroll Student</label>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+
+    <!-- Filter Section -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title">Filter Enrollments</h2>
+            <form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Academic Year</span></label>
+                    <select name="academicYear" class="select select-bordered">
+                        <option value="">All Years</option>
+                        <option th:each="year : ${academicYears}" 
+                                th:value="${year.id}" 
+                                th:text="${year.name}"
+                                th:selected="${param.academicYear == year.id.toString()}">2024-2025</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Grade Level</span></label>
+                    <select name="gradeLevel" class="select select-bordered">
+                        <option value="">All Grades</option>
+                        <option th:each="grade : ${gradeLevels}" 
+                                th:value="${grade.id}" 
+                                th:text="${grade.name}"
+                                th:selected="${param.gradeLevel == grade.id.toString()}">Grade 10</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">Medium</span></label>
+                    <select name="medium" class="select select-bordered">
+                        <option value="">All Mediums</option>
+                        <option value="ENGLISH" th:selected="${param.medium == 'ENGLISH'}">English</option>
+                        <option value="TAMIL" th:selected="${param.medium == 'TAMIL'}">Tamil</option>
+                        <option value="SINHALA" th:selected="${param.medium == 'SINHALA'}">Sinhala</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">&nbsp;</span></label>
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Current Enrollments -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title">Current Enrollments</h2>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Classroom</th>
+                        <th>Academic Year</th>
+                        <th>Enrollment Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="enrollment : ${enrollments}">
+                        <td>
+                            <div class="flex items-center space-x-3">
+                                <div>
+                                    <div class="font-bold" th:text="${enrollment.student.firstName + ' ' + enrollment.student.lastName}">John Doe</div>
+                                    <div class="text-sm opacity-50" th:text="${enrollment.student.username}">john_doe</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div>
+                                <div class="font-bold" th:text="${enrollment.classroom.fullName}">Grade 10-A (English Medium)</div>
+                                <div class="text-sm opacity-50">
+                                    Teacher: <span th:text="${enrollment.classroom.classTeacher?.firstName + ' ' + enrollment.classroom.classTeacher?.lastName}">John Smith</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td th:text="${enrollment.academicYear.name}">2024-2025</td>
+                        <td th:text="${#temporals.format(enrollment.enrollmentDate, 'dd-MMM-yyyy')}">01-Sep-2024</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${enrollment.active} ? 'badge-success' : 'badge-error'"
+                                  th:text="${enrollment.active} ? 'Active' : 'Inactive'">Active</span>
+                        </td>
+                        <td>
+                            <div class="dropdown dropdown-end">
+                                <label tabindex="0" class="btn btn-ghost btn-sm">Actions</label>
+                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                    <li th:if="${enrollment.active}">
+                                        <a th:onclick="'transferStudent(' + ${enrollment.id} + ')'">Transfer</a>
+                                    </li>
+                                    <li th:if="${enrollment.active}">
+                                        <a th:onclick="'withdrawStudent(' + ${enrollment.id} + ')'">Withdraw</a>
+                                    </li>
+                                    <li th:if="${!enrollment.active}">
+                                        <a th:onclick="'reactivateStudent(' + ${enrollment.id} + ')'">Reactivate</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Classroom Capacity Overview -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Classroom Capacity Overview</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div th:each="classroom : ${classroomCapacity}" class="stat bg-base-200">
+                    <div class="stat-title" th:text="${classroom.fullName}">Grade 10-A (English)</div>
+                    <div class="stat-value text-sm" th:text="${classroom.currentEnrollment + '/' + classroom.maxStudents}">25/35</div>
+                    <div class="stat-desc">
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" 
+                                 th:style="'width: ' + ${classroom.currentEnrollment * 100 / classroom.maxStudents} + '%'"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Enroll Student Modal -->
+<input type="checkbox" id="enroll-student-modal" class="modal-toggle"/>
+<div class="modal">
+    <div class="modal-box w-auto max-w-lg">
+        <h3 class="font-bold text-lg">Enroll Student</h3>
+        <form th:action="@{/admin/enrollments/create}" method="post" class="space-y-4 py-4">
+            <div class="form-control">
+                <label class="label"><span class="label-text">Student</span></label>
+                <select name="studentId" class="select select-bordered" required>
+                    <option value="">Select Student</option>
+                    <option th:each="student : ${availableStudents}" 
+                            th:value="${student.id}" 
+                            th:text="${student.firstName + ' ' + student.lastName + ' (' + student.username + ')'}">John Doe (john_doe)</option>
+                </select>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Classroom</span></label>
+                <select name="classroomId" class="select select-bordered" required>
+                    <option value="">Select Classroom</option>
+                    <option th:each="classroom : ${availableClassrooms}" 
+                            th:value="${classroom.id}" 
+                            th:text="${classroom.fullName + ' (Available: ' + (classroom.maxStudents - classroom.currentEnrollment) + ')'}">Grade 10-A (Available: 10)</option>
+                </select>
+            </div>
+            <div class="form-control">
+                <label class="label"><span class="label-text">Academic Year</span></label>
+                <select name="academicYearId" class="select select-bordered" required>
+                    <option th:each="year : ${academicYears}" 
+                            th:value="${year.id}" 
+                            th:text="${year.name}"
+                            th:selected="${year.active}">2024-2025</option>
+                </select>
+            </div>
+            <div class="modal-action">
+                <label for="enroll-student-modal" class="btn btn-ghost">Cancel</label>
+                <button type="submit" class="btn btn-primary">Enroll</button>
+            </div>
+        </form>
+    </div>
+    <label class="modal-backdrop" for="enroll-student-modal">Close</label>
+</div>
+
+<script>
+function transferStudent(enrollmentId) {
+    // Implementation for transfer functionality
+    alert('Transfer functionality to be implemented');
+}
+
+function withdrawStudent(enrollmentId) {
+    if (confirm('Are you sure you want to withdraw this student?')) {
+        fetch('/admin/enrollments/' + enrollmentId + '/withdraw', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(() => {
+            location.reload();
+        });
+    }
+}
+
+function reactivateStudent(enrollmentId) {
+    if (confirm('Are you sure you want to reactivate this enrollment?')) {
+        fetch('/admin/enrollments/' + enrollmentId + '/reactivate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        }).then(() => {
+            location.reload();
+        });
+    }
+}
+</script>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>
