@@ -3,6 +3,8 @@ package com.student_management_system.user_management.controller;
 import com.student_management_system.user_management.dto.UserRegistrationDto;
 import com.student_management_system.user_management.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -10,7 +12,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import com.student_management_system.common.service.PublicService;
-
 
 @Controller
 public class AuthController {
@@ -28,7 +29,44 @@ public class AuthController {
     public String home(Model model) {
         publicService.getLatestAnnouncement().ifPresent(announcement ->
                 model.addAttribute("latestAnnouncement", announcement));
+        
+        // Check if user is authenticated
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAuthenticated = authentication != null && 
+                                authentication.isAuthenticated() && 
+                                !authentication.getName().equals("anonymousUser");
+        
+        model.addAttribute("isAuthenticated", isAuthenticated);
+        
+        // If authenticated, determine the appropriate dashboard URL based on user role
+        if (isAuthenticated) {
+            String dashboardUrl = getDashboardUrlByRole(authentication);
+            model.addAttribute("dashboardUrl", dashboardUrl);
+        }
+        
         return "index";
+    }
+    
+    private String getDashboardUrlByRole(Authentication authentication) {
+        // Get user authorities/roles
+        String role = authentication.getAuthorities().iterator().next().getAuthority();
+        
+        switch (role) {
+            case "ROLE_ADMIN":
+                return "/admin/dashboard";
+            case "ROLE_TEACHER":
+                return "/teacher/dashboard";
+            case "ROLE_STUDENT":
+                return "/student/dashboard";
+            case "ROLE_PRINCIPAL":
+                return "/principal/dashboard";
+            case "ROLE_PARENT":
+                return "/parent/dashboard";
+            case "ROLE_STAFF":
+                return "/staff/dashboard";
+            default:
+                return "/dashboard"; // fallback
+        }
     }
 
     @GetMapping("/login")

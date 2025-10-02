@@ -29,8 +29,12 @@
                 Empowering students, teachers, and administrators with a unified platform for learning, communication,
                 and management.
             </p>
-            <div class="mt-8">
+            <div class="mt-8" th:if="${!isAuthenticated}">
                 <a th:href="@{/login}" class="btn btn-primary btn-lg">Get Started</a>
+            </div>
+            <div class="mt-8" th:if="${isAuthenticated}">
+                <p class="text-lg text-gray-600 mb-4">Welcome back! You're already logged in.</p>
+                <a th:href="${dashboardUrl}" class="btn btn-primary btn-lg">Go to Dashboard</a>
             </div>
         </section>
 

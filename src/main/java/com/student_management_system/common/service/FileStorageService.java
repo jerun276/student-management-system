@@ -30,8 +30,14 @@ public class FileStorageService {
     }
 
     public String storeFile(MultipartFile file) {
+        // Get original filename with null safety
+        String rawFileName = file.getOriginalFilename();
+        if (rawFileName == null || rawFileName.trim().isEmpty()) {
+            rawFileName = "uploaded_file";
+        }
+        
         // Normalize file name
-        String originalFileName = StringUtils.cleanPath(file.getOriginalFilename());
+        String originalFileName = StringUtils.cleanPath(rawFileName);
         // Generate a unique file name to avoid collisions
         String uniqueFileName = UUID.randomUUID().toString() + "_" + originalFileName;
 
