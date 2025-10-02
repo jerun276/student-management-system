@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Student Profile</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary">Student Profile</h1>
+            <p class="text-lg text-gray-600" th:text="${student.firstName + ' ' + student.lastName}">John Doe</p>
+        </div>
+        <div class="flex gap-2">
+            <a th:href="@{/admin/classroom/{id}/students(id=${currentEnrollment?.classroom?.id})}" 
+               th:if="${returnTo == null and currentEnrollment != null}" 
+               class="btn btn-outline">← Back to Classroom</a>
+            <a th:href="@{/admin/enrollments}" 
+               th:if="${returnTo == 'enrollments'}" 
+               class="btn btn-outline">← Back to Enrollments</a>
+            <a th:href="@{/admin/dashboard}" 
+               th:if="${returnTo == null and currentEnrollment == null}" 
+               class="btn btn-outline">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span th:text="${successMessage}">Success message</span>
+    </div>
+    
+    <div th:if="${errorMessage}" class="alert alert-error mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span th:text="${errorMessage}">Error message</span>
+    </div>
+
+    <!-- Student Information Card -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <div class="flex items-start gap-6">
+                <!-- Student Avatar -->
+                <div class="avatar placeholder">
+                    <div class="bg-neutral text-neutral-content rounded-full w-24 h-24">
+                        <span class="text-2xl" th:text="${student.firstName.substring(0,1) + student.lastName.substring(0,1)}">JD</span>
+                    </div>
+                </div>
+                
+                <!-- Student Details -->
+                <div class="flex-1">
+                    <h2 class="card-title text-2xl" th:text="${student.firstName + ' ' + student.lastName}">John Doe</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <p class="text-sm text-gray-600">Username</p>
+                            <p class="font-semibold" th:text="${student.username}">john_doe</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Email</p>
+                            <p class="font-semibold" th:text="${student.email}">john.doe@email.com</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Date of Birth</p>
+                            <p class="font-semibold" th:text="${#temporals.format(student.dateOfBirth, 'dd-MMM-yyyy')}">15-Jan-2008</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Phone Number</p>
+                            <p class="font-semibold" th:text="${student.phoneNumber}">+94 77 123 4567</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">NIC</p>
+                            <p class="font-semibold" th:text="${student.nic}">200812345678</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-600">Status</p>
+                            <span class="badge" 
+                                  th:classappend="${student.enabled} ? 'badge-success' : 'badge-error'"
+                                  th:text="${student.enabled} ? 'Active' : 'Inactive'">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Enrollment Card -->
+    <div class="card bg-base-100 shadow-xl mb-6" th:if="${currentEnrollment}">
+        <div class="card-body">
+            <h2 class="card-title">Current Enrollment</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <p class="text-sm text-gray-600">Classroom</p>
+                    <p class="font-semibold" th:text="${currentEnrollment.classroom.fullName}">Grade 10-A (English Medium) - 2024-2025</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Class Teacher</p>
+                    <p class="font-semibold" th:text="${currentEnrollment.classroom.classTeacher?.firstName + ' ' + currentEnrollment.classroom.classTeacher?.lastName ?: 'Not Assigned'}">Ms. Johnson</p>
+                </div>
+                <div>
+                    <p class="text-sm text-gray-600">Enrollment Date</p>
+                    <p class="font-semibold" th:text="${#temporals.format(currentEnrollment.enrollmentDate, 'dd-MMM-yyyy')}">01-Sep-2024</p>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card-actions justify-end mt-4">
+                <a th:href="@{/admin/classroom/{classroomId}/transfer-student/{studentId}(classroomId=${currentEnrollment.classroom.id}, studentId=${student.id})}" 
+                   class="btn btn-warning btn-sm">Transfer Student</a>
+                <form method="post" th:action="@{/admin/classroom/{classroomId}/withdraw-student/{studentId}(classroomId=${currentEnrollment.classroom.id}, studentId=${student.id})}" 
+                      class="inline" onsubmit="return confirm('Are you sure you want to withdraw this student?')">
+                    <input type="hidden" name="remarks" value="Withdrawn from student profile"/>
+                    <button type="submit" class="btn btn-error btn-sm">Withdraw Student</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- No Current Enrollment Message -->
+    <div class="alert alert-warning mb-6" th:if="${currentEnrollment == null}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+        </svg>
+        <span>This student is not currently enrolled in any classroom.</span>
+    </div>
+
+    <!-- Enrollment Statistics -->
+    <div class="stats shadow mb-6 w-full">
+        <div class="stat">
+            <div class="stat-title">Total Enrollments</div>
+            <div class="stat-value text-primary" th:text="${totalEnrollments}">5</div>
+            <div class="stat-desc">All time</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Active Enrollments</div>
+            <div class="stat-value text-success" th:text="${activeEnrollments}">1</div>
+            <div class="stat-desc">Currently active</div>
+        </div>
+        <div class="stat">
+            <div class="stat-title">Withdrawn Enrollments</div>
+            <div class="stat-value text-error" th:text="${withdrawnEnrollments}">4</div>
+            <div class="stat-desc">Previously withdrawn</div>
+        </div>
+    </div>
+
+    <!-- Enrollment History -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Enrollment History</h2>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <thead>
+                    <tr>
+                        <th>Classroom</th>
+                        <th>Academic Year</th>
+                        <th>Enrollment Date</th>
+                        <th>Withdrawal Date</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="enrollment : ${enrollmentHistory}">
+                        <td th:text="${enrollment.classroom.fullName}">Grade 10-A (English Medium) - 2024-2025</td>
+                        <td th:text="${enrollment.academicYear.name}">2024-2025</td>
+                        <td th:text="${#temporals.format(enrollment.enrollmentDate, 'dd-MMM-yyyy')}">01-Sep-2024</td>
+                        <td th:text="${enrollment.withdrawalDate != null ? #temporals.format(enrollment.withdrawalDate, 'dd-MMM-yyyy') : '-'}">-</td>
+                        <td>
+                            <span class="badge" 
+                                  th:classappend="${enrollment.active} ? 'badge-success' : 'badge-error'"
+                                  th:text="${enrollment.active} ? 'Active' : 'Withdrawn'">Active</span>
+                        </td>
+                        <td th:text="${enrollment.remarks ?: '-'}">-</td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(enrollmentHistory)}">
+                        <td colspan="6" class="text-center text-gray-500">No enrollment history found</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

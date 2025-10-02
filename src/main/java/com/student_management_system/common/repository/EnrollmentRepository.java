@@ -16,6 +16,11 @@ import java.util.Optional;
 public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
     
     /**
+     * Find any enrollment (active or inactive) for a student in a specific academic year
+     */
+    Optional<Enrollment> findByStudentAndAcademicYear(User student, AcademicYear academicYear);
+    
+    /**
      * Find active enrollment for a student in a specific academic year
      */
     @Query("SELECT e FROM Enrollment e WHERE e.student = :student AND e.academicYear = :academicYear AND e.isActive = true")

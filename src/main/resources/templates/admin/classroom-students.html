@@ -42,7 +42,14 @@
         <div class="card-body">
             <div class="flex justify-between items-center mb-4">
                 <h2 class="card-title">Enrolled Students</h2>
-                <button class="btn btn-primary">Enroll New Student</button>
+                <div class="flex gap-2">
+                    <a th:href="@{/admin/classroom/{id}/assign-teacher(id=${classroom.id})}" 
+                       class="btn btn-secondary">Assign Teacher</a>
+                    <a th:href="@{/admin/classroom/{id}/edit(id=${classroom.id})}" 
+                       class="btn btn-outline">Edit Classroom</a>
+                    <a th:href="@{/admin/classroom/{id}/enroll-student(id=${classroom.id})}" 
+                       class="btn btn-primary">Enroll New Student</a>
+                </div>
             </div>
             
             <div class="overflow-x-auto">
@@ -65,8 +72,15 @@
                         <td th:text="${#temporals.format(student.dateOfBirth, 'dd-MMM-yyyy')}">15-Jan-2008</td>
                         <td th:text="${student.phoneNumber}">+94 77 123 4567</td>
                         <td>
-                            <button class="btn btn-sm btn-ghost">View Profile</button>
-                            <button class="btn btn-sm btn-warning">Transfer</button>
+                            <a th:href="@{/admin/student/{studentId}/profile(studentId=${student.id})}" 
+                               class="btn btn-sm btn-ghost">View Profile</a>
+                            <a th:href="@{/admin/classroom/{classroomId}/transfer-student/{studentId}(classroomId=${classroom.id}, studentId=${student.id})}" 
+                               class="btn btn-sm btn-warning">Transfer</a>
+                            <form method="post" th:action="@{/admin/classroom/{classroomId}/withdraw-student/{studentId}(classroomId=${classroom.id}, studentId=${student.id})}" 
+                                  class="inline" onsubmit="return confirmWithdrawal(this)">
+                                <input type="hidden" name="remarks" value=""/>
+                                <button type="submit" class="btn btn-sm btn-error">Withdraw</button>
+                            </form>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(students)}">
@@ -80,5 +94,20 @@
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script>
+function confirmWithdrawal(form) {
+    const studentName = form.closest('tr').querySelector('td:nth-child(2)').textContent;
+    const remarks = prompt(`Are you sure you want to withdraw ${studentName} from this classroom?\n\nPlease provide a reason (optional):`);
+    
+    if (remarks === null) {
+        return false; // User cancelled
+    }
+    
+    // Set the remarks in the hidden field
+    form.querySelector('input[name="remarks"]').value = remarks || 'Withdrawn by administrator';
+    return true;
+}
+</script>
 </body>
 </html>

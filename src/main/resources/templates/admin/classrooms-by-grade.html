@@ -58,8 +58,10 @@
                 <div class="card-actions justify-end mt-4">
                     <a th:href="@{/admin/classroom/{id}/students(id=${classroom.id})}" 
                        class="btn btn-sm btn-primary">View Students</a>
-                    <button class="btn btn-sm btn-outline">Edit</button>
-                    <button class="btn btn-sm btn-ghost">Assign Teacher</button>
+                    <a th:href="@{/admin/classroom/{id}/assign-teacher(id=${classroom.id})}" 
+                       class="btn btn-sm btn-secondary">Assign Teacher</a>
+                    <a th:href="@{/admin/classroom/{id}/edit(id=${classroom.id})}" 
+                       class="btn btn-sm btn-outline">Edit</a>
                 </div>
             </div>
         </div>
@@ -84,19 +86,22 @@
         <h3 class="font-bold text-lg">Create New Classroom</h3>
         <form method="post" th:action="@{/admin/classroom/create}" class="space-y-4 py-4">
             <div class="form-control">
-                <label class="label"><span class="label-text">Section Name (e.g., A, B, C)</span></label>
-                <input type="text" name="name" class="input input-bordered" required/>
+                <label class="label" for="modalClassroomName"><span class="label-text">Section Name (e.g., A, B, C)</span></label>
+                <input id="modalClassroomName" type="text" name="name" class="input input-bordered" 
+                       autocomplete="off" required/>
             </div>
             
             <div class="form-control" th:if="${gradeLevel}">
-                <label class="label"><span class="label-text">Grade Level</span></label>
+                <label class="label" for="modalGradeLevelDisplay"><span class="label-text">Grade Level</span></label>
                 <input type="hidden" name="gradeLevelId" th:value="${gradeLevel.id}"/>
-                <input type="text" th:value="${gradeLevel.name}" class="input input-bordered" readonly/>
+                <input id="modalGradeLevelDisplay" type="text" th:value="${gradeLevel.name}" 
+                       class="input input-bordered" readonly/>
             </div>
             
             <div class="form-control" th:unless="${gradeLevel}">
-                <label class="label"><span class="label-text">Grade Level</span></label>
-                <select name="gradeLevelId" class="select select-bordered" required>
+                <label class="label" for="modalGradeLevelSelect"><span class="label-text">Grade Level</span></label>
+                <select id="modalGradeLevelSelect" name="gradeLevelId" class="select select-bordered" 
+                        autocomplete="off" required>
                     <option value="">Select Grade Level</option>
                     <option th:each="grade : ${gradeLevels}" 
                             th:value="${grade.id}" 
@@ -105,8 +110,9 @@
             </div>
             
             <div class="form-control">
-                <label class="label"><span class="label-text">Academic Year</span></label>
-                <select name="academicYearId" class="select select-bordered" required>
+                <label class="label" for="modalAcademicYear"><span class="label-text">Academic Year</span></label>
+                <select id="modalAcademicYear" name="academicYearId" class="select select-bordered" 
+                        autocomplete="off" required>
                     <option value="">Select Academic Year</option>
                     <option th:each="year : ${academicYears}" 
                             th:value="${year.id}" 
@@ -116,8 +122,9 @@
             </div>
             
             <div class="form-control">
-                <label class="label"><span class="label-text">Medium of Instruction</span></label>
-                <select name="medium" class="select select-bordered" required>
+                <label class="label" for="modalMedium"><span class="label-text">Medium of Instruction</span></label>
+                <select id="modalMedium" name="medium" class="select select-bordered" 
+                        autocomplete="off" required>
                     <option value="">Select Medium</option>
                     <option th:each="medium : ${mediumValues}" 
                             th:value="${medium}" 
@@ -126,9 +133,9 @@
             </div>
             
             <div class="form-control">
-                <label class="label"><span class="label-text">Maximum Students</span></label>
-                <input type="number" name="maxStudents" class="input input-bordered" 
-                       min="1" max="50" value="35" required/>
+                <label class="label" for="modalMaxStudents"><span class="label-text">Maximum Students</span></label>
+                <input id="modalMaxStudents" type="number" name="maxStudents" class="input input-bordered" 
+                       min="1" max="50" value="35" autocomplete="off" required/>
             </div>
             
             <div class="modal-action">

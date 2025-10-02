@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Classroom</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary">Edit Classroom</h1>
+            <p class="text-lg text-gray-600" th:text="'Editing: ' + ${classroom.fullName}">Editing: Grade 10-A (English Medium) - 2024-2025</p>
+        </div>
+        <a href="javascript:history.back()" class="btn btn-outline">← Back</a>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+
+    <!-- Edit Form -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Classroom Details</h2>
+            
+            <form method="post" th:action="@{/admin/classroom/{id}/update(id=${classroom.id})}" class="space-y-4">
+                <div class="form-control">
+                    <label class="label" for="editClassroomName">
+                        <span class="label-text">Section Name (e.g., A, B, C)</span>
+                    </label>
+                    <input id="editClassroomName" type="text" name="name" 
+                           th:value="${classroom.name}" 
+                           class="input input-bordered" autocomplete="off" required/>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label" for="editClassroomGradeLevel">
+                        <span class="label-text">Grade Level</span>
+                    </label>
+                    <select id="editClassroomGradeLevel" name="gradeLevelId" 
+                            class="select select-bordered" autocomplete="off" required>
+                        <option value="">Select Grade Level</option>
+                        <option th:each="grade : ${gradeLevels}" 
+                                th:value="${grade.id}" 
+                                th:text="${grade.name}"
+                                th:selected="${grade.id == classroom.gradeLevel.id}">Grade 10</option>
+                    </select>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label" for="editClassroomAcademicYear">
+                        <span class="label-text">Academic Year</span>
+                    </label>
+                    <select id="editClassroomAcademicYear" name="academicYearId" 
+                            class="select select-bordered" autocomplete="off" required>
+                        <option value="">Select Academic Year</option>
+                        <option th:each="year : ${academicYears}" 
+                                th:value="${year.id}" 
+                                th:text="${year.name}"
+                                th:selected="${year.id == classroom.academicYear.id}">2024-2025</option>
+                    </select>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label" for="editClassroomMedium">
+                        <span class="label-text">Medium of Instruction</span>
+                    </label>
+                    <select id="editClassroomMedium" name="medium" 
+                            class="select select-bordered" autocomplete="off" required>
+                        <option value="">Select Medium</option>
+                        <option th:each="medium : ${mediumValues}" 
+                                th:value="${medium}" 
+                                th:text="${medium}"
+                                th:selected="${medium == classroom.medium}">ENGLISH</option>
+                    </select>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label" for="editClassroomMaxStudents">
+                        <span class="label-text">Maximum Students</span>
+                    </label>
+                    <input id="editClassroomMaxStudents" type="number" name="maxStudents" 
+                           th:value="${classroom.maxStudents}" 
+                           class="input input-bordered" min="1" max="50" autocomplete="off" required/>
+                </div>
+                
+                <div class="card-actions justify-end mt-6">
+                    <a href="javascript:history.back()" class="btn btn-ghost">Cancel</a>
+                    <button type="submit" class="btn btn-primary" 
+                            onclick="return confirm('Are you sure you want to update this classroom? This may affect student enrollments.')">
+                        Update Classroom
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Current Status -->
+    <div class="card bg-base-100 shadow-xl mt-6">
+        <div class="card-body">
+            <h2 class="card-title">Current Status</h2>
+            
+            <div class="stats stats-vertical lg:stats-horizontal shadow">
+                <div class="stat">
+                    <div class="stat-title">Current Enrollment</div>
+                    <div class="stat-value text-primary" th:text="${currentEnrollment}">0</div>
+                    <div class="stat-desc" th:text="'Out of ' + ${classroom.maxStudents} + ' maximum'">Out of 35 maximum</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-title">Class Teacher</div>
+                    <div class="stat-value text-sm" th:text="${classroom.classTeacher?.firstName + ' ' + classroom.classTeacher?.lastName ?: 'Not Assigned'}">
+                        Not Assigned
+                    </div>
+                </div>
+                <div class="stat">
+                    <div class="stat-title">Available Spots</div>
+                    <div class="stat-value text-success" th:text="${availableSpots}">35</div>
+                </div>
+            </div>
+            
+            <div class="flex gap-2 mt-4">
+                <a th:href="@{/admin/classroom/{id}/students(id=${classroom.id})}" 
+                   class="btn btn-outline btn-sm">View Students</a>
+                <a th:href="@{/admin/classroom/{id}/assign-teacher(id=${classroom.id})}" 
+                   class="btn btn-secondary btn-sm">Assign Teacher</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

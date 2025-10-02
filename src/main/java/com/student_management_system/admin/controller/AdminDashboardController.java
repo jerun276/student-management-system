@@ -4,6 +4,11 @@ import com.student_management_system.admin.dto.CreateUserDto;
 import com.student_management_system.admin.service.AdminService;
 import com.student_management_system.user_management.model.Role;
 import com.student_management_system.admin.dto.UserDto;
+import com.student_management_system.common.service.AcademicYearService;
+import com.student_management_system.common.model.AcademicYear;
+import com.student_management_system.user_management.model.User;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.Optional;
 import org.springframework.web.bind.annotation.PathVariable;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -15,12 +20,17 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Controller
 @RequestMapping("/admin")
 public class AdminDashboardController {
 
     private final AdminService adminService;
+    
+    @Autowired
+    private AcademicYearService academicYearService;
 
     public AdminDashboardController(AdminService adminService) {
         this.adminService = adminService;
@@ -35,45 +45,88 @@ public class AdminDashboardController {
         }
         // Pass all Role enum values to the template
         model.addAttribute("allRoles", Role.values());
+        
+        // Add current academic year
+        Optional<AcademicYear> currentAcademicYear = academicYearService.getCurrentAcademicYear();
+        model.addAttribute("currentAcademicYear", currentAcademicYear.orElse(null));
+        
+        // Add current user information for UI restrictions
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        model.addAttribute("currentUsername", authentication.getName());
+        
         return "admin/dashboard";
     }
 
     @PostMapping("/users/create")
     public String createUser(@Valid @ModelAttribute("newUser") CreateUserDto createUserDto,
-                             BindingResult bindingResult,
-                             RedirectAttributes redirectAttributes) {
-
+                           BindingResult bindingResult,
+                           RedirectAttributes redirectAttributes) {
+        
+        // Custom validation for business rules
+        validateCreateUser(createUserDto, bindingResult);
+        
         if (bindingResult.hasErrors()) {
-            // If there are errors, pass the DTO and errors back to the dashboard
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.newUser", bindingResult);
             redirectAttributes.addFlashAttribute("newUser", createUserDto);
+            redirectAttributes.addFlashAttribute("errorMessage", "Please correct the validation errors and try again.");
             return "redirect:/admin/dashboard";
         }
-
+        
         try {
             adminService.createUser(createUserDto);
-            redirectAttributes.addFlashAttribute("successMessage", "User created successfully!");
+            redirectAttributes.addFlashAttribute("successMessage", 
+                "User '" + createUserDto.getUsername() + "' created successfully!");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
             redirectAttributes.addFlashAttribute("newUser", createUserDto);
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error creating user: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("newUser", createUserDto);
         }
-
         return "redirect:/admin/dashboard";
     }
-
-    @GetMapping("/users/{id}/edit")
-    public String showEditUserForm(@PathVariable Long id, Model model) {
-        UserDto userDto = adminService.findUserById(id);
-        model.addAttribute("user", userDto);
-        model.addAttribute("allRoles", Role.values());
-        return "admin/user-edit";
+    
+    private void validateCreateUser(CreateUserDto createUserDto, BindingResult bindingResult) {
+        // Check username uniqueness
+        if (createUserDto.getUsername() != null && adminService.isUsernameExists(createUserDto.getUsername())) {
+            bindingResult.rejectValue("username", "username.exists", 
+                "Username '" + createUserDto.getUsername() + "' already exists");
+        }
+        
+        // Check email uniqueness
+        if (createUserDto.getEmail() != null && adminService.isEmailExists(createUserDto.getEmail())) {
+            bindingResult.rejectValue("email", "email.exists", 
+                "Email '" + createUserDto.getEmail() + "' is already registered");
+        }
+        
+        // Check NIC uniqueness
+        if (createUserDto.getNic() != null && !createUserDto.getNic().trim().isEmpty()) {
+            if (adminService.isNicExists(createUserDto.getNic())) {
+                bindingResult.rejectValue("nic", "nic.exists", 
+                    "NIC '" + createUserDto.getNic() + "' is already registered");
+            }
+        }
+        
+        // Age validation based on date of birth
+        if (createUserDto.getDateOfBirth() != null) {
+            int age = java.time.Period.between(createUserDto.getDateOfBirth(), java.time.LocalDate.now()).getYears();
+            if (age < 5) {
+                bindingResult.rejectValue("dateOfBirth", "age.tooYoung", 
+                    "User must be at least 5 years old");
+            }
+            if (age > 100) {
+                bindingResult.rejectValue("dateOfBirth", "age.tooOld", 
+                    "Please enter a valid date of birth");
+            }
+        }
     }
 
-    @PostMapping("/users/update")
-    public String updateUser(@Valid @ModelAttribute("user") UserDto userDto,
-                             BindingResult bindingResult,
-                             RedirectAttributes redirectAttributes,
-                             Model model) {
+    @PostMapping("/users/{id}/edit")
+    public String updateUser(@PathVariable Long id,
+                           @Valid @ModelAttribute("userDto") UserDto userDto,
+                           BindingResult bindingResult,
+                           RedirectAttributes redirectAttributes,
+                           Model model) {
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("allRoles", Role.values());
@@ -84,9 +137,7 @@ public class AdminDashboardController {
             adminService.updateUser(userDto);
             redirectAttributes.addFlashAttribute("successMessage", "User updated successfully!");
         } catch (IllegalStateException e) {
-            // This will now catch the "Username already taken" error
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            // Redirect back to the edit page to show the error
             return "redirect:/admin/users/" + userDto.getId() + "/edit";
         } catch (RuntimeException e) {
             redirectAttributes.addFlashAttribute("errorMessage", "An unexpected error occurred.");
@@ -120,6 +171,24 @@ public class AdminDashboardController {
     @PostMapping("/users/{id}/delete")
     public String deleteUser(@PathVariable Long id, RedirectAttributes redirectAttributes) {
         try {
+            // Get current authenticated user
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            String currentUsername = authentication.getName();
+            
+            // Get the user to be deleted
+            Optional<User> userToDelete = adminService.getUserById(id);
+            
+            if (userToDelete.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "User not found!");
+                return "redirect:/admin/dashboard";
+            }
+            
+            // Prevent self-deletion
+            if (userToDelete.get().getUsername().equals(currentUsername)) {
+                redirectAttributes.addFlashAttribute("errorMessage", "You cannot delete your own account!");
+                return "redirect:/admin/dashboard";
+            }
+            
             adminService.deleteUser(id);
             redirectAttributes.addFlashAttribute("successMessage", "User deleted successfully!");
         } catch (RuntimeException e) {

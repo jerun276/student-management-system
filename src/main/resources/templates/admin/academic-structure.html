@@ -51,15 +51,17 @@
                                   th:text="${year.active} ? 'Active' : 'Inactive'"></span>
                         </td>
                         <td>
-                            <button th:if="${!year.active}" 
-                                    th:onclick="'setActiveYear(' + ${year.id} + ')'"
-                                    class="btn btn-sm btn-primary">Set Active</button>
-                            <button class="btn btn-sm btn-ghost">Edit</button>
+                            <a th:href="@{/admin/academic-year/{id}/edit(id=${year.id})}" 
+                               class="btn btn-sm btn-ghost">Edit</a>
+                            <form th:if="${!year.active}" method="post" 
+                                  th:action="@{/admin/academic-year/{id}/activate(id=${year.id})}" class="inline">
+                                <button type="submit" class="btn btn-sm btn-primary">Activate</button>
+                            </form>
                         </td>
                     </tr>
                     </tbody>
                 </table>
-            </div>
+            </div> 
         </div>
     </div>
 
@@ -87,7 +89,8 @@
                             <span class="badge badge-info" th:text="${classroomCounts[grade.id]} + ' classes'">0 classes</span>
                         </td>
                         <td>
-                            <button class="btn btn-sm btn-ghost">Edit</button>
+                            <a th:href="@{/admin/grade-level/{id}/edit(id=${grade.id})}" 
+                               class="btn btn-sm btn-ghost">Edit</a>
                             <a th:href="@{/admin/classrooms?gradeId={id}(id=${grade.id})}" 
                                class="btn btn-sm btn-outline">View Classes</a>
                         </td>
@@ -121,15 +124,24 @@
                         <td>
                             <span class="badge badge-primary" th:text="${classroom.medium}">ENGLISH</span>
                         </td>
-                        <td th:text="${classroom.classTeacher?.firstName + ' ' + classroom.classTeacher?.lastName}">John Smith</td>
+                        <td>
+                            <span th:if="${classroom.classTeacher}" 
+                                  th:text="${classroom.classTeacher.firstName + ' ' + classroom.classTeacher.lastName}">John Smith</span>
+                            <span th:if="${classroom.classTeacher == null}" 
+                                  class="text-gray-500 italic">No teacher assigned</span>
+                        </td>
                         <td>
                             <span class="badge badge-info" 
-                                  th:text="'0/' + ${classroom.maxStudents}">0/35</span>
+                                  th:text="${enrollmentCounts[classroom.id]} + '/' + ${classroom.maxStudents}">0/35</span>
                         </td>
                         <td>
                             <a th:href="@{/admin/classroom/{id}/students(id=${classroom.id})}" 
                                class="btn btn-sm btn-outline">Students</a>
-                            <button class="btn btn-sm btn-ghost">Edit</button>
+                            <a th:href="@{/admin/classroom/{id}/assign-teacher(id=${classroom.id})}" 
+                               th:class="${classroom.classTeacher != null ? 'btn btn-sm btn-warning' : 'btn btn-sm btn-secondary'}"
+                               th:text="${classroom.classTeacher != null ? 'Change Teacher' : 'Assign Teacher'}">Assign Teacher</a>
+                            <a th:href="@{/admin/classroom/{id}/edit(id=${classroom.id})}" 
+                               class="btn btn-sm btn-ghost">Edit</a>
                         </td>
                     </tr>
                     </tbody>
@@ -141,8 +153,9 @@
     <!-- Statistics Section -->
     <div class="stats shadow mb-6">
         <div class="stat">
-            <div class="stat-title">Total Students</div>
+            <div class="stat-title">Enrolled Students</div>
             <div class="stat-value" th:text="${totalStudents}">1,200</div>
+            <div class="stat-desc" th:text="'Out of ' + ${totalRegisteredStudents} + ' registered'">Out of 1,250 registered</div>
         </div>
         <div class="stat">
             <div class="stat-title">Total Teachers</div>
@@ -165,16 +178,19 @@
         <h3 class="font-bold text-lg">Create Academic Year</h3>
         <form method="post" th:action="@{/admin/academic-year/create}" class="space-y-4 py-4">
             <div class="form-control">
-                <label class="label"><span class="label-text">Name (e.g., 2024-2025)</span></label>
-                <input type="text" name="name" class="input input-bordered" required/>
+                <label class="label" for="academicYearName"><span class="label-text">Name (e.g., 2024-2025)</span></label>
+                <input id="academicYearName" type="text" name="name" class="input input-bordered" 
+                       autocomplete="off" required/>
             </div>
             <div class="form-control">
-                <label class="label"><span class="label-text">Start Date</span></label>
-                <input type="date" name="startDate" class="input input-bordered" required/>
+                <label class="label" for="academicYearStartDate"><span class="label-text">Start Date</span></label>
+                <input id="academicYearStartDate" type="date" name="startDate" class="input input-bordered" 
+                       autocomplete="off" required/>
             </div>
             <div class="form-control">
-                <label class="label"><span class="label-text">End Date</span></label>
-                <input type="date" name="endDate" class="input input-bordered" required/>
+                <label class="label" for="academicYearEndDate"><span class="label-text">End Date</span></label>
+                <input id="academicYearEndDate" type="date" name="endDate" class="input input-bordered" 
+                       autocomplete="off" required/>
             </div>
             <div class="modal-action">
                 <a href="#" class="btn btn-ghost">Cancel</a>
@@ -190,16 +206,19 @@
         <h3 class="font-bold text-lg">Create Grade Level</h3>
         <form method="post" th:action="@{/admin/grade-level/create}" class="space-y-4 py-4">
             <div class="form-control">
-                <label class="label"><span class="label-text">Level (Numeric)</span></label>
-                <input type="number" name="level" class="input input-bordered" min="1" max="13" required/>
+                <label class="label" for="gradeLevelNumber"><span class="label-text">Level (Numeric)</span></label>
+                <input id="gradeLevelNumber" type="number" name="level" class="input input-bordered" 
+                       min="1" max="13" autocomplete="off" required/>
             </div>
             <div class="form-control">
-                <label class="label"><span class="label-text">Name (e.g., Grade 10)</span></label>
-                <input type="text" name="name" class="input input-bordered" required/>
+                <label class="label" for="gradeLevelName"><span class="label-text">Name (e.g., Grade 10)</span></label>
+                <input id="gradeLevelName" type="text" name="name" class="input input-bordered" 
+                       autocomplete="off" required/>
             </div>
             <div class="form-control">
-                <label class="label"><span class="label-text">Description</span></label>
-                <textarea name="description" class="textarea textarea-bordered"></textarea>
+                <label class="label" for="gradeLevelDescription"><span class="label-text">Description</span></label>
+                <textarea id="gradeLevelDescription" name="description" class="textarea textarea-bordered" 
+                          autocomplete="off"></textarea>
             </div>
             <div class="modal-action">
                 <a href="#" class="btn btn-ghost">Cancel</a>
@@ -215,12 +234,14 @@
         <h3 class="font-bold text-lg">Create Classroom</h3>
         <form method="post" th:action="@{/admin/classroom/create}" class="space-y-4 py-4">
             <div class="form-control">
-                <label class="label"><span class="label-text">Section Name (e.g., A, B, C)</span></label>
-                <input type="text" name="name" class="input input-bordered" required/>
+                <label class="label" for="classroomName"><span class="label-text">Section Name (e.g., A, B, C)</span></label>
+                <input id="classroomName" type="text" name="name" class="input input-bordered" 
+                       autocomplete="off" required/>
             </div>
             <div class="form-control">
-                <label class="label"><span class="label-text">Grade Level</span></label>
-                <select name="gradeLevelId" class="select select-bordered" required>
+                <label class="label" for="classroomGradeLevel"><span class="label-text">Grade Level</span></label>
+                <select id="classroomGradeLevel" name="gradeLevelId" class="select select-bordered" 
+                        autocomplete="off" required>
                     <option value="">Select Grade Level</option>
                     <option th:each="grade : ${gradeLevels}" 
                             th:value="${grade.id}" 
@@ -228,8 +249,9 @@
                 </select>
             </div>
             <div class="form-control">
-                <label class="label"><span class="label-text">Academic Year</span></label>
-                <select name="academicYearId" class="select select-bordered" required>
+                <label class="label" for="classroomAcademicYear"><span class="label-text">Academic Year</span></label>
+                <select id="classroomAcademicYear" name="academicYearId" class="select select-bordered" 
+                        autocomplete="off" required>
                     <option value="">Select Academic Year</option>
                     <option th:each="year : ${academicYears}" 
                             th:value="${year.id}" 
@@ -238,8 +260,9 @@
                 </select>
             </div>
             <div class="form-control">
-                <label class="label"><span class="label-text">Medium of Instruction</span></label>
-                <select name="medium" class="select select-bordered" required>
+                <label class="label" for="classroomMedium"><span class="label-text">Medium of Instruction</span></label>
+                <select id="classroomMedium" name="medium" class="select select-bordered" 
+                        autocomplete="off" required>
                     <option value="">Select Medium</option>
                     <option th:each="medium : ${mediumValues}" 
                             th:value="${medium}" 
@@ -247,9 +270,9 @@
                 </select>
             </div>
             <div class="form-control">
-                <label class="label"><span class="label-text">Maximum Students</span></label>
-                <input type="number" name="maxStudents" class="input input-bordered" 
-                       min="1" max="50" value="35" required/>
+                <label class="label" for="classroomMaxStudents"><span class="label-text">Maximum Students</span></label>
+                <input id="classroomMaxStudents" type="number" name="maxStudents" class="input input-bordered" 
+                       min="1" max="50" value="35" autocomplete="off" required/>
             </div>
             <div class="modal-action">
                 <a href="#" class="btn btn-ghost">Cancel</a>

@@ -28,13 +28,17 @@ public class EnrollmentService {
      * Enroll a student in a classroom for a specific academic year
      */
     public Enrollment enrollStudent(User student, Classroom classroom, AcademicYear academicYear) {
-        // Check if student is already enrolled in this academic year
-        Optional<Enrollment> existingEnrollment = enrollmentRepository
+        // Check if student is already actively enrolled in this academic year
+        Optional<Enrollment> activeEnrollment = enrollmentRepository
             .findActiveEnrollmentByStudentAndAcademicYear(student, academicYear);
         
-        if (existingEnrollment.isPresent()) {
+        if (activeEnrollment.isPresent()) {
             throw new IllegalStateException("Student is already enrolled in a classroom for this academic year");
         }
+        
+        // Check for any existing enrollment (including withdrawn) for this student and academic year
+        Optional<Enrollment> existingEnrollment = enrollmentRepository
+            .findByStudentAndAcademicYear(student, academicYear);
         
         // Check classroom capacity
         Long currentEnrollmentCount = classroomRepository.getCurrentEnrollmentCount(classroom);
@@ -42,12 +46,24 @@ public class EnrollmentService {
             throw new IllegalStateException("Classroom has reached maximum capacity");
         }
         
-        Enrollment enrollment = new Enrollment();
-        enrollment.setStudent(student);
-        enrollment.setClassroom(classroom);
-        enrollment.setAcademicYear(academicYear);
-        enrollment.setEnrollmentDate(LocalDate.now());
-        enrollment.setActive(true);
+        Enrollment enrollment;
+        if (existingEnrollment.isPresent()) {
+            // Reactivate existing enrollment record
+            enrollment = existingEnrollment.get();
+            enrollment.setClassroom(classroom);
+            enrollment.setEnrollmentDate(LocalDate.now());
+            enrollment.setActive(true);
+            enrollment.setWithdrawalDate(null);
+            enrollment.setRemarks("Re-enrolled after withdrawal");
+        } else {
+            // Create new enrollment record
+            enrollment = new Enrollment();
+            enrollment.setStudent(student);
+            enrollment.setClassroom(classroom);
+            enrollment.setAcademicYear(academicYear);
+            enrollment.setEnrollmentDate(LocalDate.now());
+            enrollment.setActive(true);
+        }
         
         return enrollmentRepository.save(enrollment);
     }
@@ -164,5 +180,21 @@ public class EnrollmentService {
     public Integer getAvailableSpots(Classroom classroom) {
         Long currentCount = getCurrentEnrollmentCount(classroom);
         return classroom.getMaxStudents() - currentCount.intValue();
+    }
+    
+    /**
+     * Check if a student is enrolled in any classroom for a specific academic year
+     */
+    public boolean isStudentEnrolledInAcademicYear(User student, AcademicYear academicYear) {
+        Optional<Enrollment> enrollment = enrollmentRepository
+            .findActiveEnrollmentByStudentAndAcademicYear(student, academicYear);
+        return enrollment.isPresent();
+    }
+    
+    /**
+     * Enroll a student in a classroom (uses classroom's academic year)
+     */
+    public Enrollment enrollStudent(User student, Classroom classroom) {
+        return enrollStudent(student, classroom, classroom.getAcademicYear());
     }
 }

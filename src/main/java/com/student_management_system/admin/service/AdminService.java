@@ -28,6 +28,10 @@ public class AdminService {
                 .map(this::mapToUserDto)
                 .collect(Collectors.toList());
     }
+    
+    public Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
 
     @Transactional
     public void createUser(CreateUserDto createUserDto) {
@@ -107,5 +111,33 @@ public class AdminService {
         userDto.setRole(user.getRole());
         userDto.setEnabled(user.isEnabled());
         return userDto;
+    }
+    
+    // Validation helper methods
+    public boolean isUsernameExists(String username) {
+        return userRepository.findByUsername(username).isPresent();
+    }
+    
+    public boolean isEmailExists(String email) {
+        return userRepository.findByEmail(email).isPresent();
+    }
+    
+    public boolean isNicExists(String nic) {
+        return userRepository.findByNic(nic).isPresent();
+    }
+    
+    public boolean isUsernameExistsForOtherUser(String username, Long userId) {
+        Optional<User> existingUser = userRepository.findByUsername(username);
+        return existingUser.isPresent() && !existingUser.get().getId().equals(userId);
+    }
+    
+    public boolean isEmailExistsForOtherUser(String email, Long userId) {
+        Optional<User> existingUser = userRepository.findByEmail(email);
+        return existingUser.isPresent() && !existingUser.get().getId().equals(userId);
+    }
+    
+    public boolean isNicExistsForOtherUser(String nic, Long userId) {
+        Optional<User> existingUser = userRepository.findByNic(nic);
+        return existingUser.isPresent() && !existingUser.get().getId().equals(userId);
     }
 }

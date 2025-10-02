@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Grade Level</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary">Edit Grade Level</h1>
+            <p class="text-lg text-gray-600" th:text="'Editing: ' + ${gradeLevel.name}">Editing: Grade 10</p>
+        </div>
+        <a href="/admin/academic-structure" class="btn btn-outline">← Back to Academic Structure</a>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
+    <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+
+    <!-- Edit Form -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Grade Level Details</h2>
+            
+            <form method="post" th:action="@{/admin/grade-level/{id}/update(id=${gradeLevel.id})}" class="space-y-4">
+                <div class="form-control">
+                    <label class="label" for="editGradeLevelNumber">
+                        <span class="label-text">Level (Numeric)</span>
+                    </label>
+                    <input id="editGradeLevelNumber" type="number" name="level" 
+                           th:value="${gradeLevel.level}" 
+                           class="input input-bordered" min="1" max="13" autocomplete="off" required/>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label" for="editGradeLevelName">
+                        <span class="label-text">Name (e.g., Grade 10)</span>
+                    </label>
+                    <input id="editGradeLevelName" type="text" name="name" 
+                           th:value="${gradeLevel.name}" 
+                           class="input input-bordered" autocomplete="off" required/>
+                </div>
+                
+                <div class="form-control">
+                    <label class="label" for="editGradeLevelDescription">
+                        <span class="label-text">Description</span>
+                    </label>
+                    <textarea id="editGradeLevelDescription" name="description" 
+                              class="textarea textarea-bordered" autocomplete="off" 
+                              th:text="${gradeLevel.description}">Senior Secondary</textarea>
+                </div>
+                
+                <div class="card-actions justify-end mt-6">
+                    <a href="/admin/academic-structure" class="btn btn-ghost">Cancel</a>
+                    <button type="submit" class="btn btn-primary">Update Grade Level</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Current Statistics -->
+    <div class="card bg-base-100 shadow-xl mt-6">
+        <div class="card-body">
+            <h2 class="card-title">Current Statistics</h2>
+            <div class="stats stats-vertical lg:stats-horizontal shadow">
+                <div class="stat">
+                    <div class="stat-title">Level Order</div>
+                    <div class="stat-value text-primary" th:text="${gradeLevel.level}">10</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-title">Total Classrooms</div>
+                    <div class="stat-value text-secondary" th:text="${totalClassrooms}">0</div>
+                    <div class="stat-desc">Across all academic years</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-title">Total Students</div>
+                    <div class="stat-value text-accent" th:text="${totalStudents}">0</div>
+                    <div class="stat-desc">Currently enrolled</div>
+                </div>
+            </div>
+            
+            <div class="mt-4">
+                <a th:href="@{/admin/classrooms?gradeId={id}(id=${gradeLevel.id})}" 
+                   class="btn btn-outline btn-sm">View All Classrooms</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

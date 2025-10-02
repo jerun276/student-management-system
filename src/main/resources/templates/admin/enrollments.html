@@ -2,6 +2,8 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
 <head>
     <meta charset="UTF-8">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Enrollment Management</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
@@ -108,6 +110,9 @@
                             <div class="dropdown dropdown-end">
                                 <label tabindex="0" class="btn btn-ghost btn-sm">Actions</label>
                                 <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                                    <li>
+                                        <a th:href="@{/admin/student/{studentId}/profile(studentId=${enrollment.student.id})}?returnTo=enrollments">View Profile</a>
+                                    </li>
                                     <li th:if="${enrollment.active}">
                                         <a th:onclick="'transferStudent(' + ${enrollment.id} + ')'">Transfer</a>
                                     </li>
@@ -191,33 +196,64 @@
 
 <script>
 function transferStudent(enrollmentId) {
-    // Implementation for transfer functionality
-    alert('Transfer functionality to be implemented');
+    // Get enrollment details to construct transfer URL
+    fetch('/admin/enrollments/' + enrollmentId + '/transfer-info')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Redirect to the existing transfer page
+                window.location.href = '/admin/classroom/' + data.classroomId + '/transfer-student/' + data.studentId + '?returnTo=enrollments';
+            } else {
+                alert('Error: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Error getting transfer information');
+        });
 }
 
 function withdrawStudent(enrollmentId) {
     if (confirm('Are you sure you want to withdraw this student?')) {
-        fetch('/admin/enrollments/' + enrollmentId + '/withdraw', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then(() => {
-            location.reload();
-        });
+        // Create a form and submit it (handles CSRF automatically)
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/enrollments/' + enrollmentId + '/withdraw';
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="_csrf"]');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_csrf';
+            csrfInput.value = csrfToken.getAttribute('content');
+            form.appendChild(csrfInput);
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
     }
 }
 
 function reactivateStudent(enrollmentId) {
     if (confirm('Are you sure you want to reactivate this enrollment?')) {
-        fetch('/admin/enrollments/' + enrollmentId + '/reactivate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        }).then(() => {
-            location.reload();
-        });
+        // Create a form and submit it (handles CSRF automatically)
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '/admin/enrollments/' + enrollmentId + '/reactivate';
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="_csrf"]');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = '_csrf';
+            csrfInput.value = csrfToken.getAttribute('content');
+            form.appendChild(csrfInput);
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
     }
 }
 </script>
