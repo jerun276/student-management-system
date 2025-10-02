@@ -121,6 +121,39 @@ public class AdminDashboardController {
         }
     }
 
+    @GetMapping("/users/{id}/edit")
+    public String showEditUserForm(@PathVariable Long id, Model model, RedirectAttributes redirectAttributes) {
+        try {
+            Optional<User> userOptional = adminService.getUserById(id);
+            if (userOptional.isEmpty()) {
+                redirectAttributes.addFlashAttribute("errorMessage", "User not found!");
+                return "redirect:/admin/dashboard";
+            }
+            
+            User user = userOptional.get();
+            UserDto userDto = new UserDto();
+            userDto.setId(user.getId());
+            userDto.setUsername(user.getUsername());
+            userDto.setEmail(user.getEmail());
+            userDto.setFirstName(user.getFirstName());
+            userDto.setLastName(user.getLastName());
+            userDto.setDateOfBirth(user.getDateOfBirth());
+            userDto.setAddress(user.getAddress());
+            userDto.setPhoneNumber(user.getPhoneNumber());
+            userDto.setNic(user.getNic());
+            userDto.setRole(user.getRole());
+            userDto.setEnabled(user.isEnabled());
+            
+            model.addAttribute("userDto", userDto);
+            model.addAttribute("allRoles", Role.values());
+            
+            return "admin/user-edit";
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error loading user: " + e.getMessage());
+            return "redirect:/admin/dashboard";
+        }
+    }
+
     @PostMapping("/users/{id}/edit")
     public String updateUser(@PathVariable Long id,
                            @Valid @ModelAttribute("userDto") UserDto userDto,

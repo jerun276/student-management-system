@@ -104,7 +104,11 @@
                         <td><span class="badge" th:classappend="${user.enabled} ? 'badge-success' : 'badge-error'"
                                   th:text="${user.enabled} ? 'Enabled' : 'Disabled'"></span></td>
                         <td>
-                            <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="btn btn-ghost btn-sm">Edit</a>
+                            <!-- Hide edit button for current user -->
+                            <a th:if="${user.username != currentUsername}" 
+                               th:href="@{/admin/users/{id}/edit(id=${user.id})}" 
+                               class="btn btn-ghost btn-sm">Edit</a>
+                            
                             <!-- Hide delete button for current user -->
                             <form th:if="${user.username != currentUsername}" 
                                   th:action="@{/admin/users/{id}/delete(id=${user.id})}" 
@@ -112,9 +116,10 @@
                                   onsubmit="return confirm('Are you sure you want to delete this user?');">
                                 <button type="submit" class="btn btn-ghost btn-sm text-error">Delete</button>
                             </form>
-                            <!-- Show disabled message for current user -->
+                            
+                            <!-- Show message for current user -->
                             <span th:if="${user.username == currentUsername}" 
-                                  class="text-xs text-gray-500 italic">Cannot delete yourself</span>
+                                  class="text-xs text-gray-500 italic">Use Profile page to edit your account</span>
                         </td>
                     </tr>
                     </tbody>

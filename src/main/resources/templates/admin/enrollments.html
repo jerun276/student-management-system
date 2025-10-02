@@ -111,7 +111,7 @@
                                 <label tabindex="0" class="btn btn-ghost btn-sm">Actions</label>
                                 <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
                                     <li>
-                                        <a th:href="@{/admin/student/{studentId}/profile(studentId=${enrollment.student.id})}?returnTo=enrollments">View Profile</a>
+                                        <a th:href="@{/admin/student/{studentId}/profile(studentId=${enrollment.student.id}, returnTo=enrollments)}">View Profile</a>
                                     </li>
                                     <li th:if="${enrollment.active}">
                                         <a th:onclick="'transferStudent(' + ${enrollment.id} + ')'">Transfer</a>
@@ -132,24 +132,159 @@
         </div>
     </div>
 
-    <!-- Classroom Capacity Overview -->
+    <!-- Classroom Capacity Overview with Pie Charts -->
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-            <h2 class="card-title">Classroom Capacity Overview</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div th:each="classroom : ${classroomCapacity}" class="stat bg-base-200">
-                    <div class="stat-title" th:text="${classroom.fullName}">Grade 10-A (English)</div>
-                    <div class="stat-value text-sm" th:text="${classroom.currentEnrollment + '/' + classroom.maxStudents}">25/35</div>
-                    <div class="stat-desc">
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" 
-                                 th:style="'width: ' + ${classroom.currentEnrollment * 100 / classroom.maxStudents} + '%'"></div>
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="card-title text-2xl flex items-center gap-2">
+                    <svg class="w-6 h-6 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    Classroom Capacity Overview
+                </h2>
+                <div class="text-sm text-gray-500">
+                    <span th:text="${#lists.size(classroomCapacity)}">0</span> Classrooms
+                </div>
+            </div>
+            
+            <!-- Empty State -->
+            <div th:if="${#lists.isEmpty(classroomCapacity)}" class="text-center py-12">
+                <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m-1 4h1m3-4h2m-2-4h2m-2-4h2m3 8h2m-2-4h2"/>
+                </svg>
+                <h3 class="mt-2 text-sm font-medium text-gray-900">No classrooms found</h3>
+                <p class="mt-1 text-sm text-gray-500">Select an academic year to view classroom capacity information.</p>
+            </div>
+
+            <!-- Pie Charts Grid -->
+            <div th:unless="${#lists.isEmpty(classroomCapacity)}" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                <div th:each="classroom, iterStat : ${classroomCapacity}" class="bg-white border border-gray-200 rounded-xl p-4 hover:shadow-lg transition-all duration-200">
+                    <!-- Classroom Title -->
+                    <div class="text-center mb-4">
+                        <h3 class="font-semibold text-gray-900 text-sm leading-tight mb-1" th:text="${classroom.fullName}">Grade 10-A (English)</h3>
+                        <div class="text-xs text-gray-500" th:text="${classroom.currentEnrollment + '/' + classroom.maxStudents}">2/35</div>
+                    </div>
+                    
+                    <!-- Pie Chart Container -->
+                    <div class="relative flex justify-center mb-4">
+                        <canvas th:id="'pieChart' + ${iterStat.index}" width="120" height="120" class="max-w-[120px] max-h-[120px]"></canvas>
+                    </div>
+                    
+                    <!-- Legend -->
+                    <div class="space-y-2 text-xs">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                                <span>Enrolled</span>
+                            </div>
+                            <span class="font-medium" th:text="${classroom.currentEnrollment}">2</span>
                         </div>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 bg-gray-300 rounded-full mr-2"></div>
+                                <span>Available</span>
+                            </div>
+                            <span class="font-medium" th:text="${classroom.maxStudents - classroom.currentEnrollment}">33</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Capacity Percentage -->
+                    <div class="text-center mt-3 pt-3 border-t border-gray-100">
+                        <div class="text-lg font-bold" 
+                             th:classappend="${classroom.currentEnrollment >= classroom.maxStudents} ? 'text-red-600' : (${classroom.currentEnrollment >= classroom.maxStudents * 0.8} ? 'text-yellow-600' : 'text-green-600')"
+                             th:text="${classroom.maxStudents > 0 ? #numbers.formatDecimal(classroom.currentEnrollment * 100.0 / classroom.maxStudents, 1, 1) + '%' : '0%'}">5.7%</div>
+                        <div class="text-xs text-gray-500">Capacity Used</div>
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Summary Statistics -->
+            <div th:unless="${#lists.isEmpty(classroomCapacity)}" class="mt-8 pt-6 border-t border-gray-200">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-primary" th:text="${#lists.size(classroomCapacity)}">8</div>
+                        <div class="text-sm text-gray-600">Total Classrooms</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-blue-600" th:text="${#aggregates.sum(classroomCapacity.![currentEnrollment])}">245</div>
+                        <div class="text-sm text-gray-600">Total Students</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-green-600" th:text="${#aggregates.sum(classroomCapacity.![maxStudents])}">320</div>
+                        <div class="text-sm text-gray-600">Total Capacity</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-2xl font-bold text-orange-600" th:text="${#aggregates.sum(classroomCapacity.![maxStudents]) - #aggregates.sum(classroomCapacity.![currentEnrollment])}">75</div>
+                        <div class="text-sm text-gray-600">Available Spots</div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Chart.js Script -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            /*<![CDATA[*/
+            var classroomData = /*[[${classroomCapacity}]]*/ [];
+            /*]]>*/
+            
+            classroomData.forEach(function(classroom, index) {
+                var ctx = document.getElementById('pieChart' + index);
+                if (ctx) {
+                    var enrolled = classroom.currentEnrollment;
+                    var available = classroom.maxStudents - classroom.currentEnrollment;
+                    
+                    // Determine color based on capacity
+                    var enrolledColor = '#3B82F6'; // Blue
+                    if (enrolled >= classroom.maxStudents) {
+                        enrolledColor = '#EF4444'; // Red for full capacity
+                    } else if (enrolled >= classroom.maxStudents * 0.8) {
+                        enrolledColor = '#F59E0B'; // Yellow for near capacity
+                    }
+                    
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: ['Enrolled', 'Available'],
+                            datasets: [{
+                                data: [enrolled, available],
+                                backgroundColor: [enrolledColor, '#E5E7EB'],
+                                borderWidth: 0,
+                                cutout: '60%'
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: true,
+                            plugins: {
+                                legend: {
+                                    display: false
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            var label = context.label || '';
+                                            var value = context.parsed;
+                                            var total = enrolled + available;
+                                            var percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                            return label + ': ' + value + ' (' + percentage + '%)';
+                                        }
+                                    }
+                                }
+                            },
+                            animation: {
+                                animateRotate: true,
+                                duration: 1000
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 </main>
 
 <!-- Enroll Student Modal -->

@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -30,6 +31,9 @@ public class EnrollmentController {
 
     @Autowired
     private GradeLevelRepository gradeLevelRepository;
+
+    @Autowired
+    private ClassroomRepository classroomRepository;
 
     @GetMapping("/enrollments")
     public String showEnrollments(@RequestParam(required = false) Long academicYear,
@@ -97,6 +101,14 @@ public class EnrollmentController {
             model.addAttribute("totalEnrollments", totalEnrollments);
             model.addAttribute("activeEnrollments", activeEnrollments);
             model.addAttribute("inactiveEnrollments", inactiveEnrollments);
+
+            // Calculate classroom capacity data
+            if (selectedYear != null) {
+                List<ClassroomCapacityInfo> classroomCapacity = calculateClassroomCapacity(selectedYear);
+                model.addAttribute("classroomCapacity", classroomCapacity);
+            } else {
+                model.addAttribute("classroomCapacity", List.of());
+            }
 
             return "admin/enrollments";
 
@@ -211,5 +223,45 @@ public class EnrollmentController {
         }
 
         return response;
+    }
+
+    private List<ClassroomCapacityInfo> calculateClassroomCapacity(AcademicYear academicYear) {
+        List<Classroom> classrooms = classroomRepository.findByAcademicYear(academicYear);
+        
+        return classrooms.stream().map(classroom -> {
+            // Count active enrollments for this classroom
+            long currentEnrollment = enrollmentRepository.findActiveEnrollmentsByClassroom(classroom).size();
+            
+            return new ClassroomCapacityInfo(
+                classroom.getFullName(),
+                (int) currentEnrollment,
+                classroom.getMaxStudents()
+            );
+        }).collect(Collectors.toList());
+    }
+
+    // Inner class to hold classroom capacity information
+    public static class ClassroomCapacityInfo {
+        private String fullName;
+        private int currentEnrollment;
+        private int maxStudents;
+
+        public ClassroomCapacityInfo(String fullName, int currentEnrollment, int maxStudents) {
+            this.fullName = fullName;
+            this.currentEnrollment = currentEnrollment;
+            this.maxStudents = maxStudents;
+        }
+
+        public String getFullName() {
+            return fullName;
+        }
+
+        public int getCurrentEnrollment() {
+            return currentEnrollment;
+        }
+
+        public int getMaxStudents() {
+            return maxStudents;
+        }
     }
 }

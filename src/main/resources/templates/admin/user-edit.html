@@ -13,9 +13,9 @@
 
         <div class="card bg-base-100 shadow-xl">
             <div class="card-body">
-                <h2 class="card-title text-2xl">Edit User: <span class="text-primary" th:text="${user.username}"></span>
+                <h2 class="card-title text-2xl">Edit User: <span class="text-primary" th:text="${userDto.username}"></span>
                 </h2>
-                <form th:action="@{/admin/users/update}" th:object="${user}" method="post"
+                <form th:action="@{/admin/users/{id}/edit(id=${userDto.id})}" th:object="${userDto}" method="post"
                       class="space-y-4 mt-4">
 
                     <input type="hidden" th:field="*{id}"/>
@@ -127,7 +127,7 @@
                     </div>
                 </div>
 
-                <form th:action="@{/admin/users/{id}/reset-password(id=${user.id})}" method="post" class="mt-4">
+                <form th:action="@{/admin/users/{id}/reset-password(id=${userDto.id})}" method="post" class="mt-4">
                     <div class="form-control">
                         <label class="label"><span class="label-text">New Password</span></label>
                         <input type="password" name="newPassword" class="input input-bordered"
