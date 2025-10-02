@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Class Timetable</title>
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/student/dashboard" class="text-blue-600 hover:text-blue-800 mr-4">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-900">My Class Timetable</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/student/today" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                        Today's Schedule
+                    </a>
+                    <a href="/student/current-period" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                        Current Period
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Error Message -->
+        <div th:if="${errorMessage}" class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm text-red-800" th:text="${errorMessage}">Error message</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Student & Classroom Info -->
+        <div th:unless="${errorMessage}" class="bg-white shadow rounded-lg mb-6">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-green-500 rounded-full flex items-center justify-center mr-4">
+                            <span class="text-lg font-bold text-white" 
+                                  th:text="${student.firstName != null ? student.firstName.substring(0,1) + student.lastName.substring(0,1) : 'S'}">JS</span>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-medium text-gray-900" 
+                                th:text="${student.firstName + ' ' + student.lastName}">Student Name</h2>
+                            <p class="text-sm text-gray-500" th:text="${student.email}">student@school.edu</p>
+                        </div>
+                    </div>
+                    <div th:if="${classroom}" class="text-right">
+                        <div class="text-lg font-medium text-gray-900" th:text="${classroom.fullName}">Grade 10-A (ENGLISH Medium)</div>
+                        <div class="text-sm text-gray-500">
+                            Class Teacher: 
+                            <span th:text="${classroom.classTeacher != null ? classroom.classTeacher.firstName + ' ' + classroom.classTeacher.lastName : 'Not Assigned'}">
+                                Not Assigned
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Timetable -->
+        <div th:unless="${errorMessage}" class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Weekly Class Schedule</h3>
+                
+                <!-- Timetable Grid -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Time</th>
+                                <th th:each="day : ${weekDays}" 
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    th:text="${#strings.capitalize(#strings.toLowerCase(day))}">Monday</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="timeSlot : ${timeSlots}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <div th:text="${timeSlot.name}">Period 1</div>
+                                    <div class="text-xs text-gray-500" th:text="${timeSlot.timeRange}">08:00 - 08:45</div>
+                                </td>
+                                <td th:each="day : ${weekDays}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div th:if="${timetable != null and timetable.get(day) != null}">
+                                        <div th:each="entry : ${timetable.get(day)}" 
+                                             th:if="${entry.timeSlot.id == timeSlot.id}"
+                                             class="bg-indigo-50 border border-indigo-200 rounded-lg p-3">
+                                            <div class="font-medium text-indigo-900" th:text="${entry.subject.name}">Mathematics</div>
+                                            <div class="text-xs text-indigo-600" 
+                                                 th:text="${entry.teacher.firstName + ' ' + entry.teacher.lastName}">Teacher Name</div>
+                                            <div th:if="${entry.location}" class="text-xs text-indigo-500" 
+                                                 th:text="'Location: ' + ${entry.location}">Location: Lab 1</div>
+                                        </div>
+                                    </div>
+                                    <div th:unless="${timetable != null and timetable.get(day) != null and timetable.get(day).?[timeSlot.id == __${timeSlot.id}__].size() > 0}"
+                                         class="text-gray-400 italic">Free Period</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Weekly Summary -->
+        <div th:unless="${errorMessage}" class="mt-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+            <!-- Total Subjects -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 4.804A7.968 7.968 0 005.5 4c-1.255 0-2.443.29-3.5.804v10A7.969 7.969 0 015.5 14c1.669 0 3.218.51 4.5 1.385A7.962 7.962 0 0114.5 14c1.255 0 2.443.29 3.5.804v-10A7.968 7.968 0 0014.5 4c-1.255 0-2.443.29-3.5.804V12a1 1 0 11-2 0V4.804z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Subjects</dt>
+                                <dd class="text-lg font-medium text-gray-900">
+                                    <span th:text="${timetable != null ? timetable.values().stream().flatMap(list -> list.stream()).map(entry -> entry.subject).distinct().count() : 0}">6</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Periods -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Weekly Periods</dt>
+                                <dd class="text-lg font-medium text-gray-900">
+                                    <span th:text="${timetable != null ? timetable.values().stream().mapToInt(list -> list.size()).sum() : 0}">30</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teachers -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-purple-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Teachers</dt>
+                                <dd class="text-lg font-medium text-gray-900">
+                                    <span th:text="${timetable != null ? timetable.values().stream().flatMap(list -> list.stream()).map(entry -> entry.teacher).distinct().count() : 0}">8</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Free Periods -->
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Free Periods</dt>
+                                <dd class="text-lg font-medium text-gray-900">
+                                    <span th:text="${timeSlots != null and weekDays != null ? (timeSlots.size() * weekDays.length) - (timetable != null ? timetable.values().stream().mapToInt(list -> list.size()).sum() : 0) : 0}">10</span>
+                                </dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Subject List -->
+        <div th:unless="${errorMessage}" th:if="${timetable != null and !timetable.empty}" class="mt-6 bg-white shadow rounded-lg">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">My Subjects This Week</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div th:each="subject : ${timetable.values().stream().flatMap(list -> list.stream()).map(entry -> entry.subject).distinct().toList()}"
+                         class="border border-gray-200 rounded-lg p-4">
+                        <div class="font-medium text-gray-900" th:text="${subject.name}">Mathematics</div>
+                        <div class="text-sm text-gray-500" th:text="${subject.description ?: 'No description available'}">Subject description</div>
+                        <div class="text-xs text-gray-400 mt-1" th:text="'Grade: ' + ${subject.gradeLevel.name}">Grade: Grade 10</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Highlight current day
+        const today = new Date().getDay();
+        const dayNames = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+        const currentDay = dayNames[today];
+        
+        // Find and highlight current day column
+        const headers = document.querySelectorAll('th');
+        headers.forEach((header, index) => {
+            if (header.textContent.toUpperCase() === currentDay) {
+                header.classList.add('bg-indigo-100', 'text-indigo-800');
+                // Highlight corresponding column cells
+                const cells = document.querySelectorAll(`tbody tr td:nth-child(${index + 1})`);
+                cells.forEach(cell => {
+                    cell.classList.add('bg-indigo-25');
+                });
+            }
+        });
+
+        // Add current time indicator
+        const now = new Date();
+        const currentTime = now.getHours() * 100 + now.getMinutes();
+        
+        // This would need to be enhanced to show current period highlighting
+        // based on the actual time slots from the server
+    </script>
+</body>
+</html>

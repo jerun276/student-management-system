@@ -1,6 +1,6 @@
 package com.student_management_system.teacher.model;
 
-import com.student_management_system.common.model.Course;
+import com.student_management_system.common.model.Classroom;
 import com.student_management_system.student.model.Subject;
 import com.student_management_system.user_management.model.User;
 import jakarta.persistence.*;
@@ -9,8 +9,8 @@ import lombok.Data;
 import java.time.LocalDate;
 
 /**
- * Records student attendance for courses
- * Now linked to Course for better academic structure while maintaining backward compatibility
+ * Records student attendance for subjects in specific classrooms
+ * Links Student, Subject, Classroom, and Teacher for attendance tracking
  */
 @Entity
 @Data
@@ -24,15 +24,20 @@ public class AttendanceRecord {
     @JoinColumn(name = "student_id", nullable = false)
     private User student;
 
-    // NEW: Link to Course instead of Subject directly
+    // Subject for which attendance is being recorded
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    private Course course;
-
-    // LEGACY: Keep subject link for backward compatibility
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subject_id")
+    @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
+
+    // Classroom where the attendance was taken
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classroom_id", nullable = false)
+    private Classroom classroom;
+
+    // Teacher who recorded the attendance
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "teacher_id", nullable = false)
+    private User teacher;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -44,25 +49,28 @@ public class AttendanceRecord {
     private String remarks; // Optional notes about attendance
     
     /**
-     * Helper method to get the effective subject
+     * Helper method to get attendance description
      */
-    public Subject getEffectiveSubject() {
-        if (subject != null) {
-            return subject;
-        }
-        if (course != null) {
-            return course.getSubject();
-        }
-        return null;
+    public String getAttendanceDescription() {
+        return String.format("%s - %s (%s) on %s: %s", 
+            student.getFirstName() + " " + student.getLastName(),
+            subject.getFullName(),
+            classroom.getFullName(),
+            date.toString(),
+            status.toString());
     }
     
     /**
-     * Helper method to get the teacher from course
+     * Helper method to check if attendance is marked as absent
      */
-    public User getTeacher() {
-        if (course != null) {
-            return course.getTeacher();
-        }
-        return null;
+    public boolean isAbsent() {
+        return status == AttendanceStatus.ABSENT;
+    }
+    
+    /**
+     * Helper method to check if attendance is marked as present
+     */
+    public boolean isPresent() {
+        return status == AttendanceStatus.PRESENT;
     }
 }

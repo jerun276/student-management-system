@@ -22,11 +22,13 @@ import com.student_management_system.common.model.*;
 import com.student_management_system.common.repository.*;
 import com.student_management_system.common.service.AcademicYearService;
 import com.student_management_system.common.service.EnrollmentService;
+import com.student_management_system.common.service.TimeSlotService;
 
 import java.math.BigDecimal;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalTime;
 
 @Component
@@ -43,16 +45,17 @@ public class DataInitializer implements CommandLineRunner {
     private final AcademicYearRepository academicYearRepository;
     private final GradeLevelRepository gradeLevelRepository;
     private final ClassroomRepository classroomRepository;
-    private final CourseRepository courseRepository;
     private final AcademicYearService academicYearService;
     private final EnrollmentService enrollmentService;
+    private final TimeSlotService timeSlotService;
 
     public DataInitializer(UserRepository userRepository, PasswordEncoder passwordEncoder,
             SubjectRepository subjectRepository, TimetableEntryRepository timetableEntryRepository,
             AssignmentRepository assignmentRepository, FeeRepository feeRepository,
             AcademicYearRepository academicYearRepository, GradeLevelRepository gradeLevelRepository,
-            ClassroomRepository classroomRepository, CourseRepository courseRepository, 
-            AcademicYearService academicYearService, EnrollmentService enrollmentService) {
+            ClassroomRepository classroomRepository, 
+            AcademicYearService academicYearService, EnrollmentService enrollmentService,
+            TimeSlotService timeSlotService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.subjectRepository = subjectRepository;
@@ -62,9 +65,9 @@ public class DataInitializer implements CommandLineRunner {
         this.academicYearRepository = academicYearRepository;
         this.gradeLevelRepository = gradeLevelRepository;
         this.classroomRepository = classroomRepository;
-        this.courseRepository = courseRepository;
         this.academicYearService = academicYearService;
         this.enrollmentService = enrollmentService;
+        this.timeSlotService = timeSlotService;
     }
 
     @Override
@@ -79,12 +82,28 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("Users already exist in the DB, skipping data initialization.");
         }
 
-        if (subjectRepository.count() == 0) {
-            System.out.println("No Timetable found in DB, creating sample ...");
+        // Initialize time slots for structured scheduling
+        System.out.println("Initializing time slots...");
+        timeSlotService.initializeDefaultTimeSlots();
+        System.out.println("Time slots initialized successfully!");
+
+        // NEW: Initialize academic structure FIRST
+        if (academicYearRepository.count() == 0) {
+            System.out.println(
+                    "No academic structure found in DB, creating academic years, grade levels, and classrooms...");
+            createAcademicStructure();
+            System.out.println("Academic structure created successfully!");
+        } else {
+            System.out.println("Academic structure already exists in the DB, skipping initialization.");
+        }
+
+        // Create timetable data AFTER academic structure
+        if (timetableEntryRepository.count() == 0) {
+            System.out.println("No Timetable entries found in DB, creating sample ...");
             createTimetableData();
             System.out.println("Sample Timetable created successfully!");
         } else {
-            System.out.println("Timetable already exist in the DB, skipping data initialization.");
+            System.out.println("Timetable entries already exist in the DB, skipping data initialization.");
         }
 
         if (assignmentRepository.count() == 0) {
@@ -97,16 +116,6 @@ public class DataInitializer implements CommandLineRunner {
 
         if (feeRepository.count() == 0) {
             createStaffAndFees();
-        }
-
-        // NEW: Initialize academic structure
-        if (academicYearRepository.count() == 0) {
-            System.out.println(
-                    "No academic structure found in DB, creating academic years, grade levels, and classrooms...");
-            createAcademicStructure();
-            System.out.println("Academic structure created successfully!");
-        } else {
-            System.out.println("Academic structure already exists in the DB, skipping initialization.");
         }
 
     }
@@ -283,6 +292,7 @@ public class DataInitializer implements CommandLineRunner {
                 "Sample users including multiple teachers, students, and parent-child relationships created successfully!");
     }
 
+    @Transactional
     private void createTimetableData() {
         System.out.println("Creating sample subjects, enrollments, and timetable...");
 
@@ -303,112 +313,38 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        // Create Subjects (now simplified - teacher assignments handled through
-        // Courses)
-        Subject mathematics = new Subject();
-        mathematics.setName("Mathematics");
-        mathematics.setCode("MATH");
-        mathematics.setDescription("Mathematics curriculum");
-        mathematics.setActive(true);
-        subjectRepository.save(mathematics);
+        // Skip subject creation - subjects are properly created in createAcademicStructure()
+        // Find existing subjects instead
+        Subject mathematics = subjectRepository.findBySubjectCode("MATH10").orElse(null);
+        Subject physics = subjectRepository.findBySubjectCode("PHYS10").orElse(null);
+        Subject chemistry = subjectRepository.findBySubjectCode("CHEM10").orElse(null);
+        Subject english = subjectRepository.findBySubjectCode("ENG10").orElse(null);
+        Subject biology = subjectRepository.findBySubjectCode("BIO10").orElse(null);
 
-        Subject physics = new Subject();
-        physics.setName("Physics");
-        physics.setCode("PHYS");
-        physics.setDescription("Physics curriculum");
-        physics.setActive(true);
-        subjectRepository.save(physics);
+        // If subjects don't exist yet, skip timetable creation
+        if (mathematics == null || physics == null || chemistry == null || english == null || biology == null) {
+            System.out.println("Subjects not found, skipping timetable creation. Run after academic structure is created.");
+            return;
+        }
 
-        Subject chemistry = new Subject();
-        chemistry.setName("Chemistry");
-        chemistry.setCode("CHEM");
-        chemistry.setDescription("Chemistry curriculum");
-        chemistry.setActive(true);
-        subjectRepository.save(chemistry);
+        // NOTE: Student-subject enrollment is now handled through the new academic structure
+        // Students are enrolled in classrooms, and subjects are taught to classrooms
+        // The createAcademicStructure() method handles proper student enrollment in classrooms
+        System.out.println("Student enrollment is handled through classroom-based system in createAcademicStructure()");
 
-        Subject english = new Subject();
-        english.setName("English Literature");
-        english.setCode("ENG");
-        english.setDescription("English Literature curriculum");
-        english.setActive(true);
-        subjectRepository.save(english);
-
-        Subject biology = new Subject();
-        biology.setName("Biology");
-        biology.setCode("BIO");
-        biology.setDescription("Biology curriculum");
-        biology.setActive(true);
-        subjectRepository.save(biology);
-
-        // Establish student-subject enrollments (Many-to-Many relationships)
-        // Alice is enrolled in Math, Physics, and English
-        alice.getEnrolledSubjects().add(mathematics);
-        alice.getEnrolledSubjects().add(physics);
-        alice.getEnrolledSubjects().add(english);
-        userRepository.save(alice);
-
-        // Bob is enrolled in Math, Chemistry, and English
-        bob.getEnrolledSubjects().add(mathematics);
-        bob.getEnrolledSubjects().add(chemistry);
-        bob.getEnrolledSubjects().add(english);
-        userRepository.save(bob);
-
-        // Charlie is enrolled in Physics, Chemistry, and Biology
-        charlie.getEnrolledSubjects().add(physics);
-        charlie.getEnrolledSubjects().add(chemistry);
-        charlie.getEnrolledSubjects().add(biology);
-        userRepository.save(charlie);
-
-        // Diana is enrolled in all subjects (a high-achieving student)
-        diana.getEnrolledSubjects().add(mathematics);
-        diana.getEnrolledSubjects().add(physics);
-        diana.getEnrolledSubjects().add(chemistry);
-        diana.getEnrolledSubjects().add(english);
-        diana.getEnrolledSubjects().add(biology);
-        userRepository.save(diana);
-
-        // Create comprehensive timetable entries
-        // Alice's timetable
-        createTimetableEntry(alice, mathematics, DayOfWeek.MONDAY, 9, 0, 10, 0);
-        createTimetableEntry(alice, physics, DayOfWeek.TUESDAY, 10, 0, 11, 0);
-        createTimetableEntry(alice, english, DayOfWeek.WEDNESDAY, 11, 0, 12, 0);
-        createTimetableEntry(alice, mathematics, DayOfWeek.THURSDAY, 9, 0, 10, 0);
-        createTimetableEntry(alice, physics, DayOfWeek.FRIDAY, 10, 0, 11, 0);
-
-        // Bob's timetable
-        createTimetableEntry(bob, mathematics, DayOfWeek.MONDAY, 10, 0, 11, 0);
-        createTimetableEntry(bob, chemistry, DayOfWeek.TUESDAY, 11, 0, 12, 0);
-        createTimetableEntry(bob, english, DayOfWeek.WEDNESDAY, 9, 0, 10, 0);
-        createTimetableEntry(bob, mathematics, DayOfWeek.THURSDAY, 10, 0, 11, 0);
-        createTimetableEntry(bob, chemistry, DayOfWeek.FRIDAY, 11, 0, 12, 0);
-
-        // Charlie's timetable
-        createTimetableEntry(charlie, physics, DayOfWeek.MONDAY, 11, 0, 12, 0);
-        createTimetableEntry(charlie, chemistry, DayOfWeek.TUESDAY, 9, 0, 10, 0);
-        createTimetableEntry(charlie, biology, DayOfWeek.WEDNESDAY, 10, 0, 11, 0);
-        createTimetableEntry(charlie, physics, DayOfWeek.THURSDAY, 11, 0, 12, 0);
-        createTimetableEntry(charlie, biology, DayOfWeek.FRIDAY, 9, 0, 10, 0);
-
-        // Diana's comprehensive timetable (all subjects)
-        createTimetableEntry(diana, mathematics, DayOfWeek.MONDAY, 8, 0, 9, 0);
-        createTimetableEntry(diana, physics, DayOfWeek.MONDAY, 12, 0, 13, 0);
-        createTimetableEntry(diana, chemistry, DayOfWeek.TUESDAY, 8, 0, 9, 0);
-        createTimetableEntry(diana, english, DayOfWeek.TUESDAY, 12, 0, 13, 0);
-        createTimetableEntry(diana, biology, DayOfWeek.WEDNESDAY, 8, 0, 9, 0);
-        createTimetableEntry(diana, mathematics, DayOfWeek.WEDNESDAY, 12, 0, 13, 0);
-        createTimetableEntry(diana, physics, DayOfWeek.THURSDAY, 8, 0, 9, 0);
-        createTimetableEntry(diana, chemistry, DayOfWeek.THURSDAY, 12, 0, 13, 0);
-        createTimetableEntry(diana, english, DayOfWeek.FRIDAY, 8, 0, 9, 0);
-        createTimetableEntry(diana, biology, DayOfWeek.FRIDAY, 12, 0, 13, 0);
+        // TODO: Create proper classroom-based timetable entries
+        // Timetable creation will be redesigned in Phase 2 to work with classroom schedules
+        // rather than individual student schedules
 
         System.out.println("Sample subjects, enrollments, and comprehensive timetables created successfully!");
     }
 
-    private void createTimetableEntry(User student, Subject subject, DayOfWeek day, int startHour, int startMinute,
+    private void createTimetableEntry(Subject subject, Classroom classroom, User teacher, DayOfWeek day, int startHour, int startMinute,
             int endHour, int endMinute) {
         TimetableEntry entry = new TimetableEntry();
-        entry.setUser(student);
         entry.setSubject(subject);
+        entry.setClassroom(classroom);
+        entry.setTeacher(teacher);
         entry.setDayOfWeek(day);
         entry.setStartTime(LocalTime.of(startHour, startMinute));
         entry.setEndTime(LocalTime.of(endHour, endMinute));
@@ -416,94 +352,18 @@ public class DataInitializer implements CommandLineRunner {
     }
 
     private void createAssignmentData() {
-        System.out.println("Creating sample assignments...");
-
-        // Find teachers
-        User mathTeacher = userRepository.findByUsername("math_teacher").orElse(null);
-        User scienceTeacher = userRepository.findByUsername("science_teacher").orElse(null);
-        User englishTeacher = userRepository.findByUsername("english_teacher").orElse(null);
-
-        // Find students
-        User alice = userRepository.findByUsername("alice_johnson").orElse(null);
-        User bob = userRepository.findByUsername("bob_williams").orElse(null);
-        User charlie = userRepository.findByUsername("charlie_brown").orElse(null);
-        User diana = userRepository.findByUsername("diana_smith").orElse(null);
-
-        // Find subjects
-        Subject mathematics = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("Mathematics")).findFirst().orElse(null);
-        Subject physics = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("Physics")).findFirst().orElse(null);
-        Subject chemistry = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("Chemistry")).findFirst().orElse(null);
-        Subject english = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("English Literature")).findFirst().orElse(null);
-        Subject biology = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("Biology")).findFirst().orElse(null);
-
-        if (mathTeacher == null || scienceTeacher == null || englishTeacher == null ||
-                alice == null || bob == null || charlie == null || diana == null ||
-                mathematics == null || physics == null || chemistry == null || english == null || biology == null) {
-            System.out.println("Required data not found, skipping assignment creation");
-            return;
-        }
-
-        // Mathematics assignments
-        createAssignment("Algebra Homework 1", "Complete exercises 1-10 on page 42.",
-                LocalDate.now().plusDays(7), AssignmentStatus.ASSIGNED, mathematics, alice, mathTeacher);
-        createAssignment("Algebra Homework 1", "Complete exercises 1-10 on page 42.",
-                LocalDate.now().plusDays(7), AssignmentStatus.ASSIGNED, mathematics, bob, mathTeacher);
-        createAssignment("Algebra Homework 1", "Complete exercises 1-10 on page 42.",
-                LocalDate.now().plusDays(7), AssignmentStatus.ASSIGNED, mathematics, diana, mathTeacher);
-
-        createAssignment("Geometry Proofs", "Complete the two proofs from the worksheet.",
-                LocalDate.now().plusDays(3), AssignmentStatus.SUBMITTED, mathematics, alice, mathTeacher);
-        createAssignment("Geometry Proofs", "Complete the two proofs from the worksheet.",
-                LocalDate.now().plusDays(3), AssignmentStatus.PENDING, mathematics, bob, mathTeacher);
-        createAssignment("Geometry Proofs", "Complete the two proofs from the worksheet.",
-                LocalDate.now().plusDays(3), AssignmentStatus.GRADED, mathematics, diana, mathTeacher);
-
-        // Physics assignments
-        createAssignment("Newton's Laws Lab Report",
-                "Write a comprehensive lab report on Newton's three laws of motion.",
-                LocalDate.now().plusDays(10), AssignmentStatus.ASSIGNED, physics, alice, scienceTeacher);
-        createAssignment("Newton's Laws Lab Report",
-                "Write a comprehensive lab report on Newton's three laws of motion.",
-                LocalDate.now().plusDays(10), AssignmentStatus.ASSIGNED, physics, charlie, scienceTeacher);
-        createAssignment("Newton's Laws Lab Report",
-                "Write a comprehensive lab report on Newton's three laws of motion.",
-                LocalDate.now().plusDays(10), AssignmentStatus.ASSIGNED, physics, diana, scienceTeacher);
-
-        // Chemistry assignments
-        createAssignment("Chemical Bonding Quiz",
-                "Study chapters 5-7 and prepare for the quiz on ionic and covalent bonds.",
-                LocalDate.now().plusDays(5), AssignmentStatus.ASSIGNED, chemistry, bob, scienceTeacher);
-        createAssignment("Chemical Bonding Quiz",
-                "Study chapters 5-7 and prepare for the quiz on ionic and covalent bonds.",
-                LocalDate.now().plusDays(5), AssignmentStatus.SUBMITTED, chemistry, charlie, scienceTeacher);
-        createAssignment("Chemical Bonding Quiz",
-                "Study chapters 5-7 and prepare for the quiz on ionic and covalent bonds.",
-                LocalDate.now().plusDays(5), AssignmentStatus.ASSIGNED, chemistry, diana, scienceTeacher);
-
-        // English assignments
-        createAssignment("Shakespeare Essay", "Write a 500-word essay analyzing the themes in Romeo and Juliet.",
-                LocalDate.now().plusDays(14), AssignmentStatus.ASSIGNED, english, alice, englishTeacher);
-        createAssignment("Shakespeare Essay", "Write a 500-word essay analyzing the themes in Romeo and Juliet.",
-                LocalDate.now().plusDays(14), AssignmentStatus.ASSIGNED, english, bob, englishTeacher);
-        createAssignment("Shakespeare Essay", "Write a 500-word essay analyzing the themes in Romeo and Juliet.",
-                LocalDate.now().plusDays(14), AssignmentStatus.ASSIGNED, english, diana, englishTeacher);
-
-        // Biology assignments
-        createAssignment("Cell Structure Diagram", "Draw and label a detailed diagram of plant and animal cells.",
-                LocalDate.now().plusDays(8), AssignmentStatus.ASSIGNED, biology, charlie, scienceTeacher);
-        createAssignment("Cell Structure Diagram", "Draw and label a detailed diagram of plant and animal cells.",
-                LocalDate.now().plusDays(8), AssignmentStatus.ASSIGNED, biology, diana, scienceTeacher);
-
-        System.out.println("Sample assignments created across multiple subjects and students.");
+        System.out.println("Skipping assignment creation - assignments now require classroom assignments.");
+        System.out.println("Assignment creation will be redesigned to work with the new classroom-based academic structure.");
+        
+        // TODO: Implement classroom-based assignment creation
+        // Assignments should be created for entire classrooms, not individual students
+        // This requires finding student enrollments in classrooms and creating assignments accordingly
+        
+        return;
     }
 
     private void createAssignment(String title, String description, LocalDate dueDate,
-            AssignmentStatus status, Subject subject, User student, User teacher) {
+            AssignmentStatus status, Subject subject, User student, User teacher, Classroom classroom) {
         Assignment assignment = new Assignment();
         assignment.setTitle(title);
         assignment.setDescription(description);
@@ -512,6 +372,7 @@ public class DataInitializer implements CommandLineRunner {
         assignment.setSubject(subject);
         assignment.setUser(student);
         assignment.setTeacher(teacher);
+        assignment.setClassroom(classroom);
 
         // Add some sample data for submitted/graded assignments
         if (status == AssignmentStatus.SUBMITTED) {
@@ -628,6 +489,7 @@ public class DataInitializer implements CommandLineRunner {
      * Create the new academic structure with academic years, grade levels,
      * classrooms, and enrollments
      */
+    @Transactional
     private void createAcademicStructure() {
         System.out.println("Creating comprehensive academic structure...");
 
@@ -671,38 +533,49 @@ public class DataInitializer implements CommandLineRunner {
         Classroom grade9A_English = createClassroom("A", Medium.ENGLISH, grade9, currentYear, mathTeacher, 40);
         Classroom grade9B_English = createClassroom("B", Medium.ENGLISH, grade9, currentYear, scienceTeacher, 40);
 
-        // 4. Create Courses (Subject-Classroom-Teacher assignments)
-        // Find subjects
-        Subject mathematics = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("Mathematics")).findFirst().orElse(null);
-        Subject physics = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("Physics")).findFirst().orElse(null);
-        Subject chemistry = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("Chemistry")).findFirst().orElse(null);
-        Subject english = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("English Literature")).findFirst().orElse(null);
-        Subject biology = subjectRepository.findAll().stream()
-                .filter(s -> s.getName().equals("Biology")).findFirst().orElse(null);
-
-        if (mathematics != null && physics != null && chemistry != null && english != null && biology != null) {
-            // Create courses for Grade 10A English Medium
-            createCourse(mathematics, grade10A_English, mathTeacher, currentYear);
-            createCourse(physics, grade10A_English, scienceTeacher, currentYear);
-            createCourse(chemistry, grade10A_English, scienceTeacher, currentYear);
-            createCourse(english, grade10A_English, englishTeacher, currentYear);
-            createCourse(biology, grade10A_English, scienceTeacher, currentYear);
-
-            // Create courses for Grade 10B English Medium
-            createCourse(mathematics, grade10B_English, mathTeacher, currentYear);
-            createCourse(physics, grade10B_English, scienceTeacher, currentYear);
-            createCourse(chemistry, grade10B_English, scienceTeacher, currentYear);
-            createCourse(english, grade10B_English, englishTeacher, currentYear);
-
-            // Create courses for Grade 9A English Medium
-            createCourse(mathematics, grade9A_English, mathTeacher, currentYear);
-            createCourse(english, grade9A_English, englishTeacher, currentYear);
-            createCourse(physics, grade9A_English, scienceTeacher, currentYear);
+        // 4. Create Grade-Specific Subjects and Teacher Assignments
+        // Create subjects for Grade 10
+        Subject math10 = createSubject("Mathematics", "MATH10", "Mathematics for Grade 10", grade10);
+        Subject physics10 = createSubject("Physics", "PHYS10", "Physics for Grade 10", grade10);
+        Subject chemistry10 = createSubject("Chemistry", "CHEM10", "Chemistry for Grade 10", grade10);
+        Subject english10 = createSubject("English Literature", "ENG10", "English Literature for Grade 10", grade10);
+        Subject biology10 = createSubject("Biology", "BIO10", "Biology for Grade 10", grade10);
+        
+        // Create subjects for Grade 9
+        Subject math9 = createSubject("Mathematics", "MATH09", "Mathematics for Grade 9", grade9);
+        Subject science9 = createSubject("Science", "SCI09", "General Science for Grade 9", grade9);
+        Subject english9 = createSubject("English", "ENG09", "English for Grade 9", grade9);
+        
+        // 5. Assign Teachers to Subjects (Many-to-Many relationships)
+        // Use Subject-side of the relationship to avoid LazyInitializationException
+        if (mathTeacher != null) {
+            math10.getTeachers().add(mathTeacher);
+            math9.getTeachers().add(mathTeacher);
+            subjectRepository.save(math10);
+            subjectRepository.save(math9);
         }
+        
+        if (scienceTeacher != null) {
+            physics10.getTeachers().add(scienceTeacher);
+            chemistry10.getTeachers().add(scienceTeacher);
+            biology10.getTeachers().add(scienceTeacher);
+            science9.getTeachers().add(scienceTeacher);
+            subjectRepository.save(physics10);
+            subjectRepository.save(chemistry10);
+            subjectRepository.save(biology10);
+            subjectRepository.save(science9);
+        }
+        
+        if (englishTeacher != null) {
+            english10.getTeachers().add(englishTeacher);
+            english9.getTeachers().add(englishTeacher);
+            subjectRepository.save(english10);
+            subjectRepository.save(english9);
+        }
+
+        // Note: Course model has been eliminated. 
+        // Teacher-Subject relationships are now handled through direct many-to-many associations above.
+        // Timetable entries will link Subject, Classroom, and Teacher directly.
 
         // 5. Enroll students in classrooms
         User alice = userRepository.findByUsername("alice_johnson").orElse(null);
@@ -741,6 +614,16 @@ public class DataInitializer implements CommandLineRunner {
         gradeLevel.setDescription(description);
         return gradeLevelRepository.save(gradeLevel);
     }
+    
+    private Subject createSubject(String name, String subjectCode, String description, GradeLevel gradeLevel) {
+        Subject subject = new Subject();
+        subject.setName(name);
+        subject.setSubjectCode(subjectCode);
+        subject.setDescription(description);
+        subject.setGradeLevel(gradeLevel);
+        subject.setActive(true);
+        return subjectRepository.save(subject);
+    }
 
     private Classroom createClassroom(String name, Medium medium, GradeLevel gradeLevel,
             AcademicYear academicYear, User classTeacher, Integer maxStudents) {
@@ -754,14 +637,4 @@ public class DataInitializer implements CommandLineRunner {
         return classroomRepository.save(classroom);
     }
 
-    private Course createCourse(Subject subject, Classroom classroom, User teacher, AcademicYear academicYear) {
-        Course course = new Course();
-        course.setSubject(subject);
-        course.setClassroom(classroom);
-        course.setTeacher(teacher);
-        course.setAcademicYear(academicYear);
-        course.setActive(true);
-        course.setDescription(subject.getName() + " for " + classroom.getFullName());
-        return courseRepository.save(course);
-    }
 }

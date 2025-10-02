@@ -48,11 +48,11 @@ class DataInitializerTest {
     @Mock
     private ClassroomRepository classroomRepository;
     @Mock
-    private CourseRepository courseRepository;
-    @Mock
     private AcademicYearService academicYearService;
     @Mock
     private EnrollmentService enrollmentService;
+    @Mock
+    private com.student_management_system.common.service.TimeSlotService timeSlotService;
 
     private DataInitializer dataInitializer;
 
@@ -63,7 +63,7 @@ class DataInitializerTest {
                 userRepository, passwordEncoder, subjectRepository,
                 timetableEntryRepository, assignmentRepository, feeRepository,
                 academicYearRepository, gradeLevelRepository, classroomRepository,
-                courseRepository, academicYearService, enrollmentService);
+                academicYearService, enrollmentService, timeSlotService);
     }
 
     @Test

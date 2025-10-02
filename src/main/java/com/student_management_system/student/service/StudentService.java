@@ -48,8 +48,8 @@ public class StudentService {
         User user = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new IllegalStateException("Current user not found in database"));
 
-        // Use our custom repository method to fetch the timetable
-        return timetableEntryRepository.findByUserOrderByDayOfWeekAscStartTimeAsc(user);
+        // Use our custom repository method to fetch the timetable for student's enrolled classrooms
+        return timetableEntryRepository.findByStudentOrderByDayAndTime(user);
     }
 
     public List<Assignment> getStudentAssignments() {

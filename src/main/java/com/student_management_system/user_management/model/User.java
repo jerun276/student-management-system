@@ -12,6 +12,7 @@ import lombok.ToString;
 import lombok.EqualsAndHashCode;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -70,6 +71,17 @@ public class User {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<Subject> enrolledSubjects;
+    
+    // NEW: Many-to-many relationship with subjects for teachers
+    @ManyToMany
+    @JoinTable(
+        name = "teacher_subjects",
+        joinColumns = @JoinColumn(name = "teacher_id"),
+        inverseJoinColumns = @JoinColumn(name = "subject_id")
+    )
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Set<Subject> subjects = new HashSet<>();
     
     // NEW: Link to enrollments for the new academic structure
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)

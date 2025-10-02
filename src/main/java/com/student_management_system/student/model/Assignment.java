@@ -1,6 +1,6 @@
 package com.student_management_system.student.model;
 
-import com.student_management_system.common.model.Course;
+import com.student_management_system.common.model.Classroom;
 import com.student_management_system.user_management.model.User;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 
 /**
  * Represents an assignment given to students
- * Now linked to Course instead of Subject directly for better academic structure
+ * Now directly linked to Subject and Classroom for simplified academic structure
  */
 @Entity
 @Data
@@ -43,51 +43,43 @@ public class Assignment {
     @Column(nullable = false)
     private AssignmentStatus status = AssignmentStatus.ASSIGNED;
 
-    // NEW: Link to Course instead of Subject directly
+    // Subject for this assignment
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "course_id")
-    private Course course;
-
-    // LEGACY: Keep subject link for backward compatibility during transition
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "subject_id")
+    @JoinColumn(name = "subject_id", nullable = false)
     private Subject subject;
+
+    // Classroom for this assignment (to identify which class gets this assignment)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "classroom_id", nullable = false)
+    private Classroom classroom;
 
     // An assignment is assigned to one specific student
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // Teacher can be inferred from Course, but keeping for direct access
+    // Teacher who created this assignment (must be assigned to the subject)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "teacher_id")
+    @JoinColumn(name = "teacher_id", nullable = false)
     private User teacher;
     
     private LocalDateTime createdDate = LocalDateTime.now();
     
     /**
-     * Helper method to get the teacher from course if not directly set
+     * Helper method to get assignment description with context
      */
-    public User getEffectiveTeacher() {
-        if (teacher != null) {
-            return teacher;
-        }
-        if (course != null) {
-            return course.getTeacher();
-        }
-        return null;
+    public String getFullDescription() {
+        return String.format("%s - %s (%s)", 
+            subject.getFullName(), 
+            title, 
+            classroom.getFullName());
     }
     
     /**
-     * Helper method to get the subject from course if not directly set
+     * Helper method to check if assignment is overdue
      */
-    public Subject getEffectiveSubject() {
-        if (subject != null) {
-            return subject;
-        }
-        if (course != null) {
-            return course.getSubject();
-        }
-        return null;
+    public boolean isOverdue() {
+        return LocalDate.now().isAfter(dueDate) && 
+               (status == AssignmentStatus.ASSIGNED || status == AssignmentStatus.PENDING);
     }
 }

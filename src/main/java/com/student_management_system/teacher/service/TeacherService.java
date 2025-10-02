@@ -25,8 +25,7 @@ import com.student_management_system.common.repository.BudgetRequestRepository;
 import com.student_management_system.teacher.dto.AssignmentCreationDto;
 
 // NEW: Import new academic structure
-import com.student_management_system.common.model.Course;
-import com.student_management_system.common.repository.CourseRepository;
+import com.student_management_system.common.model.Classroom;
 import com.student_management_system.common.repository.EnrollmentRepository;
 
 import java.math.BigDecimal;
@@ -51,13 +50,12 @@ public class TeacherService {
     private final BudgetRequestRepository budgetRequestRepository;
     
     // NEW: Academic structure repositories
-    private final CourseRepository courseRepository;
     private final EnrollmentRepository enrollmentRepository;
 
     public TeacherService(AssignmentRepository assignmentRepository, SubjectRepository subjectRepository,
                           UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, 
                           StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService, 
-                          BudgetRequestRepository budgetRequestRepository, CourseRepository courseRepository,
+                          BudgetRequestRepository budgetRequestRepository,
                           EnrollmentRepository enrollmentRepository) {
         this.assignmentRepository = assignmentRepository;
         this.subjectRepository = subjectRepository;
@@ -66,7 +64,6 @@ public class TeacherService {
         this.studyMaterialRepository = studyMaterialRepository;
         this.fileStorageService = fileStorageService;
         this.budgetRequestRepository = budgetRequestRepository;
-        this.courseRepository = courseRepository;
         this.enrollmentRepository = enrollmentRepository;
     }
 
@@ -197,23 +194,22 @@ public class TeacherService {
         Subject subject = subjectRepository.findById(dto.getSubjectId())
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
 
-        // NEW: Get students through Course-based enrollment system
-        List<Course> teacherCourses = courseRepository.findActiveByTeacher(teacher);
-        Set<User> students = new java.util.HashSet<>();
-        
-        // Find courses for this subject taught by this teacher
-        for (Course course : teacherCourses) {
-            if (course.getSubject().getId().equals(subject.getId())) {
-                // Get students enrolled in this course's classroom
-                List<User> courseStudents = enrollmentRepository.findStudentsByClassroom(course.getClassroom());
-                students.addAll(courseStudents);
-            }
+        // NEW: Verify teacher is assigned to this subject
+        if (!subject.hasTeacher(teacher)) {
+            throw new IllegalStateException("You are not assigned to teach this subject. Cannot create assignments.");
         }
+
+        // Get students enrolled in classrooms for this subject's grade level
+        Set<User> students = new java.util.HashSet<>();
+        List<Classroom> classrooms = enrollmentRepository.findClassroomsByGradeLevel(subject.getGradeLevel());
         
-        // Note: Legacy subject.getEnrolledStudents() removed in favor of Course-based system
+        for (Classroom classroom : classrooms) {
+            List<User> classroomStudents = enrollmentRepository.findStudentsByClassroom(classroom);
+            students.addAll(classroomStudents);
+        }
 
         if (students.isEmpty()) {
-            throw new IllegalStateException("No students are enrolled in this subject. Cannot create assignments.");
+            throw new IllegalStateException("No students are enrolled in classrooms for this subject's grade level. Cannot create assignments.");
         }
 
         // Create an assignment for each student
@@ -226,6 +222,12 @@ public class TeacherService {
             assignment.setUser(student);
             assignment.setTeacher(teacher);
             assignment.setStatus(AssignmentStatus.ASSIGNED);
+            
+            // Set classroom - find the student's classroom for this grade level
+            Classroom studentClassroom = enrollmentRepository.findClassroomByStudentAndGradeLevel(student, subject.getGradeLevel());
+            if (studentClassroom != null) {
+                assignment.setClassroom(studentClassroom);
+            }
 
             assignmentRepository.save(assignment);
         }

@@ -3,6 +3,7 @@ package com.student_management_system.common.repository;
 import com.student_management_system.common.model.Enrollment;
 import com.student_management_system.common.model.AcademicYear;
 import com.student_management_system.common.model.Classroom;
+import com.student_management_system.common.model.GradeLevel;
 import com.student_management_system.user_management.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -76,4 +77,22 @@ public interface EnrollmentRepository extends JpaRepository<Enrollment, Long> {
      */
     @Query("SELECT COUNT(e) FROM Enrollment e WHERE e.classroom = :classroom AND e.isActive = true")
     Long countActiveEnrollmentsByClassroom(@Param("classroom") Classroom classroom);
+    
+    /**
+     * Find classrooms by grade level
+     */
+    @Query("SELECT DISTINCT e.classroom FROM Enrollment e WHERE e.classroom.gradeLevel = :gradeLevel AND e.isActive = true")
+    List<Classroom> findClassroomsByGradeLevel(@Param("gradeLevel") GradeLevel gradeLevel);
+    
+    /**
+     * Find a student's classroom for a specific grade level
+     */
+    @Query("SELECT e.classroom FROM Enrollment e WHERE e.student = :student AND e.classroom.gradeLevel = :gradeLevel AND e.isActive = true")
+    Classroom findClassroomByStudentAndGradeLevel(@Param("student") User student, @Param("gradeLevel") GradeLevel gradeLevel);
+    
+    /**
+     * Find all classrooms a student is enrolled in
+     */
+    @Query("SELECT e.classroom FROM Enrollment e WHERE e.student = :student AND e.isActive = true")
+    List<Classroom> findClassroomsByStudent(@Param("student") User student);
 }

@@ -9,7 +9,6 @@ import com.student_management_system.teacher.repository.AttendanceRecordReposito
 import com.student_management_system.teacher.repository.StudyMaterialRepository;
 import com.student_management_system.common.service.FileStorageService;
 import com.student_management_system.common.repository.BudgetRequestRepository;
-import com.student_management_system.common.repository.CourseRepository;
 import com.student_management_system.common.repository.EnrollmentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,9 +49,6 @@ class TeacherServiceTest {
     
     @Mock
     private BudgetRequestRepository budgetRequestRepository;
-    
-    @Mock
-    private CourseRepository courseRepository;
     
     @Mock
     private EnrollmentRepository enrollmentRepository;

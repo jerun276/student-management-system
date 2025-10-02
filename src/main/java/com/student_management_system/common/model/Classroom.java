@@ -48,10 +48,8 @@ public class Classroom {
     @EqualsAndHashCode.Exclude
     private Set<Enrollment> enrollments;
     
-    @OneToMany(mappedBy = "classroom", cascade = CascadeType.ALL)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Set<Course> courses;
+    // Note: Course model has been removed. 
+    // Classroom relationships are now handled through Enrollments, TimetableEntries, etc.
     
     /**
      * Helper method to get the full display name
