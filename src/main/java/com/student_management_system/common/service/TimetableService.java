@@ -75,9 +75,10 @@ public class TimetableService {
         for (TimetableEntry entry : teacherEntries) {
             conflicts.add(new TimetableConflict(
                 TimetableConflict.ConflictType.TEACHER_DOUBLE_BOOKED,
-                "Teacher " + teacher.getFirstName() + " " + teacher.getLastName() + 
-                " is already scheduled to teach " + entry.getSubject().getName() + 
-                " in " + entry.getClassroom().getFullName() + " at this time"
+                "❌ TEACHER CONFLICT: " + teacher.getFirstName() + " " + teacher.getLastName() + 
+                " is already teaching " + entry.getSubject().getName() + 
+                " in " + entry.getClassroom().getFullName() + " during this time slot. " +
+                "A teacher can only be in one classroom at a time."
             ));
         }
 
@@ -88,9 +89,10 @@ public class TimetableService {
         for (TimetableEntry entry : classroomEntries) {
             conflicts.add(new TimetableConflict(
                 TimetableConflict.ConflictType.CLASSROOM_DOUBLE_BOOKED,
-                "Classroom " + classroom.getFullName() + " is already occupied by " + 
+                "🏫 CLASSROOM CONFLICT: " + classroom.getFullName() + " is already occupied by " + 
                 entry.getSubject().getName() + " with teacher " + 
-                entry.getTeacher().getFirstName() + " " + entry.getTeacher().getLastName()
+                entry.getTeacher().getFirstName() + " " + entry.getTeacher().getLastName() + 
+                " during this time slot."
             ));
         }
 
@@ -125,7 +127,7 @@ public class TimetableService {
      * Get all timetable entries for a specific day and time slot
      */
     public List<TimetableEntry> getTimetableEntriesForSlot(DayOfWeek dayOfWeek, TimeSlot timeSlot) {
-        return timetableEntryRepository.findByDayOfWeekAndTimeSlotOrderByClassroom(dayOfWeek, timeSlot);
+        return timetableEntryRepository.findByDayOfWeekAndTimeSlot(dayOfWeek, timeSlot);
     }
 
     /**

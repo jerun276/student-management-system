@@ -45,22 +45,20 @@ public interface TimetableEntryRepository extends JpaRepository<TimetableEntry, 
     List<TimetableEntry> findByTeacherOrderByDayAndTime(@Param("teacher") User teacher);
     
     /**
-     * Find timetable entries by day and time slot ordered by classroom
+     * Find timetable entries by day and time slot with eager loading
      */
-    @Query("SELECT te FROM TimetableEntry te WHERE te.dayOfWeek = :dayOfWeek AND te.timeSlot = :timeSlot " +
-           "ORDER BY te.classroom.gradeLevel.level ASC, te.classroom.name ASC")
-    List<TimetableEntry> findByDayOfWeekAndTimeSlotOrderByClassroom(
-        @Param("dayOfWeek") DayOfWeek dayOfWeek, @Param("timeSlot") TimeSlot timeSlot);
+    @Query("SELECT te FROM TimetableEntry te " +
+           "JOIN FETCH te.classroom c " +
+           "JOIN FETCH c.gradeLevel " +
+           "JOIN FETCH te.subject s " +
+           "JOIN FETCH te.teacher t " +
+           "WHERE te.dayOfWeek = :dayOfWeek AND te.timeSlot = :timeSlot")
+    List<TimetableEntry> findByDayOfWeekAndTimeSlot(@Param("dayOfWeek") DayOfWeek dayOfWeek, @Param("timeSlot") TimeSlot timeSlot);
     
     /**
      * Find timetable entries by teacher and day
      */
     List<TimetableEntry> findByTeacherAndDayOfWeek(User teacher, DayOfWeek dayOfWeek);
-    
-    /**
-     * Find timetable entries by day and time slot
-     */
-    List<TimetableEntry> findByDayOfWeekAndTimeSlot(DayOfWeek dayOfWeek, TimeSlot timeSlot);
     
     /**
      * Find all entries for a specific teacher

@@ -41,7 +41,7 @@ public class Subject {
     private GradeLevel gradeLevel;
     
     // NEW: Many-to-many relationship with teachers
-    @ManyToMany(mappedBy = "subjects")
+    @ManyToMany(mappedBy = "subjects", fetch = FetchType.EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Set<User> teachers = new HashSet<>();

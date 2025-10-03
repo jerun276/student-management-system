@@ -75,7 +75,7 @@ public class User {
     // NEW: Many-to-many relationship with subjects for teachers
     @ManyToMany
     @JoinTable(
-        name = "teacher_subjects",
+        name = "teacher_subject",
         joinColumns = @JoinColumn(name = "teacher_id"),
         inverseJoinColumns = @JoinColumn(name = "subject_id")
     )

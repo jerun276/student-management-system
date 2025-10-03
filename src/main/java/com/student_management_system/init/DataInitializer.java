@@ -7,8 +7,6 @@ import com.student_management_system.student.repository.TimetableEntryRepository
 import com.student_management_system.user_management.model.Role;
 import com.student_management_system.user_management.model.User;
 import com.student_management_system.user_management.repository.UserRepository;
-import com.student_management_system.student.model.Assignment;
-import com.student_management_system.student.model.AssignmentStatus;
 import com.student_management_system.student.repository.AssignmentRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,19 +19,22 @@ import com.student_management_system.staff.repository.FeeRepository;
 import com.student_management_system.common.model.*;
 import com.student_management_system.common.repository.*;
 import com.student_management_system.common.service.AcademicYearService;
-import com.student_management_system.common.service.EnrollmentService;
 import com.student_management_system.common.service.TimeSlotService;
 
 import java.math.BigDecimal;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
-import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
+import com.student_management_system.common.service.EnrollmentService;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
-
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final SubjectRepository subjectRepository;
@@ -105,6 +106,9 @@ public class DataInitializer implements CommandLineRunner {
         } else {
             System.out.println("Timetable entries already exist in the DB, skipping data initialization.");
         }
+
+        // Always check and populate teacher-subject relationships if they don't exist
+        checkAndPopulateTeacherSubjectRelationships();
 
         if (assignmentRepository.count() == 0) {
             System.out.println("No Assignment found in DB, creating sample ...");
@@ -327,27 +331,190 @@ public class DataInitializer implements CommandLineRunner {
             return;
         }
 
-        // NOTE: Student-subject enrollment is now handled through the new academic structure
-        // Students are enrolled in classrooms, and subjects are taught to classrooms
-        // The createAcademicStructure() method handles proper student enrollment in classrooms
-        System.out.println("Student enrollment is handled through classroom-based system in createAcademicStructure()");
+        // Find Grade 10 level first to avoid lazy loading issues
+        GradeLevel grade10 = gradeLevelRepository.findByName("Grade 10").orElse(null);
+        if (grade10 == null) {
+            System.out.println("Grade 10 not found, skipping timetable creation");
+            return;
+        }
 
-        // TODO: Create proper classroom-based timetable entries
-        // Timetable creation will be redesigned in Phase 2 to work with classroom schedules
-        // rather than individual student schedules
+        // Find classrooms for Grade 10 specifically
+        List<Classroom> grade10Classrooms = classroomRepository.findByGradeLevel(grade10);
+        if (grade10Classrooms.isEmpty()) {
+            System.out.println("No Grade 10 classrooms found, skipping timetable creation");
+            return;
+        }
 
-        System.out.println("Sample subjects, enrollments, and comprehensive timetables created successfully!");
+        // Get time slots
+        List<TimeSlot> regularSlots = timeSlotService.getRegularPeriods();
+        if (regularSlots.isEmpty()) {
+            System.out.println("No time slots found, skipping timetable creation");
+            return;
+        }
+
+        // Create sample timetable entries for Grade 10 classrooms
+        for (Classroom classroom : grade10Classrooms) {
+            createSampleTimetableForClassroom(classroom, mathematics, physics, chemistry, english, biology,
+                mathTeacher, scienceTeacher, englishTeacher, regularSlots);
+        }
+
+        System.out.println("Sample timetable entries created successfully!");
+    }
+    
+    @Transactional
+    private void populateTeacherSubjectRelationships() {
+        System.out.println("Populating teacher-subject relationships...");
+        
+        // Get all existing timetable entries
+        List<TimetableEntry> allEntries = timetableEntryRepository.findAll();
+        
+        // Create a set to track unique teacher-subject combinations  
+        java.util.Set<String> processedPairs = new java.util.HashSet<>();
+        int relationshipsAdded = 0;
+        
+        for (TimetableEntry entry : allEntries) {
+            if (entry.getTeacher() != null && entry.getSubject() != null) {
+                Long teacherId = entry.getTeacher().getId();
+                Long subjectId = entry.getSubject().getId();
+                String key = teacherId + "_" + subjectId;
+                
+                if (!processedPairs.contains(key)) {
+                    processedPairs.add(key);
+                    
+                    try {
+                        // Fetch teacher and subject fresh from database to avoid lazy loading issues
+                        User teacher = userRepository.findById(teacherId).orElse(null);
+                        Subject subject = subjectRepository.findById(subjectId).orElse(null);
+                        
+                        if (teacher != null && subject != null) {
+                            // Initialize collections if null
+                            if (teacher.getSubjects() == null) {
+                                teacher.setSubjects(new java.util.HashSet<>());
+                            }
+                            
+                            if (!teacher.getSubjects().contains(subject)) {
+                                teacher.getSubjects().add(subject);
+                                userRepository.save(teacher);
+                                relationshipsAdded++;
+                                
+                                System.out.println("Added relationship: " + teacher.getFirstName() + " " + 
+                                                 teacher.getLastName() + " teaches " + subject.getName());
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.err.println("Error adding teacher-subject relationship: " + e.getMessage());
+                    }
+                }
+            }
+        }
+        
+        System.out.println("Teacher-subject relationships populated successfully! Added " + relationshipsAdded + " relationships.");
     }
 
-    private void createTimetableEntry(Subject subject, Classroom classroom, User teacher, DayOfWeek day, int startHour, int startMinute,
-            int endHour, int endMinute) {
+    private void checkAndPopulateTeacherSubjectRelationships() {
+        System.out.println("=== Checking teacher-subject relationships ===");
+        
+        // Check if teacher-subject relationships exist by querying the actual subjects
+        // and see if they have teachers assigned through the admin interface
+        List<Subject> subjects = subjectRepository.findAll();
+        boolean hasAnyRelationships = false;
+        
+        System.out.println("Checking " + subjects.size() + " subjects for teacher assignments...");
+        
+        for (Subject subject : subjects) {
+            try {
+                // Refresh the subject to get latest data including teachers
+                Subject refreshedSubject = subjectRepository.findById(subject.getId()).orElse(null);
+                if (refreshedSubject != null && refreshedSubject.getTeachers() != null && !refreshedSubject.getTeachers().isEmpty()) {
+                    hasAnyRelationships = true;
+                    System.out.println("Subject '" + subject.getName() + "' has " + refreshedSubject.getTeachers().size() + " teacher(s) assigned");
+                } else {
+                    System.out.println("Subject '" + subject.getName() + "' has no teachers assigned");
+                }
+            } catch (Exception e) {
+                System.out.println("Could not check teachers for subject '" + subject.getName() + "': " + e.getMessage());
+            }
+        }
+        
+        if (hasAnyRelationships) {
+            System.out.println("Teacher-subject relationships found! Timetable creation will use these relationships.");
+        } else {
+            System.out.println("No teacher-subject relationships found. Please assign teachers to subjects via /admin/subjects/{id}/edit before creating timetables.");
+        }
+        
+        System.out.println("=== Teacher-subject relationship check complete ===");
+    }
+
+
+    // Helper method to find assigned teacher for a subject
+    private User findAssignedTeacherForSubject(Subject subject, User fallbackTeacher) {
+        try {
+            // Check if subject has assigned teachers through the admin interface
+            Subject refreshedSubject = subjectRepository.findById(subject.getId()).orElse(null);
+            if (refreshedSubject != null && refreshedSubject.getTeachers() != null && !refreshedSubject.getTeachers().isEmpty()) {
+                // Return the first assigned teacher
+                User assignedTeacher = refreshedSubject.getTeachers().iterator().next();
+                System.out.println("Using assigned teacher " + assignedTeacher.getFirstName() + " " + assignedTeacher.getLastName() + " for " + subject.getName());
+                return assignedTeacher;
+            }
+        } catch (Exception e) {
+            System.err.println("Error finding assigned teacher for " + subject.getName() + ": " + e.getMessage());
+        }
+        
+        // Use fallback teacher if no assignment found
+        System.out.println("Using fallback teacher " + fallbackTeacher.getFirstName() + " " + fallbackTeacher.getLastName() + " for " + subject.getName());
+        return fallbackTeacher;
+    }
+
+    // Removed old createTimetableEntry method - using TimeSlot-based approach instead
+
+    private void createSampleTimetableForClassroom(Classroom classroom, Subject mathematics, Subject physics, 
+            Subject chemistry, Subject english, Subject biology, User mathTeacher, User scienceTeacher, 
+            User englishTeacher, List<TimeSlot> timeSlots) {
+        
+        if (timeSlots.size() < 3) {
+            System.out.println("Not enough time slots available for timetable creation");
+            return;
+        }
+
+        // Create a simple weekly schedule - only 3 periods per day to avoid overloading
+        // This will create 15 periods total (3 periods × 5 days) per classroom
+        
+        // Monday - 3 periods only
+        if (timeSlots.size() > 0) createTimetableEntryWithTimeSlot(mathematics, classroom, findAssignedTeacherForSubject(mathematics, mathTeacher), DayOfWeek.MONDAY, timeSlots.get(0));
+        if (timeSlots.size() > 1) createTimetableEntryWithTimeSlot(english, classroom, findAssignedTeacherForSubject(english, englishTeacher), DayOfWeek.MONDAY, timeSlots.get(1));
+        if (timeSlots.size() > 2) createTimetableEntryWithTimeSlot(physics, classroom, findAssignedTeacherForSubject(physics, scienceTeacher), DayOfWeek.MONDAY, timeSlots.get(2));
+        
+        // Tuesday - 3 periods only
+        if (timeSlots.size() > 0) createTimetableEntryWithTimeSlot(chemistry, classroom, findAssignedTeacherForSubject(chemistry, scienceTeacher), DayOfWeek.TUESDAY, timeSlots.get(0));
+        if (timeSlots.size() > 1) createTimetableEntryWithTimeSlot(mathematics, classroom, findAssignedTeacherForSubject(mathematics, mathTeacher), DayOfWeek.TUESDAY, timeSlots.get(1));
+        if (timeSlots.size() > 2) createTimetableEntryWithTimeSlot(english, classroom, findAssignedTeacherForSubject(english, englishTeacher), DayOfWeek.TUESDAY, timeSlots.get(2));
+        
+        // Wednesday - 3 periods only
+        if (timeSlots.size() > 0) createTimetableEntryWithTimeSlot(biology, classroom, findAssignedTeacherForSubject(biology, scienceTeacher), DayOfWeek.WEDNESDAY, timeSlots.get(0));
+        if (timeSlots.size() > 1) createTimetableEntryWithTimeSlot(physics, classroom, findAssignedTeacherForSubject(physics, scienceTeacher), DayOfWeek.WEDNESDAY, timeSlots.get(1));
+        if (timeSlots.size() > 2) createTimetableEntryWithTimeSlot(mathematics, classroom, findAssignedTeacherForSubject(mathematics, mathTeacher), DayOfWeek.WEDNESDAY, timeSlots.get(2));
+        
+        // Thursday - 3 periods only
+        if (timeSlots.size() > 0) createTimetableEntryWithTimeSlot(english, classroom, findAssignedTeacherForSubject(english, englishTeacher), DayOfWeek.THURSDAY, timeSlots.get(0));
+        if (timeSlots.size() > 1) createTimetableEntryWithTimeSlot(chemistry, classroom, findAssignedTeacherForSubject(chemistry, scienceTeacher), DayOfWeek.THURSDAY, timeSlots.get(1));
+        if (timeSlots.size() > 2) createTimetableEntryWithTimeSlot(biology, classroom, findAssignedTeacherForSubject(biology, scienceTeacher), DayOfWeek.THURSDAY, timeSlots.get(2));
+        
+        // Friday - 3 periods only
+        if (timeSlots.size() > 0) createTimetableEntryWithTimeSlot(mathematics, classroom, findAssignedTeacherForSubject(mathematics, mathTeacher), DayOfWeek.FRIDAY, timeSlots.get(0));
+        if (timeSlots.size() > 1) createTimetableEntryWithTimeSlot(physics, classroom, findAssignedTeacherForSubject(physics, scienceTeacher), DayOfWeek.FRIDAY, timeSlots.get(1));
+        if (timeSlots.size() > 2) createTimetableEntryWithTimeSlot(english, classroom, findAssignedTeacherForSubject(english, englishTeacher), DayOfWeek.FRIDAY, timeSlots.get(2));
+    }
+
+    private void createTimetableEntryWithTimeSlot(Subject subject, Classroom classroom, User teacher, 
+            DayOfWeek dayOfWeek, TimeSlot timeSlot) {
         TimetableEntry entry = new TimetableEntry();
         entry.setSubject(subject);
         entry.setClassroom(classroom);
         entry.setTeacher(teacher);
-        entry.setDayOfWeek(day);
-        entry.setStartTime(LocalTime.of(startHour, startMinute));
-        entry.setEndTime(LocalTime.of(endHour, endMinute));
+        entry.setDayOfWeek(dayOfWeek);
+        entry.setTimeSlot(timeSlot);
+        entry.setLocation("Classroom " + classroom.getName()); // Use simple name to avoid lazy loading
         timetableEntryRepository.save(entry);
     }
 
@@ -362,31 +529,7 @@ public class DataInitializer implements CommandLineRunner {
         return;
     }
 
-    private void createAssignment(String title, String description, LocalDate dueDate,
-            AssignmentStatus status, Subject subject, User student, User teacher, Classroom classroom) {
-        Assignment assignment = new Assignment();
-        assignment.setTitle(title);
-        assignment.setDescription(description);
-        assignment.setDueDate(dueDate);
-        assignment.setStatus(status);
-        assignment.setSubject(subject);
-        assignment.setUser(student);
-        assignment.setTeacher(teacher);
-        assignment.setClassroom(classroom);
-
-        // Add some sample data for submitted/graded assignments
-        if (status == AssignmentStatus.SUBMITTED) {
-            assignment.setSubmissionText("This is a sample submission for " + title);
-            assignment.setSubmissionDate(LocalDate.now().minusDays(1).atStartOfDay());
-        } else if (status == AssignmentStatus.GRADED) {
-            assignment.setSubmissionText("This is a sample submission for " + title);
-            assignment.setSubmissionDate(LocalDate.now().minusDays(3).atStartOfDay());
-            assignment.setGrade("A-");
-            assignment.setFeedback("Excellent work! Well-structured and thorough analysis.");
-        }
-
-        assignmentRepository.save(assignment);
-    }
+    // Removed unused createAssignment method - will be reimplemented when assignment creation is redesigned
 
     private void createStaffAndFees() {
         System.out.println("Creating sample staff users and fees...");

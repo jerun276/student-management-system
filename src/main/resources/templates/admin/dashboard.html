@@ -45,7 +45,7 @@
         </div>
 
         <!-- Navigation Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
             <div class="card bg-base-100 shadow-xl">
                 <div class="card-body">
                     <h2 class="card-title">Academic Structure</h2>
@@ -61,6 +61,15 @@
                     <p>Create and manage subjects, assign teachers, and organize curriculum.</p>
                     <div class="card-actions justify-end">
                         <a th:href="@{/admin/subjects}" class="btn btn-primary">Manage</a>
+                    </div>
+                </div>
+            </div>
+            <div class="card bg-base-100 shadow-xl">
+                <div class="card-body">
+                    <h2 class="card-title">Timetable Management</h2>
+                    <p>Create and manage school timetables, schedules, and time slots.</p>
+                    <div class="card-actions justify-end">
+                        <a th:href="@{/admin/timetable}" class="btn btn-primary">Manage</a>
                     </div>
                 </div>
             </div>

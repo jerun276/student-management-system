@@ -1,158 +1,152 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Timetable Entry</title>
-    <link href="/css/style.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/admin/timetable" class="text-blue-600 hover:text-blue-800 mr-4">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </a>
-                    <h1 class="text-xl font-semibold text-gray-900">Create Timetable Entry</h1>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Create Timetable Entry</h1>
+        <a th:href="@{/admin/timetable}" class="btn btn-outline">
+            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title text-primary mb-6">Timetable Entry Details</h2>
+            
+            <form th:action="@{/admin/timetable/create}" method="post" id="timetableForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Subject Selection -->
+                    <div class="form-control">
+                        <label class="label" for="subjectId">
+                            <span class="label-text font-medium">Subject</span>
+                        </label>
+                        <select name="subjectId" id="subjectId" required class="select select-bordered w-full">
+                            <option value="">Select Subject</option>
+                            <option th:each="subject : ${subjects}" 
+                                    th:value="${subject.id}" 
+                                    th:text="${subject.name}">Mathematics</option>
+                        </select>
+                    </div>
+
+                    <!-- Classroom Selection -->
+                    <div class="form-control">
+                        <label class="label" for="classroomId">
+                            <span class="label-text font-medium">Classroom</span>
+                        </label>
+                        <select name="classroomId" id="classroomId" required class="select select-bordered w-full">
+                            <option value="">Select Classroom</option>
+                            <option th:each="classroom : ${classrooms}" 
+                                    th:value="${classroom.id}" 
+                                    th:text="${classroom.fullName}">Grade 10-A (ENGLISH Medium)</option>
+                        </select>
+                    </div>
+
+                    <!-- Teacher Selection -->
+                    <div class="form-control">
+                        <label class="label" for="teacherId">
+                            <span class="label-text font-medium">Teacher</span>
+                        </label>
+                        <select name="teacherId" id="teacherId" required class="select select-bordered w-full">
+                            <option value="">Select Teacher</option>
+                            <option th:each="teacher : ${teachers}" 
+                                    th:value="${teacher.id}" 
+                                    th:text="${teacher.firstName + ' ' + teacher.lastName + ' (' + teacher.email + ')'}"
+                                    th:attr="data-subjects=${teacher.subjects}">John Doe (john@example.com)</option>
+                        </select>
+                        <label class="label">
+                            <span class="label-text-alt text-info" id="teacherInfo">Select a subject first to filter teachers</span>
+                        </label>
+                    </div>
+
+                    <!-- Day of Week -->
+                    <div class="form-control">
+                        <label class="label" for="dayOfWeek">
+                            <span class="label-text font-medium">Day of Week</span>
+                        </label>
+                        <select name="dayOfWeek" id="dayOfWeek" required class="select select-bordered w-full">
+                            <option value="">Select Day</option>
+                            <option th:each="day : ${weekDays}" 
+                                    th:value="${day}" 
+                                    th:text="${#strings.capitalize(#strings.toLowerCase(day))}">Monday</option>
+                        </select>
+                    </div>
+
+                    <!-- Time Slot -->
+                    <div class="form-control">
+                        <label class="label" for="timeSlotId">
+                            <span class="label-text font-medium">Time Slot</span>
+                        </label>
+                        <select name="timeSlotId" id="timeSlotId" required class="select select-bordered w-full">
+                            <option value="">Select Time Slot</option>
+                            <option th:each="timeSlot : ${timeSlots}" 
+                                    th:value="${timeSlot.id}" 
+                                    th:text="${timeSlot.name + ' (' + timeSlot.startTime + ' - ' + timeSlot.endTime + ')'}"
+                                    th:disabled="${timeSlot.type.name() != 'REGULAR'}">Period 1 (08:00 - 08:45)</option>
+                        </select>
+                    </div>
+
+                    <!-- Location (Optional) -->
+                    <div class="form-control">
+                        <label class="label" for="location">
+                            <span class="label-text font-medium">Location</span>
+                            <span class="label-text-alt">(Optional)</span>
+                        </label>
+                        <input type="text" name="location" id="location" 
+                               placeholder="e.g., Lab 1, Library, etc."
+                               class="input input-bordered w-full">
+                    </div>
                 </div>
-            </div>
-        </div>
-    </nav>
 
-    <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-                <form th:action="@{/admin/timetable/create}" method="post" id="timetableForm">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <!-- Subject Selection -->
-                        <div>
-                            <label for="subjectId" class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                            <select name="subjectId" id="subjectId" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select Subject</option>
-                                <option th:each="subject : ${subjects}" 
-                                        th:value="${subject.id}" 
-                                        th:text="${subject.fullName}">Mathematics - Grade 10</option>
-                            </select>
-                        </div>
-
-                        <!-- Classroom Selection -->
-                        <div>
-                            <label for="classroomId" class="block text-sm font-medium text-gray-700 mb-2">Classroom</label>
-                            <select name="classroomId" id="classroomId" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select Classroom</option>
-                                <option th:each="classroom : ${classrooms}" 
-                                        th:value="${classroom.id}" 
-                                        th:text="${classroom.fullName}">Grade 10-A (ENGLISH Medium) - 2024-2025</option>
-                            </select>
-                        </div>
-
-                        <!-- Teacher Selection -->
-                        <div>
-                            <label for="teacherId" class="block text-sm font-medium text-gray-700 mb-2">Teacher</label>
-                            <select name="teacherId" id="teacherId" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select Teacher</option>
-                                <option th:each="teacher : ${teachers}" 
-                                        th:value="${teacher.id}" 
-                                        th:text="${teacher.firstName + ' ' + teacher.lastName + ' (' + teacher.email + ')'}">John Doe (john@school.edu)</option>
-                            </select>
-                        </div>
-
-                        <!-- Day of Week -->
-                        <div>
-                            <label for="dayOfWeek" class="block text-sm font-medium text-gray-700 mb-2">Day of Week</label>
-                            <select name="dayOfWeek" id="dayOfWeek" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select Day</option>
-                                <option th:each="day : ${weekDays}" 
-                                        th:value="${day}" 
-                                        th:text="${#strings.capitalize(#strings.toLowerCase(day))}">Monday</option>
-                            </select>
-                        </div>
-
-                        <!-- Time Slot -->
-                        <div>
-                            <label for="timeSlotId" class="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
-                            <select name="timeSlotId" id="timeSlotId" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                                <option value="">Select Time Slot</option>
-                                <option th:each="timeSlot : ${timeSlots}" 
-                                        th:value="${timeSlot.id}" 
-                                        th:text="${timeSlot.fullDisplayName}"
-                                        th:disabled="${timeSlot.type.name() != 'REGULAR'}">Period 1 (08:00 - 08:45)</option>
-                            </select>
-                        </div>
-
-                        <!-- Location (Optional) -->
-                        <div>
-                            <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location (Optional)</label>
-                            <input type="text" name="location" id="location" 
-                                   placeholder="e.g., Lab 1, Library, etc."
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                        </div>
+                <!-- Conflict Check Results -->
+                <div id="conflictResults" class="alert alert-error mt-6 hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <h3 class="font-bold">Scheduling Conflicts Detected!</h3>
+                        <div class="text-xs" id="conflictList"></div>
                     </div>
+                </div>
 
-                    <!-- Conflict Check Results -->
-                    <div id="conflictResults" class="mt-6 hidden">
-                        <div class="bg-red-50 border border-red-200 rounded-md p-4">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-red-800">Scheduling Conflicts Detected</h3>
-                                    <div class="mt-2 text-sm text-red-700">
-                                        <ul id="conflictList" class="list-disc list-inside space-y-1">
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                <!-- Success Message -->
+                <div id="noConflicts" class="alert alert-success mt-6 hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <h3 class="font-bold">No Conflicts Found!</h3>
+                        <div class="text-xs">This timetable entry can be scheduled without conflicts.</div>
                     </div>
+                </div>
 
-                    <!-- Success Message -->
-                    <div id="noConflicts" class="mt-6 hidden">
-                        <div class="bg-green-50 border border-green-200 rounded-md p-4">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <p class="text-sm font-medium text-green-800">No conflicts detected. Ready to create!</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Form Actions -->
-                    <div class="mt-6 flex justify-end space-x-3">
-                        <button type="button" id="checkConflicts" 
-                                class="bg-yellow-600 text-white px-4 py-2 rounded-md hover:bg-yellow-700 transition-colors">
-                            Check for Conflicts
-                        </button>
-                        <button type="submit" id="submitBtn" 
-                                class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                            Create Timetable Entry
-                        </button>
-                    </div>
-                </form>
-            </div>
+                <!-- Form Actions -->
+                <div class="card-actions justify-end mt-8">
+                    <a th:href="@{/admin/timetable}" class="btn btn-ghost">Cancel</a>
+                    <button type="button" id="checkConflicts" class="btn btn-warning">Check for Conflicts</button>
+                    <button type="submit" id="submitBtn" class="btn btn-primary" disabled>Create Entry</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- Error Messages -->
     <div th:if="${errorMessage}" class="fixed top-4 right-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded z-50">
         <span th:text="${errorMessage}"></span>
+        <button class="btn btn-sm btn-circle absolute top-0 right-0" onclick="this.parentElement.remove()">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
     </div>
 
     <script>
@@ -221,5 +215,110 @@
             document.getElementById('submitBtn').classList.remove('opacity-50', 'cursor-not-allowed');
         });
     </script>
+    <!-- JavaScript for dynamic teacher filtering and conflict checking -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const subjectSelect = document.getElementById('subjectId');
+            const teacherSelect = document.getElementById('teacherId');
+            const teacherInfo = document.getElementById('teacherInfo');
+            const checkConflictsBtn = document.getElementById('checkConflicts');
+            const submitBtn = document.getElementById('submitBtn');
+            const conflictResults = document.getElementById('conflictResults');
+            const noConflicts = document.getElementById('noConflicts');
+            const conflictList = document.getElementById('conflictList');
+            
+            // Store all teachers for filtering
+            const allTeachers = Array.from(teacherSelect.options).slice(1); // Skip first "Select Teacher" option
+            
+            // Subject selection change handler
+            subjectSelect.addEventListener('change', function() {
+                const selectedSubjectId = this.value;
+                
+                // Clear teacher selection
+                teacherSelect.innerHTML = '<option value="">Select Teacher</option>';
+                
+                if (selectedSubjectId) {
+                    // Show loading state
+                    teacherInfo.textContent = 'Loading teachers...';
+                    teacherInfo.className = 'label-text-alt text-warning';
+                    
+                    // Fetch teachers who teach this subject
+                    fetch(`/admin/timetable/teachers-by-subject/${selectedSubjectId}`)
+                        .then(response => response.json())
+                        .then(teachers => {
+                            if (teachers.length > 0) {
+                                teachers.forEach(teacher => {
+                                    const option = document.createElement('option');
+                                    option.value = teacher.id;
+                                    option.textContent = `${teacher.name} (${teacher.email})`;
+                                    teacherSelect.appendChild(option);
+                                });
+                                teacherInfo.textContent = `${teachers.length} teacher(s) available for this subject`;
+                                teacherInfo.className = 'label-text-alt text-success';
+                            } else {
+                                teacherInfo.textContent = 'No teachers found for this subject';
+                                teacherInfo.className = 'label-text-alt text-warning';
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching teachers:', error);
+                            teacherInfo.textContent = 'Error loading teachers';
+                            teacherInfo.className = 'label-text-alt text-error';
+                        });
+                } else {
+                    teacherInfo.textContent = 'Select a subject first to filter teachers';
+                    teacherInfo.className = 'label-text-alt text-info';
+                }
+            });
+            
+            // Check conflicts functionality
+            checkConflictsBtn.addEventListener('click', function() {
+                const formData = new FormData(document.getElementById('timetableForm'));
+                
+                // Validate required fields
+                if (!formData.get('classroomId') || !formData.get('teacherId') || 
+                    !formData.get('dayOfWeek') || !formData.get('timeSlotId')) {
+                    alert('Please fill in all required fields before checking for conflicts.');
+                    return;
+                }
+                
+                // Show loading state
+                checkConflictsBtn.disabled = true;
+                checkConflictsBtn.textContent = 'Checking...';
+                
+                // Make AJAX request to check conflicts
+                fetch('/admin/timetable/check-conflicts', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.hasConflicts) {
+                        // Show conflicts
+                        conflictList.innerHTML = data.conflicts.map(conflict => 
+                            `<div class="mb-1">• ${conflict}</div>`
+                        ).join('');
+                        conflictResults.classList.remove('hidden');
+                        noConflicts.classList.add('hidden');
+                        submitBtn.disabled = true;
+                    } else {
+                        // No conflicts
+                        conflictResults.classList.add('hidden');
+                        noConflicts.classList.remove('hidden');
+                        submitBtn.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking conflicts:', error);
+                    alert('Error checking for conflicts. Please try again.');
+                })
+                .finally(() => {
+                    checkConflictsBtn.disabled = false;
+                    checkConflictsBtn.textContent = 'Check for Conflicts';
+                });
+            });
+        });
+    </script>
+</main>
 </body>
 </html>

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Classroom Timetable - ' + ${classroom.getFullName()}">Classroom Timetable</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <a href="/admin/timetable" class="text-blue-600 hover:text-blue-800 mr-4">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
+                        </svg>
+                    </a>
+                    <h1 class="text-xl font-semibold text-gray-900" th:text="'Classroom Timetable - ' + ${classroom.getFullName()}">Classroom Timetable</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <a href="/admin/timetable/create" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                        Add Entry
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <!-- Classroom Info Card -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="px-4 py-5 sm:p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-lg font-medium text-gray-900" th:text="${classroom.getFullName()}">Classroom Name</h2>
+                        <p class="text-sm text-gray-500">
+                            <span th:text="'Grade Level: ' + ${classroom.gradeLevel.name}">Grade Level</span> | 
+                            <span th:text="'Medium: ' + ${classroom.medium}">Medium</span> | 
+                            <span th:text="'Academic Year: ' + ${classroom.academicYear.name}">Academic Year</span>
+                        </p>
+                        <p class="text-sm text-gray-500" th:if="${classroom.classTeacher}">
+                            <span>Class Teacher: </span>
+                            <span th:text="${classroom.classTeacher.firstName + ' ' + classroom.classTeacher.lastName}">Teacher Name</span>
+                        </p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-gray-500">
+                            <span th:text="'Max Students: ' + ${classroom.maxStudents}">Max Students</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timetable Grid -->
+        <div class="bg-white shadow rounded-lg overflow-hidden">
+            <div class="px-4 py-5 sm:p-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Weekly Schedule</h3>
+                
+                <!-- Timetable Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Time Slot
+                                </th>
+                                <th th:each="day : ${weekDays}" 
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                    th:text="${#strings.capitalize(#strings.toLowerCase(day))}">Day</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            <tr th:each="timeSlot : ${timeSlots}">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                    <div th:text="${timeSlot.name}">Time Slot</div>
+                                    <div class="text-xs text-gray-500" th:text="${timeSlot.startTime + ' - ' + timeSlot.endTime}">Time Range</div>
+                                </td>
+                                <td th:each="day : ${weekDays}" class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    <div th:with="entry=${timetableGrid[day.name() + '_' + timeSlot.id]}">
+                                        <div th:if="${entry != null}" class="bg-blue-50 border border-blue-200 rounded-md p-2">
+                                            <div class="font-medium text-blue-900" th:text="${entry.subject.name}">Subject</div>
+                                            <div class="text-xs text-blue-700" th:text="${entry.teacher.firstName + ' ' + entry.teacher.lastName}">Teacher</div>
+                                            <div class="text-xs text-blue-600" th:text="${entry.location ?: 'Room ' + entry.classroom.name}">Location</div>
+                                            <div class="mt-1 flex space-x-1">
+                                                <a th:href="@{/admin/timetable/edit/{id}(id=${entry.id})}" 
+                                                   class="text-blue-600 hover:text-blue-800 text-xs">Edit</a>
+                                                <form th:action="@{/admin/timetable/delete/{id}(id=${entry.id})}" method="post" class="inline"
+                                                      onsubmit="return confirm('Are you sure you want to delete this timetable entry?')">
+                                                    <input type="hidden" name="returnTo" th:value="@{/admin/timetable/classroom/{classroomId}(classroomId=${classroom.id})}">
+                                                    <button type="submit" class="text-red-600 hover:text-red-800 text-xs ml-1">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                        <div th:if="${entry == null}" class="text-gray-400 text-center py-2">
+                                            <span class="text-xs">Free Period</span>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="mt-6 grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-blue-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Periods</dt>
+                                <dd class="text-lg font-medium text-gray-900" th:text="${totalPeriods}">0</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Scheduled Periods</dt>
+                                <dd class="text-lg font-medium text-gray-900" th:text="${scheduledPeriods}">0</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white shadow rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <div class="w-8 h-8 bg-yellow-500 rounded-md flex items-center justify-center">
+                                <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="ml-5 w-0 flex-1">
+                            <dl>
+                                <dt class="text-sm font-medium text-gray-500 truncate">Free Periods</dt>
+                                <dd class="text-lg font-medium text-gray-900" th:text="${totalPeriods - scheduledPeriods}">0</dd>
+                            </dl>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
