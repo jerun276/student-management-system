@@ -33,6 +33,11 @@ public interface GradeLevelRepository extends JpaRepository<GradeLevel, Long> {
     List<GradeLevel> findAllOrderByLevel();
     
     /**
+     * Get all grade levels ordered by level (Spring Data JPA naming convention)
+     */
+    List<GradeLevel> findAllByOrderByLevelAsc();
+    
+    /**
      * Find grade levels within a range
      */
     @Query("SELECT gl FROM GradeLevel gl WHERE gl.level BETWEEN :minLevel AND :maxLevel ORDER BY gl.level")

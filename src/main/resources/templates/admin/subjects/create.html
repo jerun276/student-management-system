@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Subject - Student Management System</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Create New Subject</h1>
+        <a th:href="@{/admin/subjects}" class="btn btn-outline">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Subjects
+        </a>
+    </div>
+
+    <!-- Error Messages -->
+    <div th:if="${error}" class="alert alert-error shadow-lg mb-6" th:text="${error}"></div>
+
+    <!-- Create Subject Form -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h3 class="card-title">Subject Information</h3>
+            
+            <form th:action="@{/admin/subjects/create}" th:object="${subject}" method="post">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Subject Name -->
+                    <div class="md:col-span-2">
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Subject Name <span class="text-red-500">*</span>
+                            <span th:if="${#fields.hasErrors('name')}" class="text-red-500 text-xs">
+                                <span th:each="error : ${#fields.errors('name')}" th:text="${error.message}"></span>
+                            </span>
+                        </label>
+                        <input type="text" th:field="*{name}" id="name" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., Mathematics, Physics, English Literature">
+                    </div>
+
+                    <!-- Subject Code -->
+                    <div>
+                        <label for="subjectCode" class="block text-sm font-medium text-gray-700 mb-2">
+                            Subject Code <span class="text-red-500">*</span>
+                        </label>
+                        <input type="text" th:field="*{subjectCode}" id="subjectCode" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="e.g., MATH10, PHYS11, ENG09">
+                        <p class="text-xs text-gray-500 mt-1">Unique identifier for the subject</p>
+                    </div>
+
+                    <!-- Grade Level -->
+                    <div>
+                        <label for="gradeLevelId" class="block text-sm font-medium text-gray-700 mb-2">
+                            Grade Level <span class="text-red-500">*</span>
+                        </label>
+                        <select name="gradeLevelId" id="gradeLevelId" required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select Grade Level</option>
+                            <option th:each="grade : ${gradeLevels}" th:value="${grade.id}" th:text="${grade.name}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="md:col-span-2">
+                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
+                            Description
+                        </label>
+                        <textarea th:field="*{description}" id="description" rows="3"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Brief description of the subject curriculum and objectives"></textarea>
+                    </div>
+
+                    <!-- Teacher Assignment -->
+                    <div class="md:col-span-2">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Assign Teachers (Optional)
+                        </label>
+                        <div class="border border-gray-300 rounded-md p-4 max-h-48 overflow-y-auto">
+                            <div th:if="${#lists.isEmpty(teachers)}" class="text-gray-500 text-center py-4">
+                                No teachers available for assignment
+                            </div>
+                            <div th:if="${!#lists.isEmpty(teachers)}" class="space-y-2">
+                                <div th:each="teacher : ${teachers}" class="flex items-center">
+                                    <input type="checkbox" th:id="'teacher_' + ${teacher.id}" name="teacherIds"
+                                        th:value="${teacher.id}"
+                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                    <label th:for="'teacher_' + ${teacher.id}"
+                                        class="ml-2 block text-sm text-gray-900 cursor-pointer">
+                                        <span th:text="${teacher.firstName + ' ' + teacher.lastName}"></span>
+                                        <span class="text-gray-500" th:text="'(' + ${teacher.email} + ')'"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">Select teachers who will teach this subject</p>
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
+                    <a href="/admin/subjects"
+                        class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </a>
+                    <button type="submit"
+                        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        Create Subject
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Auto-generate subject code based on name and grade level
+        document.addEventListener('DOMContentLoaded', function () {
+            const nameInput = document.getElementById('name');
+            const codeInput = document.getElementById('subjectCode');
+            const gradeSelect = document.getElementById('gradeLevelId');
+
+            function generateCode() {
+                const name = nameInput.value.trim();
+                const gradeOption = gradeSelect.options[gradeSelect.selectedIndex];
+
+                if (name && gradeOption && gradeOption.value) {
+                    const gradeText = gradeOption.text;
+                    const gradeNumber = gradeText.match(/\d+/);
+
+                    if (gradeNumber) {
+                        const nameCode = name.substring(0, 4).toUpperCase().replace(/[^A-Z]/g, '');
+                        const code = nameCode + gradeNumber[0].padStart(2, '0');
+
+                        if (!codeInput.value || codeInput.dataset.autoGenerated === 'true') {
+                            codeInput.value = code;
+                            codeInput.dataset.autoGenerated = 'true';
+                        }
+                    }
+                }
+            }
+
+            nameInput.addEventListener('input', generateCode);
+            gradeSelect.addEventListener('change', generateCode);
+
+            codeInput.addEventListener('input', function () {
+                if (this.value) {
+                    this.dataset.autoGenerated = 'false';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

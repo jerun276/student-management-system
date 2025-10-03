@@ -32,7 +32,7 @@ public class Subject {
     
     private String description; // Optional description of the subject
     
-    @Column(nullable = false)
+    @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     private boolean isActive = true;
     
     // NEW: Grade level relationship - each subject belongs to a specific grade
@@ -82,5 +82,27 @@ public class Subject {
      */
     public boolean hasTeacher(User teacher) {
         return teachers.contains(teacher);
+    }
+    
+    /**
+     * Helper method to add a teacher to this subject (manages bidirectional relationship)
+     * @param teacher The teacher to add
+     */
+    public void addTeacher(User teacher) {
+        if (teacher != null && teacher.getRole() == com.student_management_system.user_management.model.Role.ROLE_TEACHER) {
+            this.teachers.add(teacher);
+            teacher.getSubjects().add(this);
+        }
+    }
+    
+    /**
+     * Helper method to remove a teacher from this subject (manages bidirectional relationship)
+     * @param teacher The teacher to remove
+     */
+    public void removeTeacher(User teacher) {
+        if (teacher != null) {
+            this.teachers.remove(teacher);
+            teacher.getSubjects().remove(this);
+        }
     }
 }
