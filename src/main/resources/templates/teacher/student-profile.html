@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Profile</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-surface">
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary" th:text="${student.firstName + ' ' + student.lastName}">John Doe</h1>
+            <p class="text-lg text-gray-600" th:text="'Student ID: ' + ${student.username}">Student ID: STU001</p>
+            <div class="text-sm text-gray-500 mt-1">
+                <span th:text="${classroom.gradeLevel.name + '-' + classroom.name}">Grade 10-A</span>
+                <span th:text="'(' + ${classroom.medium} + ' Medium)'">( ENGLISH Medium)</span>
+                <span th:text="'- ' + ${classroom.academicYear?.name ?: '2024-2025'}">- 2024-2025</span>
+            </div>
+        </div>
+        <a th:href="@{/teacher/classroom/students}" class="btn btn-outline">← Back to Students</a>
+    </div>
+
+    <!-- Student Information Cards -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Personal Information -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-primary mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    Personal Information
+                </h2>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3">
+                        <div class="avatar placeholder">
+                            <div class="bg-primary text-primary-content rounded-full w-16">
+                                <span class="text-xl" th:text="${student.firstName?.substring(0,1) + student.lastName?.substring(0,1)}">JD</span>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-bold text-lg" th:text="${student.firstName + ' ' + student.lastName}">John Doe</div>
+                            <div class="text-sm text-gray-500" th:text="${student.email}">john.doe@email.com</div>
+                        </div>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium">Date of Birth:</span>
+                            <span th:text="${#temporals.format(student.dateOfBirth, 'dd MMMM yyyy')}">15 January 2008</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Age:</span>
+                            <span th:text="${#temporals.year(#temporals.createNow()) - #temporals.year(student.dateOfBirth) + ' years'}">17 years</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Phone:</span>
+                            <span th:text="${student.phoneNumber ?: 'Not provided'}">+94 77 123 4567</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">NIC:</span>
+                            <span th:text="${student.nic ?: 'Not provided'}">200812345678</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Academic Information -->
+        <div class="card bg-base-100 shadow-xl">
+            <div class="card-body">
+                <h2 class="card-title text-secondary mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                    Academic Information
+                </h2>
+                
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 gap-3">
+                        <div class="flex justify-between">
+                            <span class="font-medium">Student ID:</span>
+                            <span class="font-mono" th:text="${student.username}">STU001</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Grade:</span>
+                            <span th:text="${classroom.gradeLevel.name}">Grade 10</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Class:</span>
+                            <span th:text="${classroom.gradeLevel.name + '-' + classroom.name}">Grade 10-A</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Medium:</span>
+                            <span th:text="${classroom.medium}">ENGLISH</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Academic Year:</span>
+                            <span th:text="${classroom.academicYear?.name ?: '2024-2025'}">2024-2025</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-medium">Class Teacher:</span>
+                            <span th:text="${teacher.firstName + ' ' + teacher.lastName}">Jane Smith</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Information -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title text-accent mb-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                Contact Information
+            </h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-semibold mb-2">Address</h3>
+                    <p class="text-gray-600" th:text="${student.address ?: 'Not provided'}">123 Main Street, Colombo 07</p>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2">Emergency Contact</h3>
+                    <p class="text-gray-600" th:text="${student.phoneNumber ?: 'Not provided'}">+94 77 123 4567</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="card bg-base-100 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title mb-4">Quick Actions</h2>
+            
+            <div class="flex flex-wrap gap-4">
+                <a th:href="@{/teacher/student/{id}/attendance(id=${student.id})}" class="btn btn-primary gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    View Attendance
+                </a>
+                
+                <a th:href="@{/teacher/student/{id}/assignments(id=${student.id})}" class="btn btn-secondary gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    View Assignments
+                </a>
+                
+                <!-- <a th:href="@{/teacher/messages/compose?to={id}(id=${student.id})}" class="btn btn-accent gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    Send Message
+                </a> -->
+                
+                <a th:href="@{/teacher/attendance}" class="btn btn-outline gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    </svg>
+                    Take Class Attendance
+                </a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+</body>
+</html>

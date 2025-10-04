@@ -2,12 +2,17 @@ package com.student_management_system.teacher.controller;
 
 import com.student_management_system.student.model.Assignment;
 import com.student_management_system.student.model.TimetableEntry;
+import com.student_management_system.student.model.Subject;
+import com.student_management_system.student.repository.SubjectRepository;
 import com.student_management_system.teacher.service.TeacherService;
 import com.student_management_system.common.model.AcademicYear;
 import com.student_management_system.common.model.TimeSlot;
+import com.student_management_system.common.model.Classroom;
 import com.student_management_system.common.service.AcademicYearService;
 import com.student_management_system.common.service.TimetableService;
 import com.student_management_system.common.service.TimeSlotService;
+import com.student_management_system.common.repository.EnrollmentRepository;
+import com.student_management_system.common.repository.ClassroomRepository;
 import com.student_management_system.user_management.model.User;
 import com.student_management_system.user_management.repository.UserRepository;
 import org.springframework.security.core.Authentication;
@@ -35,29 +40,111 @@ public class TeacherDashboardController {
     private final TimetableService timetableService;
     private final TimeSlotService timeSlotService;
     private final UserRepository userRepository;
+    private final SubjectRepository subjectRepository;
+    private final EnrollmentRepository enrollmentRepository;
+    private final ClassroomRepository classroomRepository;
 
     public TeacherDashboardController(TeacherService teacherService, 
                                     AcademicYearService academicYearService,
                                     TimetableService timetableService,
                                     TimeSlotService timeSlotService,
-                                    UserRepository userRepository) {
+                                    UserRepository userRepository,
+                                    SubjectRepository subjectRepository,
+                                    EnrollmentRepository enrollmentRepository,
+                                    ClassroomRepository classroomRepository) {
         this.teacherService = teacherService;
         this.academicYearService = academicYearService;
         this.timetableService = timetableService;
         this.timeSlotService = timeSlotService;
         this.userRepository = userRepository;
+        this.subjectRepository = subjectRepository;
+        this.enrollmentRepository = enrollmentRepository;
+        this.classroomRepository = classroomRepository;
     }
 
     @GetMapping("/dashboard")
-    public String getDashboard(Model model) {
+    public String teacherDashboard(Model model) {
+        // Get current teacher
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User teacher = userRepository.findByUsername(currentUsername)
+            .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+
+        // Find classroom where this teacher is the class teacher
+        Classroom assignedClassroom = classroomRepository.findByClassTeacher(teacher).orElse(null);
+        
+        // Get subjects taught by this teacher
+        List<Subject> mySubjects = subjectRepository.findByTeachersContaining(teacher);
+        model.addAttribute("mySubjects", mySubjects);
+
+        // Calculate total students - prioritize classroom students if class teacher, otherwise subject-based
+        int totalStudents;
+        if (assignedClassroom != null) {
+            // If class teacher, show students in their classroom
+            totalStudents = assignedClassroom.getEnrollments() != null ? 
+                assignedClassroom.getEnrollments().size() : 0;
+        } else {
+            // If not class teacher, count students across all subjects taught
+            // Get students from classrooms that match the subject's grade level
+            totalStudents = mySubjects.stream()
+                .mapToInt(subject -> {
+                    List<Classroom> classrooms = classroomRepository.findByGradeLevel(subject.getGradeLevel());
+                    return classrooms.stream()
+                        .mapToInt(classroom -> classroom.getEnrollments() != null ? 
+                            classroom.getEnrollments().size() : 0)
+                        .sum();
+                })
+                .sum();
+        }
+
+        // Get assignments to grade (only for this teacher)
         List<Assignment> submittedAssignments = teacherService.getAssignmentsToGrade();
-        model.addAttribute("submittedAssignments", submittedAssignments);
+        // Filter by teacher
+        List<Assignment> teacherAssignments = submittedAssignments.stream()
+            .filter(assignment -> assignment.getTeacher() != null && 
+                assignment.getTeacher().getId().equals(teacher.getId()))
+            .collect(java.util.stream.Collectors.toList());
+        model.addAttribute("submittedAssignments", teacherAssignments);
         
         // Get current academic year
         Optional<AcademicYear> currentAcademicYear = academicYearService.getCurrentAcademicYear();
         model.addAttribute("currentAcademicYear", currentAcademicYear.orElse(null));
         
+        // Add teacher and classroom data to model
+        model.addAttribute("teacher", teacher);
+        model.addAttribute("assignedClassroom", assignedClassroom);
+        model.addAttribute("totalStudents", totalStudents);
+        model.addAttribute("totalSubjects", mySubjects.size());
+        
         return "teacher/dashboard";
+    }
+
+    @GetMapping("/subjects")
+    public String showSubjects(Model model) {
+        // Get current teacher
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User teacher = userRepository.findByUsername(currentUsername)
+            .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+
+        // Get teacher's subjects
+        List<Subject> mySubjects = subjectRepository.findByTeachersContaining(teacher);
+        model.addAttribute("mySubjects", mySubjects);
+        model.addAttribute("teacher", teacher);
+
+        // Calculate total students for all subjects
+        int totalStudents = mySubjects.stream()
+            .mapToInt(subject -> {
+                List<Classroom> classrooms = classroomRepository.findByGradeLevel(subject.getGradeLevel());
+                return classrooms.stream()
+                    .mapToInt(classroom -> classroom.getEnrollments() != null ? 
+                        classroom.getEnrollments().size() : 0)
+                    .sum();
+            })
+            .sum();
+        model.addAttribute("totalStudents", totalStudents);
+
+        return "teacher/subjects";
     }
 
     @GetMapping("/assignments/{id}/grade")
@@ -156,5 +243,68 @@ public class TeacherDashboardController {
         }
 
         return "teacher/current-period";
+    }
+
+    @GetMapping("/classroom/students")
+    public String viewClassroomStudents(Model model) {
+        // Get current teacher
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User teacher = userRepository.findByUsername(currentUsername)
+            .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+
+        // Find classroom where this teacher is the class teacher
+        Classroom assignedClassroom = classroomRepository.findByClassTeacher(teacher).orElse(null);
+        
+        if (assignedClassroom == null) {
+            model.addAttribute("errorMessage", "You are not assigned as a class teacher to any classroom.");
+            return "teacher/dashboard";
+        }
+
+        // Get students in the classroom
+        List<User> students = teacherService.getStudentsInClassroom(assignedClassroom.getId());
+        
+        model.addAttribute("classroom", assignedClassroom);
+        model.addAttribute("students", students);
+        model.addAttribute("teacher", teacher);
+        
+        return "teacher/classroom-students";
+    }
+
+    @GetMapping("/student/{id}/profile")
+    public String viewStudentProfile(@PathVariable Long id, Model model) {
+        // Get current teacher
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User teacher = userRepository.findByUsername(currentUsername)
+            .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+
+        // Get the student
+        User student = userRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Student not found"));
+
+        // Verify the student is in the teacher's assigned classroom
+        Classroom assignedClassroom = classroomRepository.findByClassTeacher(teacher).orElse(null);
+        
+        if (assignedClassroom == null) {
+            model.addAttribute("errorMessage", "You are not assigned as a class teacher to any classroom.");
+            return "teacher/dashboard";
+        }
+
+        // Check if student is enrolled in teacher's classroom
+        List<User> studentsInClassroom = teacherService.getStudentsInClassroom(assignedClassroom.getId());
+        boolean isStudentInClassroom = studentsInClassroom.stream()
+            .anyMatch(s -> s.getId().equals(student.getId()));
+
+        if (!isStudentInClassroom) {
+            model.addAttribute("errorMessage", "This student is not in your assigned classroom.");
+            return "teacher/classroom-students";
+        }
+
+        model.addAttribute("student", student);
+        model.addAttribute("teacher", teacher);
+        model.addAttribute("classroom", assignedClassroom);
+        
+        return "teacher/student-profile";
     }
 }

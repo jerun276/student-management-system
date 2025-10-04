@@ -27,6 +27,7 @@ import com.student_management_system.teacher.dto.AssignmentCreationDto;
 // NEW: Import new academic structure
 import com.student_management_system.common.model.Classroom;
 import com.student_management_system.common.repository.EnrollmentRepository;
+import com.student_management_system.common.repository.ClassroomRepository;
 
 import java.math.BigDecimal;
 
@@ -51,12 +52,14 @@ public class TeacherService {
     
     // NEW: Academic structure repositories
     private final EnrollmentRepository enrollmentRepository;
+    private final ClassroomRepository classroomRepository;
 
     public TeacherService(AssignmentRepository assignmentRepository, SubjectRepository subjectRepository,
                           UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, 
                           StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService, 
                           BudgetRequestRepository budgetRequestRepository,
-                          EnrollmentRepository enrollmentRepository) {
+                          EnrollmentRepository enrollmentRepository,
+                          ClassroomRepository classroomRepository) {
         this.assignmentRepository = assignmentRepository;
         this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
@@ -65,6 +68,7 @@ public class TeacherService {
         this.fileStorageService = fileStorageService;
         this.budgetRequestRepository = budgetRequestRepository;
         this.enrollmentRepository = enrollmentRepository;
+        this.classroomRepository = classroomRepository;
     }
 
     // For now, we get all submitted assignments. Later, we can filter by teacher.
@@ -230,6 +234,72 @@ public class TeacherService {
             }
 
             assignmentRepository.save(assignment);
+        }
+    }
+
+    // NEW: Classroom-based attendance methods
+    public List<User> getStudentsInClassroom(Long classroomId) {
+        // Find classroom first, then get students
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new RuntimeException("Classroom not found with id: " + classroomId));
+        
+        return enrollmentRepository.findStudentsByClassroom(classroom);
+    }
+
+    public Map<Long, AttendanceStatus> getAttendanceRecordsForClassroomAndDate(Long classroomId, LocalDate date) {
+        // For now, we'll use the existing subject-based method
+        // TODO: Update AttendanceRecord entity to include classroom reference
+        return new java.util.HashMap<>();
+    }
+
+    @Transactional
+    public void saveClassroomAttendance(Long classroomId, LocalDate date, Map<String, String> attendanceData) {
+        // Get the classroom and teacher information
+        Classroom classroom = classroomRepository.findById(classroomId)
+                .orElseThrow(() -> new RuntimeException("Classroom not found"));
+        
+        User teacher = classroom.getClassTeacher();
+        if (teacher == null) {
+            throw new RuntimeException("No class teacher assigned to this classroom");
+        }
+        
+        // For classroom-based attendance, we'll use the first subject taught by the teacher
+        // or create a default "Homeroom" subject
+        Subject defaultSubject = subjectRepository.findByTeachersContaining(teacher)
+                .stream()
+                .findFirst()
+                .orElseGet(() -> {
+                    // Create a default "Homeroom" subject if teacher has no subjects
+                    Subject newHomeroom = new Subject();
+                    newHomeroom.setName("Homeroom");
+                    newHomeroom.setSubjectCode("HR-" + classroom.getGradeLevel().getName().replace(" ", ""));
+                    newHomeroom.setGradeLevel(classroom.getGradeLevel());
+                    newHomeroom.setActive(true);
+                    return subjectRepository.save(newHomeroom);
+                });
+        
+        for (Map.Entry<String, String> entry : attendanceData.entrySet()) {
+            if (!entry.getKey().matches("\\d+")) {
+                continue;
+            }
+
+            Long studentId = Long.parseLong(entry.getKey());
+            AttendanceStatus status = AttendanceStatus.valueOf(entry.getValue());
+
+            User student = userRepository.findById(studentId)
+                    .orElseThrow(() -> new RuntimeException("Student not found"));
+
+            // For classroom attendance, we'll create a new record each time
+            // (or you could implement update logic if needed)
+            AttendanceRecord record = new AttendanceRecord();
+            record.setStudent(student);
+            record.setSubject(defaultSubject); // Use default subject for classroom attendance
+            record.setClassroom(classroom);
+            record.setTeacher(teacher);
+            record.setDate(date);
+            record.setStatus(status);
+
+            attendanceRecordRepository.save(record);
         }
     }
 }

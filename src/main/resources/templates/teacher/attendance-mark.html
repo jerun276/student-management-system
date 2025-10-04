@@ -7,49 +7,125 @@
 </head>
 <body class="bg-surface">
 <div th:replace="~{fragments/header :: header}"></div>
+
 <main class="container mx-auto p-4">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold text-primary">Mark Attendance</h1>
+        <a th:href="@{/teacher/attendance}" class="btn btn-ghost">← Back</a>
+    </div>
+
+    <!-- Classroom & Date Info -->
+    <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="stat">
+                    <div class="stat-title">Classroom</div>
+                    <div class="stat-value text-primary">
+                        <div th:text="${classroom.gradeLevel.name + '-' + classroom.name}">Grade 10-A</div>
+                        <div class="text-lg" th:text="'(' + ${classroom.medium} + ' Medium)'">( ENGLISH Medium)</div>
+                        <div class="text-sm font-normal text-primary/70" th:text="${classroom.academicYear?.name ?: '2024-2025'}">2024-2025</div>
+                    </div>
+                    <div class="stat-desc">Your assigned class</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-title">Date</div>
+                    <div class="stat-value text-secondary" th:text="${#temporals.format(date, 'dd-MMM-yyyy')}">15-Jan-2025</div>
+                    <div class="stat-desc">Attendance date</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-title">Total Students</div>
+                    <div class="stat-value text-info" th:text="${students?.size() ?: 0}">25</div>
+                    <div class="stat-desc">Students in class</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Form -->
     <div class="card bg-base-100 shadow-xl">
         <div class="card-body">
-            <h2 class="card-title">Attendance for <span th:text="${subject.name}"></span></h2>
-            <p>Date: <span th:text="${#temporals.format(date, 'dd-MMM-yyyy')}"></span></p>
+            <h2 class="card-title">Student Attendance</h2>
+            
+            <!-- Quick Actions -->
+            <div class="flex gap-2 mb-4">
+                <button type="button" onclick="markAll('PRESENT')" class="btn btn-sm btn-success">Mark All Present</button>
+                <button type="button" onclick="markAll('ABSENT')" class="btn btn-sm btn-error">Mark All Absent</button>
+                <button type="button" onclick="clearAll()" class="btn btn-sm btn-ghost">Clear All</button>
+            </div>
+
             <form th:action="@{/teacher/attendance/save}" method="post">
-                <input type="hidden" name="subjectId" th:value="${subject.id}"/>
                 <input type="hidden" name="date" th:value="${date}"/>
-                <div class="overflow-x-auto mt-4">
-                    <table class="table w-full">
+                
+                <div class="overflow-x-auto">
+                    <table class="table table-zebra w-full">
                         <thead>
                         <tr>
+                            <th>#</th>
                             <th>Student Name</th>
-                            <th>Status</th>
+                            <th>Email</th>
+                            <th class="text-center">Present</th>
+                            <th class="text-center">Absent</th>
+                            <th class="text-center">Late</th>
                         </tr>
                         </thead>
                         <tbody>
-                        <tr th:each="student : ${students}">
-                            <td th:text="${student.username}"></td>
+                        <tr th:each="student, iterStat : ${students}">
+                            <td th:text="${iterStat.count}">1</td>
                             <td>
-                                <div class="join">
-                                    <input class="join-item btn btn-sm" type="radio" th:name="${student.id}"
-                                           value="PRESENT" aria-label="Present"
-                                           th:checked="${existingRecords.get(student.id)?.name() == 'PRESENT' or existingRecords.isEmpty()}"/>
-                                    <input class="join-item btn btn-sm" type="radio" th:name="${student.id}"
-                                           value="ABSENT" aria-label="Absent"
-                                           th:checked="${existingRecords.get(student.id)?.name() == 'ABSENT'}"/>
-                                    <input class="join-item btn btn-sm" type="radio" th:name="${student.id}"
-                                           value="LATE" aria-label="Late"
-                                           th:checked="${existingRecords.get(student.id)?.name() == 'LATE'}"/>
+                                <div class="flex items-center gap-3">
+                                    <div class="avatar placeholder">
+                                        <div class="bg-neutral text-neutral-content rounded-full w-8">
+                                            <span class="text-xs" th:text="${student.firstName?.substring(0,1) ?: 'S'}">S</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="font-bold" th:text="${student.firstName + ' ' + student.lastName}">Student Name</div>
+                                        <div class="text-sm opacity-50" th:text="${student.username}">username</div>
+                                    </div>
                                 </div>
+                            </td>
+                            <td th:text="${student.email}">student@email.com</td>
+                            <td class="text-center">
+                                <input type="radio" th:name="${student.id}" value="PRESENT" 
+                                       class="radio radio-success"
+                                       th:checked="${existingRecords.get(student.id)?.name() == 'PRESENT' or existingRecords.isEmpty()}"/>
+                            </td>
+                            <td class="text-center">
+                                <input type="radio" th:name="${student.id}" value="ABSENT" 
+                                       class="radio radio-error"
+                                       th:checked="${existingRecords.get(student.id)?.name() == 'ABSENT'}"/>
+                            </td>
+                            <td class="text-center">
+                                <input type="radio" th:name="${student.id}" value="LATE" 
+                                       class="radio radio-warning"
+                                       th:checked="${existingRecords.get(student.id)?.name() == 'LATE'}"/>
                             </td>
                         </tr>
                         </tbody>
                     </table>
                 </div>
+                
                 <div class="card-actions justify-end mt-6">
+                    <button type="button" onclick="history.back()" class="btn btn-ghost">Cancel</button>
                     <button type="submit" class="btn btn-primary">Save Attendance</button>
                 </div>
             </form>
         </div>
     </div>
 </main>
+
+<script>
+function markAll(status) {
+    const radios = document.querySelectorAll(`input[type="radio"][value="${status}"]`);
+    radios.forEach(radio => radio.checked = true);
+}
+
+function clearAll() {
+    const radios = document.querySelectorAll('input[type="radio"]');
+    radios.forEach(radio => radio.checked = false);
+}
+</script>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>

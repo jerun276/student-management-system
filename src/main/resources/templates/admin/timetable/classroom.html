@@ -7,26 +7,23 @@
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 <body class="bg-surface">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/admin/timetable" class="text-blue-600 hover:text-blue-800 mr-4">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </a>
-                    <h1 class="text-xl font-semibold text-gray-900" th:text="'Classroom Timetable - ' + ${classroom.getFullName()}">Classroom Timetable</h1>
-                </div>
-                <div class="flex items-center space-x-4">
-                    <a href="/admin/timetable/create" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                        Add Entry
-                    </a>
-                </div>
-            </div>
+<div th:replace="~{fragments/header :: header}"></div>
+
+<main class="container mx-auto p-4">
+    <!-- Page Header with Back Button -->
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary" th:text="'Classroom Timetable - ' + ${classroom.getFullName()}">Classroom Timetable</h1>
+            <p class="text-lg text-gray-600 mt-1">
+                <span th:text="'Grade Level: ' + ${classroom.gradeLevel.name}">Grade Level</span> | 
+                <span th:text="'Academic Year: ' + ${classroom.academicYear.name}">Academic Year</span>
+            </p>
         </div>
-    </nav>
+        <div class="flex gap-2">
+            <a href="/admin/timetable" class="btn btn-outline">← Back to Timetable</a>
+            <a href="/admin/timetable/create" class="btn btn-primary">Add Entry</a>
+        </div>
+    </div>
 
     <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <!-- Classroom Info Card -->
@@ -169,5 +166,8 @@
             </div>
         </div>
     </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
 </body>
 </html>
