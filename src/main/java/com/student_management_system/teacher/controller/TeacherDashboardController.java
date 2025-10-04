@@ -5,6 +5,7 @@ import com.student_management_system.student.model.TimetableEntry;
 import com.student_management_system.student.model.Subject;
 import com.student_management_system.student.repository.SubjectRepository;
 import com.student_management_system.teacher.service.TeacherService;
+import com.student_management_system.teacher.model.StudyMaterial;
 import com.student_management_system.common.model.AcademicYear;
 import com.student_management_system.common.model.TimeSlot;
 import com.student_management_system.common.model.Classroom;
@@ -147,21 +148,6 @@ public class TeacherDashboardController {
         return "teacher/subjects";
     }
 
-    @GetMapping("/assignments/{id}/grade")
-    public String showGradeAssignmentForm(@PathVariable Long id, Model model) {
-        Assignment assignment = teacherService.getAssignmentToGradeById(id);
-        model.addAttribute("assignment", assignment);
-        return "teacher/assignment-grade";
-    }
-
-    @PostMapping("/assignments/{id}/grade")
-    public String processGradeAssignment(
-            @PathVariable Long id,
-            @RequestParam String grade,
-            @RequestParam String feedback) {
-        teacherService.gradeAssignment(id, grade, feedback);
-        return "redirect:/teacher/dashboard";
-    }
 
     @PostMapping("/budget/request")
     public String submitBudgetRequest(@RequestParam String title,
@@ -306,5 +292,37 @@ public class TeacherDashboardController {
         model.addAttribute("classroom", assignedClassroom);
         
         return "teacher/student-profile";
+    }
+
+    @GetMapping("/subjects/{id}/materials")
+    public String viewSubjectMaterials(@PathVariable Long id, Model model) {
+        // Get current teacher
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User teacher = userRepository.findByUsername(currentUsername)
+            .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+
+        // Get the subject and verify teacher has access
+        Subject subject = subjectRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        // Verify teacher teaches this subject
+        List<Subject> teacherSubjects = subjectRepository.findByTeachersContaining(teacher);
+        boolean canAccess = teacherSubjects.stream()
+            .anyMatch(s -> s.getId().equals(subject.getId()));
+
+        if (!canAccess) {
+            model.addAttribute("errorMessage", "You don't have access to this subject's materials.");
+            return "redirect:/teacher/subjects";
+        }
+
+        // Get study materials for this subject
+        List<StudyMaterial> materials = teacherService.getStudyMaterialsForSubject(id);
+
+        model.addAttribute("subject", subject);
+        model.addAttribute("materials", materials);
+        model.addAttribute("teacher", teacher);
+
+        return "teacher/subject-materials";
     }
 }

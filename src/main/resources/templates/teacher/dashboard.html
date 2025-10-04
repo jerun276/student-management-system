@@ -238,12 +238,13 @@
         </div>
     </div>
 
-    <!-- Create Assignment Card -->
+    <!-- Assignment Management Card -->
     <div class="card bg-base-100 shadow-xl mt-6">
         <div class="card-body">
-            <h2 class="card-title">Create New Assignment</h2>
-            <p>Create and assign new homework, quizzes, or projects to your students.</p>
-            <div class="card-actions justify-end">
+            <h2 class="card-title">Assignment Management</h2>
+            <p>Create, view, and manage assignments for your subjects.</p>
+            <div class="card-actions justify-end gap-2">
+                <a th:href="@{/teacher/assignments}" class="btn btn-secondary">View All Assignments</a>
                 <a th:href="@{/teacher/assignments/create}" class="btn btn-primary">Create Assignment</a>
             </div>
         </div>

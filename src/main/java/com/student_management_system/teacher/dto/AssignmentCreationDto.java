@@ -18,10 +18,13 @@ public class AssignmentCreationDto {
     private String description;
 
     @NotNull(message = "Due date cannot be empty")
-    @Future(message = "Due date must be in the future")
+    @Future(message = "Due date must be in the future (at least tomorrow)")
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate dueDate;
 
     @NotNull(message = "Subject cannot be empty")
     private Long subjectId;
+
+    @NotNull(message = "Classroom cannot be empty")
+    private Long classroomId;
 }

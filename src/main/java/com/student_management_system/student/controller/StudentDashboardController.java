@@ -3,6 +3,12 @@ package com.student_management_system.student.controller;
 import com.student_management_system.student.model.TimetableEntry;
 import com.student_management_system.student.service.StudentService;
 import com.student_management_system.student.model.Assignment;
+import com.student_management_system.common.model.Enrollment;
+import com.student_management_system.user_management.model.User;
+import com.student_management_system.user_management.repository.UserRepository;
+import com.student_management_system.common.repository.EnrollmentRepository;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -10,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
@@ -17,21 +24,41 @@ import java.util.List;
 @RequestMapping("/student")
 public class StudentDashboardController {
     private final StudentService studentService;
+    private final UserRepository userRepository;
+    private final EnrollmentRepository enrollmentRepository;
 
-    // Inject the StudentService
-    public StudentDashboardController(StudentService studentService) {
+    public StudentDashboardController(StudentService studentService, UserRepository userRepository, EnrollmentRepository enrollmentRepository) {
         this.studentService = studentService;
+        this.userRepository = userRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     @GetMapping("/dashboard")
     public String getDashboard(Model model) {
-        // Call the service to get the timetable
-        List<TimetableEntry> timetable = studentService.getStudentTimetable();
-        model.addAttribute("timetable", timetable);
+        // Get current user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
 
-        // Fetch assignments
+        // Get current enrollment
+        List<Enrollment> activeEnrollments = enrollmentRepository.findActiveEnrollmentsByStudent(currentUser);
+        Enrollment currentEnrollment = activeEnrollments.isEmpty() ? null : activeEnrollments.get(0);
+
+        // Get timetable
+        List<TimetableEntry> timetable = studentService.getStudentTimetable();
+        
+        // Get assignments
         List<Assignment> assignments = studentService.getStudentAssignments();
+        
+        // Get courses (subjects) from timetable entries
+        List<Object> myCourses = studentService.getStudentSubjects();
+
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("currentEnrollment", currentEnrollment);
+        model.addAttribute("timetable", timetable);
         model.addAttribute("assignments", assignments);
+        model.addAttribute("myCourses", myCourses);
 
         return "student/dashboard";
     }
@@ -44,8 +71,30 @@ public class StudentDashboardController {
     }
 
     @PostMapping("/assignments/{id}/submit")
-    public String submitAssignment(@PathVariable Long id, @RequestParam String submissionContent) {
-        studentService.submitAssignment(id, submissionContent);
-        return "redirect:/student/dashboard"; // Redirect back to the dashboard
+    public String submitAssignment(@PathVariable Long id, @RequestParam String submissionContent, RedirectAttributes redirectAttributes) {
+        try {
+            studentService.submitAssignment(id, submissionContent);
+            redirectAttributes.addFlashAttribute("successMessage", "Assignment submitted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error submitting assignment: " + e.getMessage());
+        }
+        return "redirect:/student/dashboard";
+    }
+
+    @GetMapping("/assignments")
+    public String viewAllAssignments(Model model) {
+        // Get current user
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+
+        // Get all assignments for the student
+        List<Assignment> assignments = studentService.getStudentAssignments();
+        
+        model.addAttribute("currentUser", currentUser);
+        model.addAttribute("assignments", assignments);
+        
+        return "student/assignments";
     }
 }

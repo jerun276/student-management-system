@@ -9,10 +9,26 @@
 <div th:replace="~{fragments/header :: header}"></div>
 
 <main class="container mx-auto p-4">
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span th:text="${successMessage}">Success message</span>
+    </div>
+    
+    <div th:if="${errorMessage}" class="alert alert-error mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <span th:text="${errorMessage}">Error message</span>
+    </div>
+
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-3xl font-bold text-primary">My Dashboard</h1>
         <div class="flex gap-2">
-            <a th:href="@{/student/courses}" class="btn btn-outline btn-primary">My Courses</a>
+            <a th:href="@{/student/assignments}" class="btn btn-primary">My Assignments</a>
+            <!-- <a th:href="@{/student/courses}" class="btn btn-outline">My Courses</a> -->
             <a th:href="@{/student/materials}" class="btn btn-ghost">Study Materials</a>
         </div>
     </div>
@@ -28,17 +44,13 @@
                             <span class="font-semibold">Classroom:</span>
                             <span th:text="${currentEnrollment?.classroom?.fullName ?: 'Not Enrolled'}" class="ml-2">Grade 10-A (English Medium)</span>
                         </div>
-                        <div>
+                        <!-- <div>
                             <span class="font-semibold">Academic Year:</span>
                             <span th:text="${currentEnrollment?.academicYear?.name ?: 'N/A'}" class="ml-2">2024-2025</span>
-                        </div>
+                        </div> -->
                         <div>
                             <span class="font-semibold">Class Teacher:</span>
                             <span th:text="${currentEnrollment?.classroom?.classTeacher?.firstName + ' ' + currentEnrollment?.classroom?.classTeacher?.lastName ?: 'Not Assigned'}" class="ml-2">John Smith</span>
-                        </div>
-                        <div>
-                            <span class="font-semibold">Total Courses:</span>
-                            <span th:text="${myCourses?.size() ?: 0}" class="ml-2 badge badge-primary">5</span>
                         </div>
                     </div>
                 </div>
@@ -56,33 +68,33 @@
 
     <!-- Quick Stats -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="stat bg-base-100 shadow">
+        <!-- <div class="stat bg-base-100 shadow">
             <div class="stat-title">My Courses</div>
             <div class="stat-value text-primary" th:text="${myCourses?.size() ?: 0}">5</div>
             <div class="stat-desc">This semester</div>
-        </div>
+        </div> -->
         <div class="stat bg-base-100 shadow">
             <div class="stat-title">Pending Assignments</div>
-            <div class="stat-value text-warning" th:text="${#lists.size(assignments.?[status.name() == 'ASSIGNED'])}">3</div>
+            <div class="stat-value text-warning" th:text="${assignments != null ? #lists.size(assignments.?[status.name() == 'ASSIGNED']) : 0}">0</div>
             <div class="stat-desc">Due soon</div>
         </div>
         <div class="stat bg-base-100 shadow">
             <div class="stat-title">Completed</div>
-            <div class="stat-value text-success" th:text="${#lists.size(assignments.?[status.name() == 'GRADED'])}">12</div>
+            <div class="stat-value text-success" th:text="${assignments != null ? #lists.size(assignments.?[status.name() == 'GRADED']) : 0}">0</div>
             <div class="stat-desc">Assignments</div>
         </div>
-        <div class="stat bg-base-100 shadow">
+        <!-- <div class="stat bg-base-100 shadow">
             <div class="stat-title">Average Grade</div>
             <div class="stat-value text-info">B+</div>
             <div class="stat-desc">This semester</div>
-        </div>
+        </div> -->
     </div>
 
     <!-- My Courses Overview -->
-    <div class="card bg-base-100 shadow-xl mb-6">
-        <div class="card-body">
-            <h2 class="card-title">My Courses</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <!-- <div class="card bg-base-100 shadow-xl mb-6">
+        <div class="card-body"> -->
+            <!-- <h2 class="card-title">My Courses</h2> -->
+            <!-- <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <div th:each="course : ${myCourses}" class="card bg-base-200 shadow">
                     <div class="card-body p-4">
                         <h3 class="font-bold" th:text="${course.subject.name}">Mathematics</h3>
@@ -93,13 +105,13 @@
                         </div>
                     </div>
                 </div>
-            </div>
-            <div th:if="${myCourses == null or myCourses.isEmpty()}" class="text-center py-8">
+            </div> -->
+            <!-- <div th:if="${myCourses == null or myCourses.isEmpty()}" class="text-center py-8">
                 <p class="text-lg opacity-70">No courses enrolled</p>
                 <p class="text-sm opacity-50">Please contact administration for enrollment</p>
-            </div>
-        </div>
-    </div>
+            </div> -->
+        <!-- </div>
+    </div> -->
 
     <!-- Timetable Card -->
     <div class="card bg-base-100 shadow-xl mt-6">
@@ -131,7 +143,7 @@
                         <td th:text="${#temporals.format(entry.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(entry.endTime, 'HH:mm')}">
                             09:00 - 10:00
                         </td>
-                        <td th:text="${entry.effectiveSubject.name}">Mathematics</td>
+                        <td th:text="${entry.subject?.name ?: 'No Subject'}">Mathematics</td>
                         <td th:text="${entry.teacher?.firstName + ' ' + entry.teacher?.lastName}">Mr. Smith</td>
                     </tr>
                     </tbody>
@@ -141,7 +153,7 @@
     </div>
 
     <!-- My Assignment Card -->
-    <div class="card bg-base-100 shadow-xl mt-6">
+    <!-- <div class="card bg-base-100 shadow-xl mt-6">
         <div class="card-body">
             <h2 class="card-title">My Assignments</h2>
 
@@ -166,9 +178,9 @@
                         <td th:text="${assignment.subject.name}">Physics</td>
                         <td th:text="${assignment.title}">Chapter 1 Problems</td>
                         <td th:text="${#temporals.format(assignment.dueDate, 'dd-MMM-yyyy')}">28-Aug-2025</td>
-                        <td>
+                        <td> -->
                             <!-- Use DaisyUI badges for status -->
-                            <span th:text="${assignment.status}"
+                            <!-- <span th:text="${assignment.status}"
                                   th:classappend="${assignment.status.name() == 'PENDING'} ? 'badge-warning' : (${assignment.status.name() == 'SUBMITTED'} ? 'badge-info' : 'badge-success')"
                                   class="badge badge-ghost">
                             </span>
@@ -179,10 +191,10 @@
                                th:if="${assignment.status.name() == 'PENDING'}"
                                class="btn btn-primary btn-sm">
                                 View & Submit
-                            </a>
+                            </a> -->
 
                             <!-- Show a disabled button if already submitted -->
-                            <button th:if="${assignment.status.name() != 'PENDING'}"
+                            <!-- <button th:if="${assignment.status.name() != 'PENDING'}"
                                     class="btn btn-sm" disabled>
                                 Submitted
                             </button>
@@ -192,7 +204,7 @@
                 </table>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Events Card -->
     <div class="card bg-base-100 shadow-xl mt-6">

@@ -75,22 +75,16 @@ public class TeacherService {
     public List<Assignment> getAssignmentsToGrade() {
         return assignmentRepository.findByStatusOrderBySubmissionDateDesc(AssignmentStatus.SUBMITTED);
     }
-
     public Assignment getAssignmentToGradeById(Long assignmentId) {
         return assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new RuntimeException("Assignment not found with id: " + assignmentId));
     }
 
+    @Transactional
     public void gradeAssignment(Long assignmentId, String grade, String feedback) {
         Assignment assignment = getAssignmentToGradeById(assignmentId);
 
-        // Optional: Add a check to ensure it's in the SUBMITTED state
-        if (assignment.getStatus() != AssignmentStatus.SUBMITTED) {
-            throw new IllegalStateException("This assignment is not in a submittable state for grading.");
-        }
-
         assignment.setGrade(grade);
-        assignment.setFeedback(feedback);
         assignment.setStatus(AssignmentStatus.GRADED);
 
         assignmentRepository.save(assignment);
@@ -171,6 +165,10 @@ public class TeacherService {
         studyMaterial.setUploadDate(LocalDateTime.now());
 
         studyMaterialRepository.save(studyMaterial);
+    }
+
+    public List<StudyMaterial> getStudyMaterialsForSubject(Long subjectId) {
+        return studyMaterialRepository.findBySubjectId(subjectId);
     }
 
     // Submit a budget request
@@ -302,4 +300,126 @@ public class TeacherService {
             attendanceRecordRepository.save(record);
         }
     }
+
+    // ===== ASSIGNMENT MANAGEMENT METHODS =====
+
+    public List<Assignment> getAssignmentsByTeacher(User teacher) {
+        return assignmentRepository.findByTeacher(teacher);
+    }
+
+    public Assignment getAssignmentById(Long id) {
+        return assignmentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Assignment not found"));
+    }
+
+    public List<Assignment> getSubmissionsForAssignment(Assignment assignment) {
+        // Get all assignments for the same subject, classroom, and title (represents submissions)
+        return assignmentRepository.findBySubjectAndClassroomAndTitle(
+                assignment.getSubject(), assignment.getClassroom(), assignment.getTitle());
+    }
+
+    @Transactional
+    public void createAssignmentForSubject(AssignmentCreationDto assignmentDto) {
+        // Get current teacher
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User teacher = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+
+        // Get the subject
+        Subject subject = subjectRepository.findById(assignmentDto.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+
+        // Verify teacher teaches this subject
+        if (!subject.getTeachers().contains(teacher)) {
+            throw new RuntimeException("You are not assigned to teach this subject");
+        }
+
+        // Get the specific classroom
+        Classroom classroom = classroomRepository.findById(assignmentDto.getClassroomId())
+                .orElseThrow(() -> new RuntimeException("Classroom not found"));
+
+        // Verify the classroom is for the same grade level as the subject
+        if (!classroom.getGradeLevel().equals(subject.getGradeLevel())) {
+            throw new RuntimeException("Classroom grade level does not match subject grade level");
+        }
+
+        // Get students in the specific classroom
+        List<User> students = getStudentsInClassroom(classroom.getId());
+        
+        // Create assignment for each student in the specific classroom
+        for (User student : students) {
+            Assignment assignment = new Assignment();
+            assignment.setTitle(assignmentDto.getTitle());
+            assignment.setDescription(assignmentDto.getDescription());
+            assignment.setDueDate(assignmentDto.getDueDate());
+            assignment.setSubject(subject);
+            assignment.setClassroom(classroom);
+            assignment.setUser(student);
+            assignment.setTeacher(teacher);
+            assignment.setStatus(AssignmentStatus.ASSIGNED);
+            assignment.setCreatedDate(LocalDateTime.now());
+
+            assignmentRepository.save(assignment);
+        }
+    }
+
+    @Transactional
+    public void updateAssignmentTemplate(User teacher, String originalTitle, Long originalSubjectId, Long originalClassroomId, AssignmentCreationDto assignmentDto) {
+
+        // Find all assignments with the original title, subject, and classroom
+        List<Assignment> assignments = assignmentRepository.findByTeacher(teacher);
+        List<Assignment> templateAssignments = assignments.stream()
+                .filter(a -> a.getTitle().equals(originalTitle) && 
+                           a.getSubject().getId().equals(originalSubjectId) &&
+                           a.getClassroom().getId().equals(originalClassroomId))
+                .collect(java.util.stream.Collectors.toList());
+
+        if (templateAssignments.isEmpty()) {
+            throw new RuntimeException("Assignment template not found");
+        }
+
+        // Get the new subject and classroom
+        Subject newSubject = subjectRepository.findById(assignmentDto.getSubjectId())
+                .orElseThrow(() -> new RuntimeException("Subject not found"));
+        Classroom newClassroom = classroomRepository.findById(assignmentDto.getClassroomId())
+                .orElseThrow(() -> new RuntimeException("Classroom not found"));
+
+        // Verify teacher teaches the new subject
+        if (!newSubject.getTeachers().contains(teacher)) {
+            throw new RuntimeException("You are not assigned to teach this subject");
+        }
+
+        // Update all assignments in this template
+        for (Assignment assignment : templateAssignments) {
+            assignment.setTitle(assignmentDto.getTitle());
+            assignment.setDescription(assignmentDto.getDescription());
+            assignment.setDueDate(assignmentDto.getDueDate());
+            assignment.setSubject(newSubject);
+            assignment.setClassroom(newClassroom);
+            assignmentRepository.save(assignment);
+        }
+    }
+
+    @Transactional
+    public void deleteAssignmentTemplate(User teacher, String title, Long subjectId, Long classroomId) {
+
+        // Find all assignments with this title, subject, and classroom
+        List<Assignment> assignments = assignmentRepository.findByTeacher(teacher);
+        List<Assignment> templateAssignments = assignments.stream()
+                .filter(a -> a.getTitle().equals(title) && 
+                           a.getSubject().getId().equals(subjectId) &&
+                           a.getClassroom().getId().equals(classroomId))
+                .collect(java.util.stream.Collectors.toList());
+
+        if (templateAssignments.isEmpty()) {
+            throw new RuntimeException("Assignment template not found");
+        }
+
+        // Delete all assignments in this template
+        for (Assignment assignment : templateAssignments) {
+            assignmentRepository.delete(assignment);
+        }
+    }
+
 }

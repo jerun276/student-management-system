@@ -99,4 +99,13 @@ public class StudentService {
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
+
+    public List<Object> getStudentSubjects() {
+        // For now, return empty list - this can be implemented based on your data model
+        // You might want to get subjects from the student's enrollment or timetable
+        User currentUser = getCurrentUser();
+        // This could be implemented as getting subjects from timetable entries
+        // or from enrollment-based subject assignments
+        return List.of(); // Placeholder implementation
+    }
 }
