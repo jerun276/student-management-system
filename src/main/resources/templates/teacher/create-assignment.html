@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Create Assignment</title>
@@ -25,7 +25,6 @@
                     <h2 class="card-title text-xl mb-4">Assignment Details</h2>
                     <th:block th:if="${!isEdit}">
     <form th:action="@{/teacher/assignments/create}" method="post" class="space-y-4">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <div class="form-control">
             <label class="label"><span class="label-text">Title</span></label>
             <input type="text" name="assignmentTitle" class="input input-bordered" required/>
@@ -60,7 +59,6 @@
 
 <th:block th:if="${isEdit}">
     <form th:action="@{/teacher/assignments/templates/update}" method="post" class="space-y-4">
-        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
         <input type="hidden" name="originalTitle" th:value="${originalTitle}"/>
         <input type="hidden" name="originalSubjectId" th:value="${originalSubjectId}"/>
         <input type="hidden" name="originalClassroomId" th:value="${originalClassroomId}"/>
@@ -211,13 +209,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log(`  ${key}: ${value}`);
             }
             
-            // Check if CSRF token exists
-            const csrfToken = this.querySelector('input[name="_token"], input[name="${_csrf.parameterName}"]');
-            if (csrfToken) {
-                console.log('CSRF token found:', csrfToken.value);
-            } else {
-                console.log('CSRF token NOT found - this might cause logout');
-            }
             
             console.log('Form submission continuing...');
         });

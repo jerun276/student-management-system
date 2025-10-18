@@ -42,6 +42,7 @@ public class SecurityConfig {
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
                 http
+                                .csrf(csrf -> csrf.disable())
                                 .authorizeHttpRequests(auth -> auth
                                                 // Allow public access to static resources and auth pages
                                                 .requestMatchers("/", "/css/**", "/js/**", "/images/**", "/login",
@@ -60,8 +61,12 @@ public class SecurityConfig {
                                                 .successHandler(customAuthenticationSuccessHandler)
                                                 .permitAll())
                                 .logout(logout -> logout
+                                                .logoutUrl("/logout")
                                                 .logoutSuccessUrl("/login?logout")
-                                                .permitAll());
+                                                .invalidateHttpSession(true)
+                                                .deleteCookies("JSESSIONID")
+                                                .permitAll()
+                                );
                 return http.build();
         }
 }

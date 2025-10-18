@@ -1,9 +1,7 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="_csrf" th:content="${_csrf.token}"/>
-    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <title>Enrollment Management</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
@@ -355,15 +353,6 @@ function withdrawStudent(enrollmentId) {
         form.method = 'POST';
         form.action = '/admin/enrollments/' + enrollmentId + '/withdraw';
         
-        // Add CSRF token
-        const csrfToken = document.querySelector('meta[name="_csrf"]');
-        if (csrfToken) {
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '_csrf';
-            csrfInput.value = csrfToken.getAttribute('content');
-            form.appendChild(csrfInput);
-        }
         
         document.body.appendChild(form);
         form.submit();
@@ -377,15 +366,6 @@ function reactivateStudent(enrollmentId) {
         form.method = 'POST';
         form.action = '/admin/enrollments/' + enrollmentId + '/reactivate';
         
-        // Add CSRF token
-        const csrfToken = document.querySelector('meta[name="_csrf"]');
-        if (csrfToken) {
-            const csrfInput = document.createElement('input');
-            csrfInput.type = 'hidden';
-            csrfInput.name = '_csrf';
-            csrfInput.value = csrfToken.getAttribute('content');
-            form.appendChild(csrfInput);
-        }
         
         document.body.appendChild(form);
         form.submit();

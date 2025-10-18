@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <title>Submit Assignment</title>
@@ -37,20 +37,15 @@
                     <h3 class="font-bold">Assignment Graded</h3>
                     <div class="text-xs">Grade: <span class="font-bold" th:text="${assignment.grade}"></span></div>
                     <div th:if="${assignment.feedback}" class="text-xs mt-1">Feedback: <span th:text="${assignment.feedback}"></span></div>
-                </div>
-            </div>
-
             <!-- Submission Form (only show if pending) -->
             <div th:if="${assignment.status.name() == 'ASSIGNED'}">
                 <form th:action="@{/student/assignments/{id}/submit(id=${assignment.id})}" method="post" class="mt-6">
-                    <!-- CSRF Token -->
-                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
                     
                     <div class="form-control">
                         <label class="label">
                             <span class="label-text">Your Submission</span>
                             <span class="label-text-alt">Required</span>
-                        </label>
+{{ ... }}
                         <textarea name="submissionContent" class="textarea textarea-bordered h-48"
                                   placeholder="Type your assignment submission here. Be clear and detailed in your response..."
                                   required></textarea>

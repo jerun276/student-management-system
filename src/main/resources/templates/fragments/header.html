@@ -53,20 +53,15 @@ We will add the xmlns:sec namespace to enable security tags.
                     Dashboard</a>
                 <a th:href="@{/principal/dashboard}" sec:authorize="hasRole('PRINCIPAL')" class="btn btn-ghost">My
                     Dashboard</a>
-                <!-- Add other roles here -->
-
                 <a th:href="@{/teacher/assignments}" sec:authorize="hasRole('TEACHER')" class="btn btn-ghost">Assignments</a>
                 <a th:href="@{/teacher/messages}" sec:authorize="hasRole('TEACHER')" class="btn btn-ghost">Messages</a>
                 <a th:href="@{/parent/messages}" sec:authorize="hasRole('PARENT')" class="btn btn-ghost">Messages</a>
 
-                <!-- Logout Button (must be a form for CSRF protection) -->
-                <form th:action="@{/logout}" method="post">
-                    <button type="submit" class="btn btn-outline">Logout</button>
+                <!-- Logout Button -->
+                <a th:href="@{/logout}" class="btn btn-outline">Logout</a>
             </div>
         </div>
     </div>
 </header>
-
-</body>
 
 </html>
