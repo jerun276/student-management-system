@@ -5,37 +5,41 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Timetable Management Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
 
-<body class="bg-surface">
+<body class="bg-light">
     <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
 
-    <main class="container mx-auto p-4">
-        <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-primary">Timetable Management</h1>
-            <div class="flex gap-2">
+    <main class="main-content p-4">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-calendar"></i> Timetable</li>
+            </ol>
+        </nav>
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h2 fw-bold text-primary mb-0"><i class="bi bi-calendar"></i> Timetable Management</h1>
+            <div class="btn-group" role="group">
                 <a th:href="@{/admin/timetable/create}" class="btn btn-primary">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Create Entry
+                    <i class="bi bi-plus-circle"></i> Create Entry
                 </a>
-                <a th:href="@{/admin/timetable/master}" class="btn btn-secondary">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2">
-                        </path>
-                    </svg>
-                    Master Timetable
+                <a th:href="@{/admin/timetable/master}" class="btn btn-outline-secondary">
+                    <i class="bi bi-table"></i> Master Timetable
                 </a>
             </div>
         </div>
 
         <!-- Success/Error Messages -->
-        <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
-        <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" th:text="${successMessage}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" th:text="${errorMessage}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
 
         <!-- Quick Navigation Cards -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
@@ -107,26 +111,46 @@
         </div>
 
         <!-- Statistics Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-            <div class="stat bg-base-100 shadow">
-                <div class="stat-title">Total Entries</div>
-                <div class="stat-value text-primary" th:text="${statistics != null ? statistics.totalEntries : 0}">0</div>
-                <div class="stat-desc">Timetable entries</div>
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-list-check" style="font-size: 2rem; color: #0d6efd;"></i>
+                        <h6 class="text-muted small mt-3 mb-2">Total Entries</h6>
+                        <h3 class="fw-bold text-primary" th:text="${statistics != null ? statistics.totalEntries : 0}">0</h3>
+                        <small class="text-muted">Timetable entries</small>
+                    </div>
+                </div>
             </div>
-            <div class="stat bg-base-100 shadow">
-                <div class="stat-title">Active Teachers</div>
-                <div class="stat-value text-secondary" th:text="${statistics != null ? statistics.uniqueTeachers : 0}">0</div>
-                <div class="stat-desc">Teaching staff</div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-person-check" style="font-size: 2rem; color: #198754;"></i>
+                        <h6 class="text-muted small mt-3 mb-2">Active Teachers</h6>
+                        <h3 class="fw-bold text-success" th:text="${statistics != null ? statistics.uniqueTeachers : 0}">0</h3>
+                        <small class="text-muted">Teaching staff</small>
+                    </div>
+                </div>
             </div>
-            <div class="stat bg-base-100 shadow">
-                <div class="stat-title">Classrooms</div>
-                <div class="stat-value text-accent" th:text="${statistics != null ? statistics.uniqueClassrooms : 0}">0</div>
-                <div class="stat-desc">Active classrooms</div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-building" style="font-size: 2rem; color: #0dcaf0;"></i>
+                        <h6 class="text-muted small mt-3 mb-2">Classrooms</h6>
+                        <h3 class="fw-bold text-info" th:text="${statistics != null ? statistics.uniqueClassrooms : 0}">0</h3>
+                        <small class="text-muted">Active classrooms</small>
+                    </div>
+                </div>
             </div>
-            <div class="stat bg-base-100 shadow">
-                <div class="stat-title">Subjects</div>
-                <div class="stat-value text-info" th:text="${statistics != null ? statistics.uniqueSubjects : 0}">0</div>
-                <div class="stat-desc">Unique subjects</div>
+            <div class="col-md-3">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-book" style="font-size: 2rem; color: #ffc107;"></i>
+                        <h6 class="text-muted small mt-3 mb-2">Subjects</h6>
+                        <h3 class="fw-bold text-warning" th:text="${statistics != null ? statistics.uniqueSubjects : 0}">0</h3>
+                        <small class="text-muted">Unique subjects</small>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -150,36 +174,29 @@
         </div>
 
         <!-- Teacher Workloads and Classroom Utilization -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="row g-4">
             <!-- Teacher Workloads -->
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title">Teacher Workloads</h3>
-                    <div class="space-y-2">
-                        <div th:each="entry : ${teacherWorkloads}"
-                            class="flex items-center justify-between p-2 hover:bg-base-200 rounded-lg">
-                            <div class="flex items-center">
-                                <div class="avatar placeholder mr-3">
-                                    <div class="bg-neutral-focus text-neutral-content rounded-full w-8">
-                                        <span class="text-xs"
-                                            th:text="${entry.key.firstName != null ? entry.key.firstName.substring(0,1) + entry.key.lastName.substring(0,1) : 'T'}">TN</span>
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-gradient">
+                        <h5 class="mb-0"><i class="bi bi-person-check"></i> Teacher Workloads</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div th:each="entry : ${teacherWorkloads}" class="list-group-item d-flex justify-content-between align-items-center">
+                                <div class="d-flex align-items-center">
+                                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                                        <small class="fw-bold" th:text="${entry.key.firstName != null ? entry.key.firstName.substring(0,1) + entry.key.lastName.substring(0,1) : 'T'}">TN</small>
+                                    </div>
+                                    <div>
+                                        <div class="fw-bold small" th:text="${entry.key.firstName + ' ' + entry.key.lastName}">Teacher Name</div>
+                                        <small class="text-muted" th:text="${entry.key.email}">teacher@school.edu</small>
                                     </div>
                                 </div>
-                                <div>
-                                    <div class="text-sm font-medium"
-                                        th:text="${entry.key.firstName + ' ' + entry.key.lastName}">Teacher Name</div>
-                                    <div class="text-xs opacity-70" th:text="${entry.key.email}">teacher@school.edu
-                                    </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-info" th:text="${entry.value + ' periods'}">5 periods</span>
+                                    <a th:href="@{/admin/timetable/teacher/{id}(id=${entry.key.id})}" class="btn btn-sm btn-outline-primary">View</a>
                                 </div>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <div class="text-sm font-medium">
-                                    <span th:text="${entry.value}">5</span> periods
-                                </div>
-                                <a th:href="@{/admin/timetable/teacher/{id}(id=${entry.key.id})}"
-                                    class="btn btn-xs btn-outline">
-                                    View →
-                                </a>
                             </div>
                         </div>
                     </div>
@@ -187,33 +204,26 @@
             </div>
 
             <!-- Classroom Utilization -->
-            <div class="card bg-base-100 shadow-xl">
-                <div class="card-body">
-                    <h3 class="card-title">Classroom Utilization</h3>
-                    <div class="space-y-2">
-                        <div th:each="entry : ${classroomUtilization}"
-                            class="flex items-center justify-between p-2 hover:bg-base-200 rounded-lg">
-                            <div class="flex-1">
-                                <div class="text-sm font-medium" th:text="${entry.key.fullName}">Grade 10-A</div>
-                                <div class="text-xs opacity-70">
-                                    Teacher: <span
-                                        th:text="${entry.key.classTeacher != null ? entry.key.classTeacher.firstName + ' ' + entry.key.classTeacher.lastName : 'Not Assigned'}">Not
-                                        Assigned</span>
-                                </div>
-                                <div class="mt-1">
-                                    <a th:href="@{/admin/timetable/classroom/{id}(id=${entry.key.id})}"
-                                        class="btn btn-xs btn-outline">
-                                        View Schedule →
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="text-right">
-                                <div class="text-sm font-medium">
-                                    <span th:text="${#numbers.formatDecimal(entry.value, 1, 1)}">75.0</span>%
-                                </div>
-                                <div class="w-16">
-                                    <progress class="progress progress-primary" th:value="${entry.value}"
-                                        max="100"></progress>
+            <div class="col-lg-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-gradient">
+                        <h5 class="mb-0"><i class="bi bi-building"></i> Classroom Utilization</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div th:each="entry : ${classroomUtilization}" class="list-group-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold" th:text="${entry.key.fullName}">Grade 10-A</div>
+                                        <small class="text-muted d-block">Teacher: <span th:text="${entry.key.classTeacher != null ? entry.key.classTeacher.firstName + ' ' + entry.key.classTeacher.lastName : 'Not Assigned'}">Not Assigned</span></small>
+                                        <a th:href="@{/admin/timetable/classroom/{id}(id=${entry.key.id})}" class="btn btn-sm btn-outline-primary mt-2">View Schedule</a>
+                                    </div>
+                                    <div class="text-end ms-3">
+                                        <div class="fw-bold" th:text="${#numbers.formatDecimal(entry.value, 1, 1) + '%'}">75.0%</div>
+                                        <div class="progress mt-2" style="height: 8px; width: 80px;">
+                                            <div class="progress-bar" role="progressbar" th:style="'width: ' + ${entry.value} + '%'" th:attr="aria-valuenow=${entry.value}" aria-valuemin="0" aria-valuemax="100"></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -222,6 +232,10 @@
             </div>
         </div>
     </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>

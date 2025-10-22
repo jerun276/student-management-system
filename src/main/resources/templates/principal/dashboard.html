@@ -2,223 +2,284 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Principal Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Principal Dashboard - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
-<div th:replace="~{fragments/header :: header}"></div>
-<main class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-primary">Principal's Dashboard</h1>
-        <div class="flex gap-2">
-            <a th:href="@{/principal/academic-overview}" class="btn btn-outline btn-primary">Academic Overview</a>
-            <a th:href="@{/principal/reports}" class="btn btn-ghost">Reports</a>
-        </div>
-    </div>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
 
-    <!-- School Overview Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="stat bg-base-100 shadow">
-            <div class="stat-title">Total Students</div>
-            <div class="stat-value text-primary" th:text="${totalStudents ?: 0}">245</div>
-            <div class="stat-desc">Currently enrolled</div>
-        </div>
-        <div class="stat bg-base-100 shadow">
-            <div class="stat-title">Total Teachers</div>
-            <div class="stat-value text-secondary" th:text="${totalTeachers ?: 0}">18</div>
-            <div class="stat-desc">Active staff</div>
-        </div>
-        <div class="stat bg-base-100 shadow">
-            <div class="stat-title">Active Courses</div>
-            <div class="stat-value text-accent" th:text="${totalCourses ?: 0}">42</div>
-            <div class="stat-desc">This academic year</div>
-        </div>
-        <div class="stat bg-base-100 shadow">
-            <div class="stat-title">Academic Year</div>
-            <div class="stat-value text-info" th:text="${currentAcademicYear?.name ?: 'Not Set'}">2024-2025</div>
-            <div class="stat-desc">Current year</div>
-        </div>
-    </div>
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 text-primary fw-bold mb-0"><i class="bi bi-mortarboard"></i> Principal's Dashboard</h1>
+                    <p class="text-muted small">School overview and management</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a th:href="@{/principal/academic-overview}" class="btn btn-outline-primary">
+                        <i class="bi bi-graph-up"></i> Academic Overview
+                    </a>
+                    <a th:href="@{/principal/reports}" class="btn btn-outline-secondary">
+                        <i class="bi bi-file-earmark-pdf"></i> Reports
+                    </a>
+                </div>
+            </div>
 
-    <!-- Quick Actions -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title">Academic Management</h2>
-                <p>Manage academic years, classrooms, and course assignments.</p>
-                <div class="card-actions justify-end">
-                    <a th:href="@{/admin/academic-structure}" class="btn btn-primary">Manage</a>
+            <!-- School Overview Stats -->
+            <div class="row mb-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-card-icon text-primary">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="stat-card-value" th:text="${totalStudents ?: 0}">245</div>
+                        <div class="stat-card-label">Total Students</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-card-icon text-success">
+                            <i class="bi bi-book"></i>
+                        </div>
+                        <div class="stat-card-value" th:text="${totalTeachers ?: 0}">18</div>
+                        <div class="stat-card-label">Total Teachers</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-card-icon text-info">
+                            <i class="bi bi-collection"></i>
+                        </div>
+                        <div class="stat-card-value" th:text="${totalSubjects ?: 0}">42</div>
+                        <div class="stat-card-label">Active Subjects</div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="stat-card">
+                        <div class="stat-card-icon text-warning">
+                            <i class="bi bi-calendar"></i>
+                        </div>
+                        <div class="stat-card-value" th:text="${currentAcademicYear?.name ?: 'N/A'}">2024-2025</div>
+                        <div class="stat-card-label">Academic Year</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row mb-4">
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0 text-black"><i class="bi bi-building"></i> Academic Management</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Manage academic years, classrooms, and course assignments.</p>
+                            <a th:href="@{/admin/academic-structure}" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-arrow-right"></i> Manage
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0 text-black"><i class="bi bi-person-check"></i> Student Enrollment</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">View and manage student enrollments across all classrooms.</p>
+                            <a th:href="@{/admin/enrollments}" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-arrow-right"></i> View
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0 text-black"><i class="bi bi-briefcase"></i> Teacher Assignments</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Review and manage teacher course assignments.</p>
+                            <a th:href="@{/principal/teacher-assignments}" class="btn btn-primary btn-sm w-100">
+                                <i class="bi bi-arrow-right"></i> Manage
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Academic Performance Report -->
+            <div class="card mb-4">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-graph-up"></i> Academic Performance Report</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">An overview of the average grades for numeric-graded assignments across all subjects.</p>
+
+                    <div th:if="${performanceReport.isEmpty()}" class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <span>No graded assignment data is available to generate a report yet.</span>
+                    </div>
+
+                    <div th:if="${!performanceReport.isEmpty()}" class="table-responsive mt-3">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="bi bi-book"></i> Subject</th>
+                                    <th><i class="bi bi-file-earmark-text"></i> Graded Assignments</th>
+                                    <th><i class="bi bi-percent"></i> Average Grade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="report : ${performanceReport}">
+                                    <td class="fw-bold" th:text="${report.subjectName}">Mathematics</td>
+                                    <td th:text="${report.gradedAssignmentsCount}">50</td>
+                                    <td>
+                                        <span class="badge bg-success" th:text="${#numbers.formatDecimal(report.averageGrade, 1, 2) + '%'}">88.50%</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Announcements Management Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-megaphone"></i> Manage Announcements</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Form to create a new announcement -->
+                    <form th:action="@{/principal/announcements/create}" method="post" class="mb-4">
+                        <div class="mb-3">
+                            <label for="title" class="form-label fw-bold">Title</label>
+                            <input type="text" id="title" name="title" class="form-control" placeholder="Announcement title" required/>
+                        </div>
+                        <div class="mb-3">
+                            <label for="content" class="form-label fw-bold">Content</label>
+                            <textarea id="content" name="content" class="form-control" rows="4" placeholder="Announcement content" required></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Publish Announcement
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <!-- List of past announcements -->
+                    <h6 class="fw-bold mb-3">Published Announcements</h6>
+                    <div th:if="${announcements == null or announcements.isEmpty()}" class="alert alert-light">
+                        <p class="mb-0">No announcements have been published yet.</p>
+                    </div>
+                    <div th:if="${announcements != null and !announcements.isEmpty()}" class="space-y-3" style="max-height: 400px; overflow-y: auto;">
+                        <div th:each="announcement : ${announcements}" class="p-3 border rounded-3 bg-light">
+                            <h6 class="fw-bold mb-1" th:text="${announcement.title}"></h6>
+                            <small class="text-muted d-block mb-2" th:text="'Published on ' + ${#temporals.format(announcement.publishedDate, 'dd-MMM-yyyy HH:mm')}"></small>
+                            <p class="mb-0 small" th:text="${announcement.content}"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Teacher Performance Report Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-person-badge"></i> Teacher Performance Report</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small">An overview of assignment grading by teachers.</p>
+
+                    <div th:if="${teacherPerformanceReport.isEmpty()}" class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <span>No teacher performance data is available yet.</span>
+                    </div>
+
+                    <div th:if="${!teacherPerformanceReport.isEmpty()}" class="table-responsive mt-3">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="bi bi-person"></i> Teacher</th>
+                                    <th><i class="bi bi-file-earmark-text"></i> Assigned</th>
+                                    <th><i class="bi bi-check-circle"></i> Graded</th>
+                                    <th><i class="bi bi-percent"></i> Completion</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="report : ${teacherPerformanceReport}">
+                                    <td class="fw-bold" th:text="${report.teacherName}">teacher_username</td>
+                                    <td th:text="${report.totalAssignmentsAssigned}">10</td>
+                                    <td th:text="${report.assignmentsGraded}">8</td>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="progress flex-grow-1" style="height: 20px;">
+                                                <div class="progress-bar bg-success" role="progressbar" th:style="'width: ' + ${report.gradingCompletionRate} + '%'" th:attr="aria-valuenow=${report.gradingCompletionRate}"></div>
+                                            </div>
+                                            <span class="badge bg-success" th:text="${#numbers.formatDecimal(report.gradingCompletionRate, 1, 1) + '%'}">80.0%</span>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Budget Approval Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-cash-coin"></i> Pending Budget Requests</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${pendingRequests.isEmpty()}" class="alert alert-info" role="alert">
+                        <i class="bi bi-info-circle"></i>
+                        <span>No budget requests are currently pending approval.</span>
+                    </div>
+                    <div th:if="${!pendingRequests.isEmpty()}" class="table-responsive mt-3">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="bi bi-person"></i> Requester</th>
+                                    <th><i class="bi bi-file-earmark-text"></i> Title</th>
+                                    <th><i class="bi bi-cash"></i> Amount</th>
+                                    <th><i class="bi bi-calendar"></i> Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="req : ${pendingRequests}">
+                                    <td th:text="${req.requester.username}"></td>
+                                    <td th:text="${req.title}"></td>
+                                    <td class="fw-bold" th:text="'$' + ${#numbers.formatDecimal(req.amount, 1, 'COMMA', 2, 'POINT')}"></td>
+                                    <td th:text="${#temporals.format(req.requestDate, 'dd-MMM-yyyy')}"></td>
+                                    <td>
+                                        <form th:action="@{/principal/budget/{id}/approve(id=${req.id})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-success btn-sm">
+                                                <i class="bi bi-check-circle"></i> Approve
+                                            </button>
+                                        </form>
+                                        <form th:action="@{/principal/budget/{id}/reject(id=${req.id})}" method="post" class="d-inline">
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="bi bi-x-circle"></i> Reject
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title">Student Enrollment</h2>
-                <p>View and manage student enrollments across all classrooms.</p>
-                <div class="card-actions justify-end">
-                    <a th:href="@{/admin/enrollments}" class="btn btn-primary">View</a>
-                </div>
-            </div>
-        </div>
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title">Teacher Assignments</h2>
-                <p>Review and manage teacher course assignments.</p>
-                <div class="card-actions justify-end">
-                    <a th:href="@{/principal/teacher-assignments}" class="btn btn-primary">Manage</a>
-                </div>
-            </div>
-        </div>
-    </div>
+    </main>
 
-    <!-- Academic Performance Report (US13) -->
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <h2 class="card-title">Academic Performance Report</h2>
-            <p class="text-sm">An overview of the average grades for numeric-graded assignments across all subjects.</p>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
-            <div th:if="${performanceReport.isEmpty()}" class="alert alert-info mt-4">
-                <span>No graded assignment data is available to generate a report yet.</span>
-            </div>
-
-            <div th:if="${!performanceReport.isEmpty()}" class="overflow-x-auto mt-4">
-                <table class="table w-full">
-                    <thead>
-                    <tr>
-                        <th>Subject</th>
-                        <th>Graded Assignments</th>
-                        <th>Average Grade</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="report : ${performanceReport}">
-                        <td class="font-bold" th:text="${report.subjectName}">Mathematics</td>
-                        <td th:text="${report.gradedAssignmentsCount}">50</td>
-                        <td th:text="${#numbers.formatDecimal(report.averageGrade, 1, 2) + '%'}">88.50%</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Announcements Management Card (US14) -->
-    <div class="card bg-base-100 shadow-xl mt-6">
-        <div class="card-body">
-            <h2 class="card-title">Manage Announcements</h2>
-
-            <!-- Form to create a new announcement -->
-            <form th:action="@{/principal/announcements/create}" method="post" class="space-y-4 mt-2">
-                <div class="form-control">
-                    <label class="label"><span class="label-text">Title</span></label>
-                    <input type="text" name="title" class="input input-bordered" required/>
-                </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text">Content</span></label>
-                    <textarea name="content" class="textarea textarea-bordered h-24" required></textarea>
-                </div>
-                <div class="card-actions justify-end">
-                    <button type="submit" class="btn btn-primary">Publish Announcement</button>
-                </div>
-            </form>
-
-            <div class="divider">Published Announcements</div>
-            <!-- List of past announcements -->
-            <div th:if="${announcements == null or announcements.isEmpty()}">
-                <p>No announcements have been published yet.</p>
-            </div>
-            <div th:if="${announcements != null and !announcements.isEmpty()}"
-                 class="space-y-4 max-h-96 overflow-y-auto">
-                <div th:each="announcement : ${announcements}" class="p-4 border rounded-lg">
-                    <h3 class="font-bold" th:text="${announcement.title}"></h3>
-                    <p class="text-xs text-gray-500"
-                       th:text="'Published on ' + ${#temporals.format(announcement.publishedDate, 'dd-MMM-yyyy HH:mm')}"></p>
-                    <p class="mt-2 text-sm" th:text="${announcement.content}"></p>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Teacher Performance Report Card (US15) -->
-    <div class="card bg-base-100 shadow-xl mt-6">
-        <div class="card-body">
-            <h2 class="card-title">Teacher Performance Report</h2>
-            <p class="text-sm">An overview of assignment grading by teachers.</p>
-
-            <div th:if="${teacherPerformanceReport.isEmpty()}" class="alert alert-info mt-4">
-                <span>No teacher performance data is available yet.</span>
-            </div>
-
-            <div th:if="${!teacherPerformanceReport.isEmpty()}" class="overflow-x-auto mt-4">
-                <table class="table w-full">
-                    <thead>
-                    <tr>
-                        <th>Teacher</th>
-                        <th>Assignments Assigned</th>
-                        <th>Assignments Graded</th>
-                        <th>Grading Completion</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="report : ${teacherPerformanceReport}">
-                        <td class="font-bold" th:text="${report.teacherName}">teacher_username</td>
-                        <td th:text="${report.totalAssignmentsAssigned}">10</td>
-                        <td th:text="${report.assignmentsGraded}">8</td>
-                        <td>
-                            <div class="flex items-center gap-2">
-                                <progress class="progress progress-primary w-56"
-                                          th:value="${report.gradingCompletionRate}"
-                                          max="100"></progress>
-                                <span th:text="${#numbers.formatDecimal(report.gradingCompletionRate, 1, 1) + '%'}">80.0%</span>
-                            </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Budget Approval Card (US16) -->
-    <div class="card bg-base-100 shadow-xl mt-6">
-        <div class="card-body">
-            <h2 class="card-title">Pending Budget Requests</h2>
-            <div th:if="${pendingRequests.isEmpty()}" class="alert alert-info mt-4">
-                <span>No budget requests are currently pending approval.</span>
-            </div>
-            <div th:if="${!pendingRequests.isEmpty()}" class="overflow-x-auto mt-4">
-                <table class="table w-full">
-                    <thead>
-                    <tr>
-                        <th>Requester</th>
-                        <th>Title</th>
-                        <th>Amount</th>
-                        <th>Date</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="req : ${pendingRequests}">
-                        <td th:text="${req.requester.username}"></td>
-                        <td th:text="${req.title}"></td>
-                        <td th:text="'$' + ${#numbers.formatDecimal(req.amount, 1, 'COMMA', 2, 'POINT')}"></td>
-                        <td th:text="${#temporals.format(req.requestDate, 'dd-MMM-yyyy')}"></td>
-                        <td class="flex gap-2">
-                            <form th:action="@{/principal/budget/{id}/approve(id=${req.id})}" method="post">
-                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
-                            </form>
-                            <form th:action="@{/principal/budget/{id}/reject(id=${req.id})}" method="post">
-                                <button type="submit" class="btn btn-error btn-sm">Reject</button>
-                            </form>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-</main>
-<div th:replace="~{fragments/footer :: footer}"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

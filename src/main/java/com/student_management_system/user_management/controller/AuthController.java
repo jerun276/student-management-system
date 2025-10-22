@@ -99,8 +99,14 @@ public class AuthController {
             // 2. Try to register the user
             userService.registerNewStudent(registrationDto);
         } catch (IllegalStateException e) {
-            // 3. If the username already exists, add an error to the model
+            // 3. If the username or email already exists, add an error to the model
             model.addAttribute("registrationError", e.getMessage());
+            model.addAttribute("user", registrationDto);
+            return "auth/register";
+        } catch (Exception e) {
+            // 4. Handle any other exceptions
+            model.addAttribute("registrationError", "An error occurred during registration: " + e.getMessage());
+            model.addAttribute("user", registrationDto);
             return "auth/register";
         }
 

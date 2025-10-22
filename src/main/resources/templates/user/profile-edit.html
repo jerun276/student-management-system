@@ -1,98 +1,133 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" data-theme="mytheme">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Profile</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
-<div th:replace="~{fragments/header :: header}"></div>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <div class="max-w-2xl mx-auto space-y-6">
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="mb-4">
+                <h1 class="h2 text-primary fw-bold mb-0"><i class="bi bi-pencil-square"></i> Edit Profile</h1>
+                <p class="text-muted small">Update your account information and security settings</p>
+            </div>
 
-        <!-- Success/Error Messages -->
-        <div th:if="${successMessage}" class="alert alert-success shadow-lg" th:text="${successMessage}"></div>
-        <div th:if="${errorMessage}" class="alert alert-error shadow-lg" th:text="${errorMessage}"></div>
+            <!-- Success/Error Messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
 
-        <!-- Edit Profile Card -->
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title text-2xl">Edit Profile</h2>
-                <form th:action="@{/profile/update}" th:object="${editProfileDto}" method="post" class="space-y-4 mt-4">
-                    <!-- Form fields for profile editing -->
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">First Name</span></label>
-                        <input type="text" th:field="*{firstName}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></p>
+            <div class="row">
+                <!-- Edit Profile Card -->
+                <div class="col-lg-8 mb-4">
+                    <div class="card">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0"><i class="bi bi-person"></i> Personal Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/profile/update}" th:object="${editProfileDto}" method="post">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="firstName" class="form-label fw-bold">First Name</label>
+                                        <input type="text" id="firstName" th:field="*{firstName}" class="form-control" th:classappend="${#fields.hasErrors('firstName')} ? 'is-invalid' : ''"/>
+                                        <div th:if="${#fields.hasErrors('firstName')}" class="invalid-feedback" th:errors="*{firstName}"></div>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="lastName" class="form-label fw-bold">Last Name</label>
+                                        <input type="text" id="lastName" th:field="*{lastName}" class="form-control" th:classappend="${#fields.hasErrors('lastName')} ? 'is-invalid' : ''"/>
+                                        <div th:if="${#fields.hasErrors('lastName')}" class="invalid-feedback" th:errors="*{lastName}"></div>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="email" class="form-label fw-bold">Email</label>
+                                    <input type="email" id="email" th:field="*{email}" class="form-control" th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''"/>
+                                    <div th:if="${#fields.hasErrors('email')}" class="invalid-feedback" th:errors="*{email}"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="dateOfBirth" class="form-label fw-bold">Date of Birth</label>
+                                    <input type="date" id="dateOfBirth" th:field="*{dateOfBirth}" class="form-control" th:classappend="${#fields.hasErrors('dateOfBirth')} ? 'is-invalid' : ''"/>
+                                    <div th:if="${#fields.hasErrors('dateOfBirth')}" class="invalid-feedback" th:errors="*{dateOfBirth}"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label fw-bold">Address</label>
+                                    <input type="text" id="address" th:field="*{address}" class="form-control" th:classappend="${#fields.hasErrors('address')} ? 'is-invalid' : ''"/>
+                                    <div th:if="${#fields.hasErrors('address')}" class="invalid-feedback" th:errors="*{address}"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="phoneNumber" class="form-label fw-bold">Phone Number</label>
+                                    <input type="text" id="phoneNumber" th:field="*{phoneNumber}" class="form-control" th:classappend="${#fields.hasErrors('phoneNumber')} ? 'is-invalid' : ''"/>
+                                    <div th:if="${#fields.hasErrors('phoneNumber')}" class="invalid-feedback" th:errors="*{phoneNumber}"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="nic" class="form-label fw-bold">NIC</label>
+                                    <input type="text" id="nic" th:field="*{nic}" class="form-control" th:classappend="${#fields.hasErrors('nic')} ? 'is-invalid' : ''"/>
+                                    <div th:if="${#fields.hasErrors('nic')}" class="invalid-feedback" th:errors="*{nic}"></div>
+                                </div>
+                                <hr>
+                                <div class="d-flex gap-2">
+                                    <a th:href="@{/profile}" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">Last Name</span></label>
-                        <input type="text" th:field="*{lastName}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></p>
+                </div>
+
+                <!-- Change Password Card -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0"><i class="bi bi-lock"></i> Change Password</h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/profile/change-password}" th:object="${passwordChangeDto}" method="post">
+                                <div class="mb-3">
+                                    <label for="currentPassword" class="form-label fw-bold">Current Password</label>
+                                    <input type="password" id="currentPassword" th:field="*{currentPassword}" class="form-control" th:classappend="${#fields.hasErrors('currentPassword')} ? 'is-invalid' : ''"/>
+                                    <div th:if="${#fields.hasErrors('currentPassword')}" class="invalid-feedback" th:errors="*{currentPassword}"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="newPassword" class="form-label fw-bold">New Password</label>
+                                    <input type="password" id="newPassword" th:field="*{newPassword}" class="form-control" th:classappend="${#fields.hasErrors('newPassword')} ? 'is-invalid' : ''"/>
+                                    <div th:if="${#fields.hasErrors('newPassword')}" class="invalid-feedback" th:errors="*{newPassword}"></div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="confirmNewPassword" class="form-label fw-bold">Confirm Password</label>
+                                    <input type="password" id="confirmNewPassword" th:field="*{confirmNewPassword}" class="form-control" th:classappend="${#fields.hasErrors('confirmNewPassword')} ? 'is-invalid' : ''"/>
+                                    <div th:if="${#fields.hasErrors('confirmNewPassword')}" class="invalid-feedback" th:errors="*{confirmNewPassword}"></div>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-key"></i> Update Password
+                                </button>
+                            </form>
+                        </div>
                     </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">Email</span></label>
-                        <input type="email" th:field="*{email}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></p>
-                    </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">Date of Birth</span></label>
-                        <input type="date" th:field="*{dateOfBirth}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></p>
-                    </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">Address</span></label>
-                        <input type="text" th:field="*{address}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></p>
-                    </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">Phone Number</span></label>
-                        <input type="text" th:field="*{phoneNumber}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></p>
-                    </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">NIC</span></label>
-                        <input type="text" th:field="*{nic}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('nic')}" th:errors="*{nic}"></p>
-                    </div>
-                    <div class="card-actions justify-end mt-6">
-                        <a th:href="@{/profile}" class="btn btn-ghost">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Save Changes</button>
-                    </div>
-                </form>
+                </div>
             </div>
         </div>
+    </main>
 
-        <!-- Change Password Card -->
-        <div class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title text-2xl">Change Password</h2>
-                <form th:action="@{/profile/change-password}" th:object="${passwordChangeDto}" method="post" class="space-y-4 mt-4">
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">Current Password</span></label>
-                        <input type="password" th:field="*{currentPassword}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('currentPassword')}" th:errors="*{currentPassword}"></p>
-                    </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">New Password</span></label>
-                        <input type="password" th:field="*{newPassword}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('newPassword')}" th:errors="*{newPassword}"></p>
-                    </div>
-                    <div class="form-control">
-                        <label class="label"><span class="label-text">Confirm New Password</span></label>
-                        <input type="password" th:field="*{confirmNewPassword}" class="input input-bordered"/>
-                        <p class="text-error text-xs mt-1" th:if="${#fields.hasErrors('confirmNewPassword')}" th:errors="*{confirmNewPassword}"></p>
-                    </div>
-                    <div class="card-actions justify-end mt-6">
-                        <button type="submit" class="btn btn-primary">Change Password</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</main>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

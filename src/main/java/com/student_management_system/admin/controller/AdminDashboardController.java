@@ -57,6 +57,12 @@ public class AdminDashboardController {
         return "admin/dashboard";
     }
 
+    @GetMapping("/users")
+    public String showUsersList(Model model) {
+        model.addAttribute("users", adminService.getAllUsers());
+        return "admin/users";
+    }
+
     @PostMapping("/users/create")
     public String createUser(@Valid @ModelAttribute("newUser") CreateUserDto createUserDto,
                            BindingResult bindingResult,

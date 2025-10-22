@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users Management - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body class="bg-light">
+<div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: sidebar}"></div>
+
+<main class="main-content p-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-people"></i> Users</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-primary mb-0"><i class="bi bi-people"></i> Users Management</h1>
+        <a th:href="@{/register}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Add New User
+        </a>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" th:text="${successMessage}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" th:text="${errorMessage}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Users Table -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0 text-black"><i class="bi bi-list-ul"></i> All Users</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th><i class="bi bi-person-badge"></i> Username</th>
+                            <th><i class="bi bi-envelope"></i> Email</th>
+                            <th><i class="bi bi-person-vcard"></i> Name</th>
+                            <th><i class="bi bi-shield"></i> Role</th>
+                            <th><i class="bi bi-toggle2-on"></i> Status</th>
+                            <th><i class="bi bi-gear"></i> Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="user : ${users}">
+                            <td th:text="${user.username}">john_doe</td>
+                            <td th:text="${user.email}">john@example.com</td>
+                            <td th:text="${user.firstName + ' ' + user.lastName}">John Doe</td>
+                            <td>
+                                <span class="badge" th:switch="${user.role.name()}">
+                                    <span th:case="'ROLE_ADMIN'" class="badge bg-danger" th:text="${user.role.name().replace('ROLE_', '')}">ADMIN</span>
+                                    <span th:case="'ROLE_TEACHER'" class="badge bg-info" th:text="${user.role.name().replace('ROLE_', '')}">TEACHER</span>
+                                    <span th:case="'ROLE_STUDENT'" class="badge bg-success" th:text="${user.role.name().replace('ROLE_', '')}">STUDENT</span>
+                                    <span th:case="'ROLE_PRINCIPAL'" class="badge bg-warning" th:text="${user.role.name().replace('ROLE_', '')}">PRINCIPAL</span>
+                                    <span th:case="'ROLE_STAFF'" class="badge bg-secondary" th:text="${user.role.name().replace('ROLE_', '')}">STAFF</span>
+                                    <span th:case="*" class="badge bg-primary" th:text="${user.role.name().replace('ROLE_', '')}">USER</span>
+                                </span>
+                            </td>
+                            <td>
+                                <span th:if="${user.enabled}" class="badge bg-success">Active</span>
+                                <span th:if="${!user.enabled}" class="badge bg-danger">Inactive</span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a th:href="@{/admin/users/{id}/edit(id=${user.id})}" class="btn btn-outline-primary" title="Edit">
+                                        <i class="bi bi-pencil"></i>
+                                    </a>
+                                    <form th:action="@{/admin/users/{id}/delete(id=${user.id})}" method="post" class="d-inline" 
+                                          th:if="${user.username != #authentication.name}"
+                                          onsubmit="return confirm('Are you sure you want to delete this user?');">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-outline-danger btn-sm disabled" title="Cannot delete your own account"
+                                            th:if="${user.username == #authentication.name}" disabled>
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(users)}">
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox" style="font-size: 2rem; color: #ccc;"></i>
+                                <p class="mt-2">No users found</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

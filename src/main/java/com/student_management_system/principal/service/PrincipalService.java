@@ -12,6 +12,7 @@ import com.student_management_system.user_management.repository.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.transaction.annotation.Transactional;
+import com.student_management_system.common.service.NotificationService;
 
 import java.util.Collections;
 import java.time.LocalDateTime;
@@ -21,6 +22,11 @@ import com.student_management_system.user_management.model.Role;
 import com.student_management_system.common.model.BudgetRequest;
 import com.student_management_system.common.model.RequestStatus;
 import com.student_management_system.common.repository.BudgetRequestRepository;
+import com.student_management_system.student.repository.SubjectRepository;
+import com.student_management_system.student.repository.TimetableEntryRepository;
+import com.student_management_system.common.model.AcademicYear;
+import com.student_management_system.common.service.AcademicYearService;
+import com.student_management_system.common.repository.TimeSlotRepository;
 
 import java.util.ArrayList;
 
@@ -37,12 +43,22 @@ public class PrincipalService {
     private final AnnouncementRepository announcementRepository;
     private final UserRepository userRepository;
     private final BudgetRequestRepository budgetRequestRepository;
+    private final NotificationService notificationService;
+    private final SubjectRepository subjectRepository;
+    private final AcademicYearService academicYearService;
+    private final TimetableEntryRepository timetableEntryRepository;
+    private final TimeSlotRepository timeSlotRepository;
 
-    public PrincipalService(AssignmentRepository assignmentRepository, AnnouncementRepository announcementRepository, UserRepository userRepository, BudgetRequestRepository budgetRequestRepository) {
+    public PrincipalService(AssignmentRepository assignmentRepository, AnnouncementRepository announcementRepository, UserRepository userRepository, BudgetRequestRepository budgetRequestRepository, NotificationService notificationService, SubjectRepository subjectRepository, AcademicYearService academicYearService, TimetableEntryRepository timetableEntryRepository, TimeSlotRepository timeSlotRepository) {
         this.assignmentRepository = assignmentRepository;
         this.announcementRepository = announcementRepository;
         this.userRepository = userRepository;
         this.budgetRequestRepository = budgetRequestRepository;
+        this.notificationService = notificationService;
+        this.subjectRepository = subjectRepository;
+        this.academicYearService = academicYearService;
+        this.timetableEntryRepository = timetableEntryRepository;
+        this.timeSlotRepository = timeSlotRepository;
     }
 
     public List<SubjectPerformanceDto> getSubjectPerformanceReport() {
@@ -111,6 +127,50 @@ public class PrincipalService {
         announcement.setPublishedDate(LocalDateTime.now());
 
         announcementRepository.save(announcement);
+        
+        sendAnnouncementNotifications(title, content);
+    }
+    
+    private void sendAnnouncementNotifications(String title, String content) {
+        // Get all users to notify
+        List<User> allUsers = userRepository.findAll();
+        
+        // Prepare notification message
+        String notificationMessage = "New Announcement: " + content;
+        
+        for (User user : allUsers) {
+            // Skip if user has no email
+            if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+                continue;
+            }
+            
+            // Strategy Pattern in action: Choose notification strategy based on user role
+            switch (user.getRole()) {
+                case ROLE_STUDENT:
+                case ROLE_PARENT:
+                    // For students and parents: Send in-app notification (default strategy)
+                    notificationService.sendInAppNotification(user.getEmail(), title, notificationMessage);
+                    break;
+                    
+                case ROLE_TEACHER:
+                case ROLE_STAFF:
+                    // For teachers and staff: Send both email and in-app notifications
+                    notificationService.sendEmailNotification(user.getEmail(), title, notificationMessage);
+                    notificationService.sendInAppNotification(user.getEmail(), title, notificationMessage);
+                    break;
+                    
+                case ROLE_ADMIN:
+                case ROLE_PRINCIPAL:
+                    // For admins and principals: Send via all available strategies (broadcast)
+                    notificationService.broadcastNotification(user.getEmail(), title, notificationMessage);
+                    break;
+                    
+                default:
+                    // Default: In-app notification
+                    notificationService.sendInAppNotification(user.getEmail(), title, notificationMessage);
+                    break;
+            }
+        }
     }
 
     // Generate the Teacher Performance Report
@@ -173,5 +233,78 @@ public class PrincipalService {
                 .orElseThrow(() -> new RuntimeException("Request not found"));
         request.setStatus(RequestStatus.REJECTED);
         budgetRequestRepository.save(request);
+    }
+    
+    // Get total number of students
+    public long getTotalStudents() {
+        return userRepository.countByRole(Role.ROLE_STUDENT);
+    }
+    
+    // Get total number of teachers
+    public long getTotalTeachers() {
+        return userRepository.countByRole(Role.ROLE_TEACHER);
+    }
+    
+    // Get total number of subjects
+    public long getTotalSubjects() {
+        // Count all subjects in the system
+        return subjectRepository.count();
+    }
+    
+    // Get current academic year
+    public AcademicYear getCurrentAcademicYear() {
+        return academicYearService.getCurrentAcademicYear().orElse(null);
+    }
+    
+    // Get latest announcement
+    public Announcement getLatestAnnouncement() {
+        List<Announcement> announcements = announcementRepository.findAllByOrderByPublishedDateDesc();
+        if (announcements != null && !announcements.isEmpty()) {
+            return announcements.get(0);
+        }
+        return null;
+    }
+    
+    // Get master timetable
+    public List<Object> getMasterTimetable() {
+        // Get all timetable entries from the database
+        return new ArrayList<>(timetableEntryRepository.findAll());
+    }
+    
+    // Get all users
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+    
+    // Get time slots for grid display
+    public List<Object> getTimeSlots() {
+        // Get all time slots from database
+        return new ArrayList<>(timeSlotRepository.findAll());
+    }
+    
+    // Get week days
+    public List<String> getWeekDays() {
+        List<String> days = new ArrayList<>();
+        days.add("MONDAY");
+        days.add("TUESDAY");
+        days.add("WEDNESDAY");
+        days.add("THURSDAY");
+        days.add("FRIDAY");
+        days.add("SATURDAY");
+        return days;
+    }
+    
+    // Get timetable grid organized by day and time slot
+    public Map<String, Object> getTimetableGrid() {
+        Map<String, Object> grid = new java.util.HashMap<>();
+        List<Object> allEntries = getMasterTimetable();
+        
+        // Organize entries by day_timeslot key
+        for (Object entry : allEntries) {
+            // This would need proper casting and organization
+            // For now, return empty grid
+        }
+        
+        return grid;
     }
 }

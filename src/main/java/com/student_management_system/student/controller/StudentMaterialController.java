@@ -4,7 +4,6 @@ import com.student_management_system.common.service.FileStorageService;
 import com.student_management_system.student.model.Subject;
 import com.student_management_system.student.repository.SubjectRepository;
 import com.student_management_system.student.service.StudentService;
-import com.student_management_system.teacher.model.StudyMaterial;
 import com.student_management_system.user_management.model.User;
 import com.student_management_system.user_management.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;

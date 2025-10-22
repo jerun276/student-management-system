@@ -3,123 +3,156 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Subject - Student Management System</title>
+    <title>Create Subject - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
-<div th:replace="~{fragments/header :: header}"></div>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-primary">Create New Subject</h1>
-        <a th:href="@{/admin/subjects}" class="btn btn-outline">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            Back to Subjects
-        </a>
-    </div>
+    <main class="main-content p-4">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+                <li class="breadcrumb-item"><a th:href="@{/admin/subjects}" class="text-decoration-none"><i class="bi bi-book"></i> Subjects</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-book-plus"></i> Create Subject</li>
+            </ol>
+        </nav>
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 text-primary fw-bold mb-0"><i class="bi bi-book-plus"></i> Create New Subject</h1>
+                    <p class="text-muted small">Add a new subject to the curriculum</p>
+                </div>
+                <a th:href="@{/admin/subjects}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Subjects
+                </a>
+            </div>
 
-    <!-- Error Messages -->
-    <div th:if="${error}" class="alert alert-error shadow-lg mb-6" th:text="${error}"></div>
+            <!-- Error Messages -->
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
 
-    <!-- Create Subject Form -->
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <h3 class="card-title">Subject Information</h3>
-            
-            <form th:action="@{/admin/subjects/create}" th:object="${subject}" method="post">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Subject Name -->
-                    <div class="md:col-span-2">
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Subject Name <span class="text-red-500">*</span>
-                            <span th:if="${#fields.hasErrors('name')}" class="text-red-500 text-xs">
-                                <span th:each="error : ${#fields.errors('name')}" th:text="${error.message}"></span>
-                            </span>
-                        </label>
-                        <input type="text" th:field="*{name}" id="name" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., Mathematics, Physics, English Literature">
-                    </div>
+        <!-- Create Subject Form -->
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card shadow-sm">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Subject Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/admin/subjects/create}" th:object="${subject}" method="post">
+                                <div class="row">
+                                    <!-- Subject Name -->
+                                    <div class="col-12 mb-3">
+                                        <label for="name" class="form-label fw-bold">
+                                            Subject Name <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" th:field="*{name}" id="name" class="form-control" 
+                                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid' : ''"
+                                               placeholder="e.g., Mathematics, Physics, English Literature" required/>
+                                        <div th:if="${#fields.hasErrors('name')}" class="invalid-feedback" th:errors="*{name}"></div>
+                                    </div>
 
-                    <!-- Subject Code -->
-                    <div>
-                        <label for="subjectCode" class="block text-sm font-medium text-gray-700 mb-2">
-                            Subject Code <span class="text-red-500">*</span>
-                        </label>
-                        <input type="text" th:field="*{subjectCode}" id="subjectCode" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., MATH10, PHYS11, ENG09">
-                        <p class="text-xs text-gray-500 mt-1">Unique identifier for the subject</p>
-                    </div>
+                                    <!-- Subject Code -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="subjectCode" class="form-label fw-bold">
+                                            Subject Code <span class="text-danger">*</span>
+                                        </label>
+                                        <input type="text" th:field="*{subjectCode}" id="subjectCode" class="form-control" 
+                                               th:classappend="${#fields.hasErrors('subjectCode')} ? 'is-invalid' : ''"
+                                               placeholder="e.g., MATH10, PHYS11" required/>
+                                        <small class="text-muted d-block mt-1">Unique identifier for the subject</small>
+                                        <div th:if="${#fields.hasErrors('subjectCode')}" class="invalid-feedback" th:errors="*{subjectCode}"></div>
+                                    </div>
 
-                    <!-- Grade Level -->
-                    <div>
-                        <label for="gradeLevelId" class="block text-sm font-medium text-gray-700 mb-2">
-                            Grade Level <span class="text-red-500">*</span>
-                        </label>
-                        <select name="gradeLevelId" id="gradeLevelId" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select Grade Level</option>
-                            <option th:each="grade : ${gradeLevels}" th:value="${grade.id}" th:text="${grade.name}">
-                            </option>
-                        </select>
-                    </div>
+                                    <!-- Grade Level -->
+                                    <div class="col-md-6 mb-3">
+                                        <label for="gradeLevelId" class="form-label fw-bold">
+                                            Grade Level <span class="text-danger">*</span>
+                                        </label>
+                                        <select name="gradeLevelId" id="gradeLevelId" class="form-select" required>
+                                            <option value="">Select Grade Level</option>
+                                            <option th:each="grade : ${gradeLevels}" th:value="${grade.id}" th:text="${grade.name}"></option>
+                                        </select>
+                                    </div>
 
-                    <!-- Description -->
-                    <div class="md:col-span-2">
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                            Description
-                        </label>
-                        <textarea th:field="*{description}" id="description" rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="Brief description of the subject curriculum and objectives"></textarea>
-                    </div>
+                                    <!-- Description -->
+                                    <div class="col-12 mb-3">
+                                        <label for="description" class="form-label fw-bold">Description</label>
+                                        <textarea th:field="*{description}" id="description" class="form-control" rows="4"
+                                                  placeholder="Brief description of the subject curriculum and objectives"></textarea>
+                                    </div>
 
-                    <!-- Teacher Assignment -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Assign Teachers (Optional)
-                        </label>
-                        <div class="border border-gray-300 rounded-md p-4 max-h-48 overflow-y-auto">
-                            <div th:if="${#lists.isEmpty(teachers)}" class="text-gray-500 text-center py-4">
-                                No teachers available for assignment
-                            </div>
-                            <div th:if="${!#lists.isEmpty(teachers)}" class="space-y-2">
-                                <div th:each="teacher : ${teachers}" class="flex items-center">
-                                    <input type="checkbox" th:id="'teacher_' + ${teacher.id}" name="teacherIds"
-                                        th:value="${teacher.id}"
-                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                    <label th:for="'teacher_' + ${teacher.id}"
-                                        class="ml-2 block text-sm text-gray-900 cursor-pointer">
-                                        <span th:text="${teacher.firstName + ' ' + teacher.lastName}"></span>
-                                        <span class="text-gray-500" th:text="'(' + ${teacher.email} + ')'"></span>
-                                    </label>
+                                    <!-- Teacher Assignment -->
+                                    <div class="col-12 mb-3">
+                                        <label class="form-label fw-bold">Assign Teachers (Optional)</label>
+                                        <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                            <div th:if="${#lists.isEmpty(teachers)}" class="text-muted text-center py-3">
+                                                No teachers available for assignment
+                                            </div>
+                                            <div th:if="${!#lists.isEmpty(teachers)}" class="space-y-2">
+                                                <div th:each="teacher : ${teachers}" class="form-check">
+                                                    <input type="checkbox" th:id="'teacher_' + ${teacher.id}" name="teacherIds"
+                                                           th:value="${teacher.id}" class="form-check-input">
+                                                    <label th:for="'teacher_' + ${teacher.id}" class="form-check-label">
+                                                        <span th:text="${teacher.firstName + ' ' + teacher.lastName}"></span>
+                                                        <span class="text-muted" th:text="'(' + ${teacher.email} + ')'"></span>
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">Select teachers who will teach this subject</small>
+                                    </div>
                                 </div>
+
+                                <!-- Form Actions -->
+                                <hr>
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="/admin/subjects" class="btn btn-outline-secondary">
+                                        <i class="bi bi-x-circle"></i> Cancel
+                                    </a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> Create Subject
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+            <!-- Info Sidebar -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Information</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-2">Subject Code Auto-Generation</h6>
+                            <p class="small text-muted mb-3">The subject code will be automatically generated based on the subject name and grade level, but you can customize it.</p>
+                            
+                            <h6 class="fw-bold mb-2">Teacher Assignment</h6>
+                            <p class="small text-muted mb-3">You can assign multiple teachers to teach this subject. Teachers can be added or removed later.</p>
+                            
+                            <div class="alert alert-info small" role="alert">
+                                <i class="bi bi-lightbulb"></i> <strong>Tip:</strong> Fill in all required fields marked with an asterisk (*).
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Select teachers who will teach this subject</p>
                     </div>
                 </div>
+            </div>
+    </main>
 
-                <!-- Form Actions -->
-                <div class="flex justify-end space-x-4 mt-8 pt-6 border-t border-gray-200">
-                    <a href="/admin/subjects"
-                        class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                        Cancel
-                    </a>
-                    <button type="submit"
-                        class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        Create Subject
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Auto-generate subject code based on name and grade level
         document.addEventListener('DOMContentLoaded', function () {
             const nameInput = document.getElementById('name');
             const codeInput = document.getElementById('subjectCode');

@@ -2,168 +2,185 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="'Study Materials - ' + ${subject.name}">Study Materials</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="'Study Materials - ' + ${subject.name}">Study Materials - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
-<div th:replace="~{fragments/header :: header}"></div>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <!-- Breadcrumb -->
-    <div class="breadcrumbs text-sm mb-4">
-        <ul>
-            <li><a th:href="@{/student/dashboard}">Dashboard</a></li>
-            <li><a th:href="@{/student/materials}">Study Materials</a></li>
-            <li th:text="${subject.name}">Subject Name</li>
-        </ul>
-    </div>
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Breadcrumb Navigation -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/student/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/student/materials}">Study Materials</a></li>
+                    <li class="breadcrumb-item active" th:text="${subject.name}">Subject Name</li>
+                </ol>
+            </nav>
 
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-3xl font-bold text-primary">
-                <span th:text="${subject.name}">Subject Name</span> Materials
-            </h1>
-            <p class="text-lg text-gray-600 mt-1" th:text="'Grade ' + ${subject.gradeLevel?.name ?: 'All Levels'}">Grade Level</p>
-        </div>
-        <div class="flex gap-2">
-            <a th:href="@{/student/materials}" class="btn btn-outline">← Back to Materials</a>
-        </div>
-    </div>
-
-    <!-- Subject Info Card -->
-    <div class="card bg-base-100 shadow-xl mb-6">
-        <div class="card-body">
-            <div class="flex items-center space-x-4">
-                <div class="avatar placeholder">
-                    <div class="bg-primary text-primary-content rounded-full w-16 h-16">
-                        <span class="text-xl font-bold" th:text="${subject.name?.substring(0,2)?.toUpperCase() ?: 'SU'}">SU</span>
-                    </div>
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 text-primary fw-bold mb-0">
+                        <span th:text="${subject.name}">Subject Name</span> Materials
+                    </h1>
+                    <p class="text-muted small" th:text="'Grade ' + ${subject.gradeLevel?.name ?: 'All Levels'}">Grade Level</p>
                 </div>
-                <div class="flex-1">
-                    <h2 class="text-2xl font-bold" th:text="${subject.name}">Subject Name</h2>
-                    <p class="text-gray-600" th:text="${subject.description ?: 'Study materials and resources for this subject'}">Subject description</p>
-                    <div class="flex gap-2 mt-2">
-                        <span class="badge badge-outline" th:text="${subject.gradeLevel?.name ?: 'All Grades'}">Grade Level</span>
-                        <span class="badge badge-primary" th:text="${materials?.size() ?: 0} + ' Materials'">0 Materials</span>
+                <a th:href="@{/student/materials}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Materials
+                </a>
+            </div>
+
+            <!-- Subject Info Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0"><i class="bi bi-book"></i> Subject Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-2 text-center mb-3">
+                            <div class="avatar placeholder mb-2">
+                                <div class="bg-primary text-white rounded-circle" style="width: 80px; height: 80px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+                                    <span th:text="${subject.name?.substring(0,2)?.toUpperCase() ?: 'SU'}">SU</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-10">
+                            <h4 class="fw-bold" th:text="${subject.name}">Subject Name</h4>
+                            <p class="text-muted" th:text="${subject.description ?: 'Study materials and resources for this subject'}">Subject description</p>
+                            <div class="d-flex gap-2 mt-2">
+                                <span class="badge bg-light text-dark" th:text="${subject.gradeLevel?.name ?: 'All Grades'}">Grade Level</span>
+                                <span class="badge bg-primary" th:text="${materials?.size() ?: 0} + ' Materials'">0 Materials</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    <!-- Materials List -->
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <h2 class="card-title mb-4">Available Materials</h2>
-            
-            <!-- Empty State -->
-            <div th:if="${materials == null || materials.isEmpty()}" class="text-center py-12">
-                <div class="text-6xl mb-4">📄</div>
-                <h3 class="text-xl font-bold mb-2">No Materials Available</h3>
-                <p class="text-gray-600">There are no study materials available for this subject yet.</p>
-                <div class="mt-4">
-                    <a th:href="@{/student/materials}" class="btn btn-primary">Browse Other Subjects</a>
+            <!-- Materials List -->
+            <div class="card">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0"><i class="bi bi-file-earmark-pdf"></i> Available Materials</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Empty State -->
+                    <div th:if="${materials == null || materials.isEmpty()}" class="text-center py-5">
+                        <i class="bi bi-file-earmark" style="font-size: 3rem; color: #ccc;"></i>
+                        <h5 class="mt-3">No Materials Available</h5>
+                        <p class="text-muted">There are no study materials available for this subject yet.</p>
+                        <a th:href="@{/student/materials}" class="btn btn-primary mt-2">
+                            <i class="bi bi-arrow-left"></i> Browse Other Subjects
+                        </a>
+                    </div>
+
+                    <!-- Materials Table -->
+                    <div th:if="${materials != null && !materials.isEmpty()}" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="bi bi-file-earmark\"></i> Material</th>
+                                    <th>Type</th>
+                                    <th>Uploaded</th>
+                                    <th>Size</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="material : ${materials}">
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="avatar placeholder">
+                                                <div class="bg-secondary text-white rounded" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; font-size: 0.75rem;">
+                                                    <span th:text="${material.fileName?.substring(material.fileName.lastIndexOf('.') + 1)?.toUpperCase() ?: 'FILE'}">PDF</span>
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <strong th:text="${material.title}">Material Title</strong>
+                                                <br>
+                                                <small class="text-muted" th:text="${material.description}">Material description</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-light text-dark" th:text="${material.fileName?.substring(material.fileName.lastIndexOf('.') + 1)?.toUpperCase() ?: 'FILE'}">PDF</span>
+                                    </td>
+                                    <td>
+                                        <div th:text="${#temporals.format(material.uploadDate, 'dd MMM yyyy')}">Upload Date</div>
+                                        <small class="text-muted" th:text="${material.uploadedBy?.firstName + ' ' + material.uploadedBy?.lastName ?: 'Teacher'}">Uploaded by</small>
+                                    </td>
+                                    <td>--</td>
+                                    <td>
+                                        <a th:href="@{/student/materials/download/{fileName}(fileName=${material.fileName})}" class="btn btn-primary btn-sm">
+                                            <i class="bi bi-download"></i> Download
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <!-- Materials Table -->
-            <div th:if="${materials != null && !materials.isEmpty()}" class="overflow-x-auto">
-                <table class="table table-zebra w-full">
-                    <thead>
-                    <tr>
-                        <th>Material</th>
-                        <th>Type</th>
-                        <th>Uploaded</th>
-                        <th>Size</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="material : ${materials}">
-                        <td>
-                            <div class="flex items-center space-x-3">
-                                <div class="avatar placeholder">
-                                    <div class="bg-neutral-focus text-neutral-content rounded w-10 h-10">
-                                        <span class="text-xs" th:text="${material.fileName?.substring(material.fileName.lastIndexOf('.') + 1)?.toUpperCase() ?: 'FILE'}">PDF</span>
+            <!-- Study Guidelines -->
+            <div class="card mt-4">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0"><i class="bi bi-lightbulb"></i> How to Use These Materials</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-primary">1</span>
+                                    <div>
+                                        <h6 class="fw-bold">Download Materials</h6>
+                                        <small class="text-muted">Click the download button to save materials to your device for offline study.</small>
                                     </div>
                                 </div>
-                                <div>
-                                    <div class="font-bold" th:text="${material.title}">Material Title</div>
-                                    <div class="text-sm opacity-50" th:text="${material.description}">Material description</div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-primary">2</span>
+                                    <div>
+                                        <h6 class="fw-bold">Organize Files</h6>
+                                        <small class="text-muted">Create folders on your device to organize materials by subject and topic.</small>
+                                    </div>
                                 </div>
                             </div>
-                        </td>
-                        <td>
-                            <span class="badge badge-ghost" th:text="${material.fileName?.substring(material.fileName.lastIndexOf('.') + 1)?.toUpperCase() ?: 'FILE'}">PDF</span>
-                        </td>
-                        <td>
-                            <div th:text="${#temporals.format(material.uploadDate, 'dd MMM yyyy')}">Upload Date</div>
-                            <div class="text-sm opacity-50" th:text="${material.uploadedBy?.firstName + ' ' + material.uploadedBy?.lastName ?: 'Teacher'}">Uploaded by</div>
-                        </td>
-                        <td>
-                            <span class="text-sm opacity-70">--</span>
-                        </td>
-                        <td>
-                            <div class="flex gap-2">
-                                <a th:href="@{/student/materials/download/{fileName}(fileName=${material.fileName})}"
-                                   class="btn btn-primary btn-sm">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-1">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                                    </svg>
-                                    Download
-                                </a>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-primary">3</span>
+                                    <div>
+                                        <h6 class="fw-bold">Regular Study</h6>
+                                        <small class="text-muted">Review materials regularly and make notes for better understanding.</small>
+                                    </div>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Study Guidelines -->
-    <div class="card bg-base-100 shadow-xl mt-6">
-        <div class="card-body">
-            <h2 class="card-title">📚 How to Use These Materials</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                <div class="space-y-3">
-                    <div class="flex items-start space-x-3">
-                        <div class="badge badge-primary">1</div>
-                        <div>
-                            <h4 class="font-semibold">Download Materials</h4>
-                            <p class="text-sm opacity-70">Click the download button to save materials to your device for offline study.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-3">
-                        <div class="badge badge-primary">2</div>
-                        <div>
-                            <h4 class="font-semibold">Organize Files</h4>
-                            <p class="text-sm opacity-70">Create folders on your device to organize materials by subject and topic.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="space-y-3">
-                    <div class="flex items-start space-x-3">
-                        <div class="badge badge-primary">3</div>
-                        <div>
-                            <h4 class="font-semibold">Regular Study</h4>
-                            <p class="text-sm opacity-70">Review materials regularly and make notes for better understanding.</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-3">
-                        <div class="badge badge-primary">4</div>
-                        <div>
-                            <h4 class="font-semibold">Ask Questions</h4>
-                            <p class="text-sm opacity-70">Contact your teacher if you need help understanding any material.</p>
+                            <div class="mb-3">
+                                <div class="d-flex gap-2">
+                                    <span class="badge bg-primary">4</span>
+                                    <div>
+                                        <h6 class="fw-bold">Ask Questions</h6>
+                                        <small class="text-muted">Contact your teacher if you need help understanding any material.</small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
+    </main>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

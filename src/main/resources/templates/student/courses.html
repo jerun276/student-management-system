@@ -3,99 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <title>My Courses</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
+<body class="bg-light">
 <div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-primary">My Courses</h1>
-        <div class="flex gap-2">
-            <a th:href="@{/student/dashboard}" class="btn btn-ghost">← Back to Dashboard</a>
-            <a th:href="@{/student/assignments}" class="btn btn-outline">My Assignments</a>
+<main class="main-content p-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/student/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-book"></i> My Courses</li>
+        </ol>
+    </nav>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-primary mb-0"><i class="bi bi-book"></i> My Courses</h1>
+        <div class="btn-group" role="group">
+            <a th:href="@{/student/dashboard}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
+            <a th:href="@{/student/assignments}" class="btn btn-outline-primary"><i class="bi bi-file-earmark-text"></i> Assignments</a>
         </div>
     </div>
 
     <!-- Academic Info Card -->
-    <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Academic Information</h5>
+        </div>
         <div class="card-body">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 class="card-title">Academic Information</h2>
-                    <div class="flex gap-6 mt-2">
-                        <div>
-                            <span class="font-semibold">Classroom:</span>
-                            <span th:text="${currentEnrollment?.classroom?.fullName ?: 'Not Enrolled'}" class="ml-2">Grade 10-A (English Medium)</span>
+            <div class="row align-items-center">
+                <div class="col-md-9">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Classroom</small>
+                            <strong th:text="${currentEnrollment?.classroom?.fullName ?: 'Not Enrolled'}">Grade 10-A (English Medium)</strong>
                         </div>
-                        <div>
-                            <span class="font-semibold">Academic Year:</span>
-                            <span th:text="${currentEnrollment?.academicYear?.name ?: 'N/A'}" class="ml-2">2024-2025</span>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Academic Year</small>
+                            <strong th:text="${currentEnrollment?.academicYear?.name ?: 'N/A'}">2024-2025</strong>
                         </div>
-                        <div>
-                            <span class="font-semibold">Class Teacher:</span>
-                            <span th:text="${currentEnrollment?.classroom?.classTeacher?.firstName + ' ' + currentEnrollment?.classroom?.classTeacher?.lastName ?: 'Not Assigned'}" class="ml-2">John Smith</span>
+                        <div class="col-md-4">
+                            <small class="text-muted d-block">Class Teacher</small>
+                            <strong th:text="${currentEnrollment?.classroom?.classTeacher?.firstName + ' ' + currentEnrollment?.classroom?.classTeacher?.lastName ?: 'Not Assigned'}">John Smith</strong>
                         </div>
                     </div>
                 </div>
-                <div class="text-right">
-                    <div class="stat">
-                        <div class="stat-title">Total Courses</div>
-                        <div class="stat-value text-primary" th:text="${myCourses?.size() ?: 0}">5</div>
-                    </div>
+                <div class="col-md-3 text-end">
+                    <small class="text-muted d-block">Total Courses</small>
+                    <h5 class="fw-bold text-primary mb-0" th:text="${myCourses?.size() ?: 0}">5</h5>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Courses Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div th:each="course : ${myCourses}" class="card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title">
-                    <span th:text="${course.subject.name}">Mathematics</span>
-                    <div class="badge badge-primary" th:text="${course.subject.code}">MATH</div>
-                </h2>
-                
-                <div class="space-y-2">
-                    <div class="flex justify-between">
-                        <span class="font-semibold">Teacher:</span>
-                        <span th:text="${course.teacher.firstName + ' ' + course.teacher.lastName}">John Smith</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="font-semibold">Classroom:</span>
-                        <span th:text="${course.classroom.gradeLevel.name + '-' + course.classroom.name}">Grade 10-A</span>
-                    </div>
-                    <div class="flex justify-between">
-                        <span class="font-semibold">Medium:</span>
-                        <span class="badge badge-outline" th:text="${course.classroom.medium}">ENGLISH</span>
-                    </div>
-                    <div th:if="${course.description}" class="text-sm opacity-70" th:text="${course.description}">
-                        Course description here
-                    </div>
+    <div class="row g-4 mb-4">
+        <div th:each="course : ${myCourses}" class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0" th:text="${course.subject.name}">Mathematics</h5>
+                    <small class="text-muted" th:text="${course.subject.code}">MATH</small>
                 </div>
-
-                <div class="card-actions justify-end mt-4">
-                    <div class="dropdown dropdown-top dropdown-end">
-                        <label tabindex="0" class="btn btn-primary btn-sm">Actions</label>
-                        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                            <li><a th:href="@{/student/courses/{id}/assignments(id=${course.id})}">View Assignments</a></li>
-                            <li><a th:href="@{/student/courses/{id}/materials(id=${course.id})}">Study Materials</a></li>
-                            <li><a th:href="@{/student/courses/{id}/timetable(id=${course.id})}">Timetable</a></li>
-                            <li><a th:href="@{/student/courses/{id}/attendance(id=${course.id})}">My Attendance</a></li>
-                        </ul>
+                <div class="card-body">
+                    <p class="mb-2">
+                        <strong>Teacher:</strong> <span th:text="${course.teacher.firstName + ' ' + course.teacher.lastName}">John Smith</span>
+                    </p>
+                    <p class="mb-2">
+                        <strong>Classroom:</strong> <span th:text="${course.classroom.gradeLevel.name + '-' + course.classroom.name}">Grade 10-A</span>
+                    </p>
+                    <p class="mb-3">
+                        <strong>Medium:</strong> <span class="badge bg-primary" th:text="${course.classroom.medium}">ENGLISH</span>
+                    </p>
+                    <p class="text-muted small mb-3" th:if="${course.description}" th:text="${course.description}">Course description here</p>
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <small class="text-muted d-block">Assignments</small>
+                            <h6 class="fw-bold" th:text="${course.assignments?.size() ?: 0}">3</h6>
+                        </div>
+                        <div class="col-6">
+                            <small class="text-muted d-block">Materials</small>
+                            <h6 class="fw-bold" th:text="${course.studyMaterials?.size() ?: 0}">8</h6>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Quick Stats for this course -->
-                <div class="grid grid-cols-2 gap-2 mt-4 pt-4 border-t">
-                    <div class="stat p-2">
-                        <div class="stat-title text-xs">Assignments</div>
-                        <div class="stat-value text-sm" th:text="${course.assignments?.size() ?: 0}">3</div>
-                    </div>
-                    <div class="stat p-2">
-                        <div class="stat-title text-xs">Materials</div>
-                        <div class="stat-value text-sm" th:text="${course.studyMaterials?.size() ?: 0}">8</div>
+                    <div class="btn-group w-100" role="group">
+                        <a th:href="@{/student/courses/{id}/assignments(id=${course.id})}" class="btn btn-sm btn-outline-primary" title="Assignments"><i class="bi bi-file-earmark-text"></i></a>
+                        <a th:href="@{/student/courses/{id}/materials(id=${course.id})}" class="btn btn-sm btn-outline-primary" title="Materials"><i class="bi bi-file-earmark-pdf"></i></a>
+                        <a th:href="@{/student/courses/{id}/timetable(id=${course.id})}" class="btn btn-sm btn-outline-primary" title="Timetable"><i class="bi bi-calendar"></i></a>
+                        <a th:href="@{/student/courses/{id}/attendance(id=${course.id})}" class="btn btn-sm btn-outline-primary" title="Attendance"><i class="bi bi-check-circle"></i></a>
                     </div>
                 </div>
             </div>
@@ -103,41 +98,53 @@
     </div>
 
     <!-- Empty State -->
-    <div th:if="${myCourses == null or myCourses.isEmpty()}" class="card bg-base-100 shadow-xl">
-        <div class="card-body text-center">
-            <h2 class="card-title justify-center">No Courses Enrolled</h2>
-            <p>You are not currently enrolled in any courses.</p>
-            <p class="text-sm opacity-70">Please contact the administration or your class teacher for enrollment assistance.</p>
-            <div class="card-actions justify-center mt-4">
-                <a th:href="@{/student/dashboard}" class="btn btn-primary">Back to Dashboard</a>
-            </div>
-        </div>
+    <div th:if="${myCourses == null or myCourses.isEmpty()}" class="alert alert-info" role="alert">
+        <i class="bi bi-info-circle"></i>
+        <strong>No Courses Enrolled</strong> - You are not currently enrolled in any courses. Please contact the administration or your class teacher for enrollment assistance.
     </div>
 
     <!-- Course Performance Summary -->
-    <div th:if="${myCourses != null and !myCourses.isEmpty()}" class="card bg-base-100 shadow-xl mt-6">
+    <div th:if="${myCourses != null and !myCourses.isEmpty()}" class="card shadow-sm mt-4">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0"><i class="bi bi-bar-chart"></i> Performance Summary</h5>
+        </div>
         <div class="card-body">
-            <h2 class="card-title">Performance Summary</h2>
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="stat">
-                    <div class="stat-title">Total Assignments</div>
-                    <div class="stat-value text-primary" th:text="${totalAssignments ?: 0}">15</div>
-                    <div class="stat-desc">Across all courses</div>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <small class="text-muted d-block">Total Assignments</small>
+                            <h5 class="fw-bold text-primary mb-0" th:text="${totalAssignments ?: 0}">15</h5>
+                            <small class="text-muted">Across all courses</small>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat">
-                    <div class="stat-title">Completed</div>
-                    <div class="stat-value text-success" th:text="${completedAssignments ?: 0}">12</div>
-                    <div class="stat-desc">Submitted assignments</div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <small class="text-muted d-block">Completed</small>
+                            <h5 class="fw-bold text-success mb-0" th:text="${completedAssignments ?: 0}">12</h5>
+                            <small class="text-muted">Submitted assignments</small>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat">
-                    <div class="stat-title">Pending</div>
-                    <div class="stat-value text-warning" th:text="${pendingAssignments ?: 0}">3</div>
-                    <div class="stat-desc">Due soon</div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <small class="text-muted d-block">Pending</small>
+                            <h5 class="fw-bold text-warning mb-0" th:text="${pendingAssignments ?: 0}">3</h5>
+                            <small class="text-muted">Due soon</small>
+                        </div>
+                    </div>
                 </div>
-                <div class="stat">
-                    <div class="stat-title">Average Grade</div>
-                    <div class="stat-value text-info" th:text="${averageGrade ?: 'N/A'}">B+</div>
-                    <div class="stat-desc">This semester</div>
+                <div class="col-md-3">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <small class="text-muted d-block">Average Grade</small>
+                            <h5 class="fw-bold text-info mb-0" th:text="${averageGrade ?: 'N/A'}">B+</h5>
+                            <small class="text-muted">This semester</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -145,5 +152,7 @@
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

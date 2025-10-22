@@ -5,12 +5,10 @@ import com.student_management_system.staff.model.Facility;
 import com.student_management_system.staff.service.StaffService;
 import com.student_management_system.user_management.model.User;
 import com.student_management_system.user_management.repository.UserRepository;
-import jakarta.validation.Valid;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -50,23 +48,34 @@ public class StaffFacilityController {
 
     // Handle the creation of a new booking
     @PostMapping("/bookings/create")
-    public String createBooking(@Valid @ModelAttribute("newBooking") Booking booking,
-                                BindingResult bindingResult,
+    public String createBooking(@RequestParam Long facilityId,
+                                @RequestParam String purpose,
+                                @RequestParam String startTime,
+                                @RequestParam String endTime,
                                 RedirectAttributes redirectAttributes) {
 
-        if (bindingResult.hasErrors()) {
-            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.newBooking", bindingResult);
-            redirectAttributes.addFlashAttribute("newBooking", booking);
-            return "redirect:/staff/facilities";
-        }
-
         try {
+            // Fetch the facility by ID
+            Facility facility = staffService.getFacilityById(facilityId);
+            if (facility == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Selected facility not found.");
+                return "redirect:/staff/facilities";
+            }
+
+            // Create booking object and set facility
+            Booking booking = new Booking();
+            booking.setFacility(facility);
+            booking.setPurpose(purpose);
+            booking.setStartTime(java.time.LocalDateTime.parse(startTime));
+            booking.setEndTime(java.time.LocalDateTime.parse(endTime));
+
             User currentUser = getCurrentUser();
             staffService.createBooking(booking, currentUser);
             redirectAttributes.addFlashAttribute("successMessage", "Booking confirmed successfully!");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
-            redirectAttributes.addFlashAttribute("newBooking", booking); // Send back the failed booking data
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error creating booking: " + e.getMessage());
         }
 
         return "redirect:/staff/facilities";

@@ -1,106 +1,79 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Subject - Student Management System</title>
-    <link href="/css/style.css" rel="stylesheet">
+    <title>Edit Subject - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
+<body class="bg-light">
+<div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: sidebar}"></div>
 
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-blue-600 text-white p-4">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <a href="/admin/dashboard" class="text-xl font-bold">Admin Panel</a>
-                <span class="text-blue-200">></span>
-                <a href="/admin/subjects" class="text-blue-200 hover:text-white">Subject Management</a>
-                <span class="text-blue-200">></span>
-                <span class="text-blue-200">Edit Subject</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                <span th:text="${#authentication.name}"></span>
-                <a href="/logout" class="bg-blue-700 px-3 py-1 rounded hover:bg-blue-800">Logout</a>
-            </div>
-        </div>
+<main class="main-content p-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/subjects}" class="text-decoration-none"><i class="bi bi-book"></i> Subjects</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-pencil"></i> Edit Subject</li>
+        </ol>
     </nav>
 
-    <div class="container mx-auto px-4 py-8">
-        <!-- Header -->
-        <div class="flex justify-between items-center mb-6">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-800">Edit Subject</h1>
-                <p class="text-gray-600 mt-2">
-                    Modify subject details for
-                    <span class="font-medium" th:text="${subject.name}"></span>
-                </p>
-            </div>
-            <div class="flex space-x-3">
-                <a th:href="@{/admin/subjects/{id}(id=${subject.id})}"
-                    class="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                        </path>
-                    </svg>
-                    View Details
-                </a>
-                <a href="/admin/subjects"
-                    class="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-                    </svg>
-                    Back to Subjects
-                </a>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h2 fw-bold text-primary mb-0"><i class="bi bi-pencil-square"></i> Edit Subject</h1>
+            <p class="text-muted small mt-2">
+                Modify subject details for
+                <span class="fw-bold" th:text="${subject.name}"></span>
+            </p>
         </div>
-
-        <!-- Error Messages -->
-        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
-            <span th:text="${error}"></span>
+        <div class="btn-group" role="group">
+            <a th:href="@{/admin/subjects/{id}(id=${subject.id})}"
+                class="btn btn-outline-secondary">
+                <i class="bi bi-eye"></i> View Details
+            </a>
+            <a th:href="@{/admin/subjects}"
+                class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Subjects
+            </a>
         </div>
+    </div>
 
-        <!-- Edit Subject Form -->
-        <div class="bg-white rounded-lg shadow-md">
-            <div class="px-6 py-4 border-b border-gray-200">
-                <h3 class="text-lg font-semibold text-gray-800">Subject Information</h3>
-            </div>
+    <!-- Error Messages -->
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert" th:text="${error}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
-            <form th:action="@{/admin/subjects/{id}/edit(id=${subject.id})}" th:object="${subject}" method="post"
-                class="p-6">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Edit Subject Form -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Subject Information</h5>
+        </div>
+        <div class="card-body">
+            <form th:action="@{/admin/subjects/{id}/edit(id=${subject.id})}" th:object="${subject}" method="post">
+                <div class="row">
                     <!-- Subject Name -->
-                    <div class="md:col-span-2">
-                        <label for="name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Subject Name <span class="text-red-500">*</span>
-                        </label>
+                    <div class="col-12 mb-3">
+                        <label for="name" class="form-label fw-bold">Subject Name <span class="text-danger">*</span></label>
                         <input type="text" th:field="*{name}" id="name" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., Mathematics, Physics, English Literature">
+                            class="form-control" placeholder="e.g., Mathematics, Physics, English Literature">
                     </div>
 
                     <!-- Subject Code -->
-                    <div>
-                        <label for="subjectCode" class="block text-sm font-medium text-gray-700 mb-2">
-                            Subject Code <span class="text-red-500">*</span>
-                        </label>
+                    <div class="col-md-6 mb-3">
+                        <label for="subjectCode" class="form-label fw-bold">Subject Code <span class="text-danger">*</span></label>
                         <input type="text" th:field="*{subjectCode}" id="subjectCode" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            placeholder="e.g., MATH10, PHYS11, ENG09">
-                        <p class="text-xs text-gray-500 mt-1">Unique identifier for the subject</p>
+                            class="form-control" placeholder="e.g., MATH10, PHYS11, ENG09">
+                        <small class="text-muted d-block mt-1">Unique identifier for the subject</small>
                     </div>
 
                     <!-- Grade Level -->
-                    <div>
-                        <label for="gradeLevelId" class="block text-sm font-medium text-gray-700 mb-2">
-                            Grade Level <span class="text-red-500">*</span>
-                        </label>
-                        <select name="gradeLevelId" id="gradeLevelId" required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <div class="col-md-6 mb-3">
+                        <label for="gradeLevelId" class="form-label fw-bold">Grade Level <span class="text-danger">*</span></label>
+                        <select name="gradeLevelId" id="gradeLevelId" required class="form-select">
                             <option value="">Select Grade Level</option>
                             <option th:each="grade : ${gradeLevels}" th:value="${grade.id}" th:text="${grade.name}"
                                 th:selected="${grade.id == subject.gradeLevel.id}"></option>
@@ -108,95 +81,80 @@
                     </div>
 
                     <!-- Description -->
-                    <div class="md:col-span-2">
-                        <label for="description" class="block text-sm font-medium text-gray-700 mb-2">
-                            Description
-                        </label>
-                        <textarea th:field="*{description}" id="description" rows="3"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    <div class="col-12 mb-3">
+                        <label for="description" class="form-label fw-bold">Description</label>
+                        <textarea th:field="*{description}" id="description" rows="3" class="form-control"
                             placeholder="Brief description of the subject curriculum and objectives"></textarea>
                     </div>
 
                     <!-- Teacher Assignment -->
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Assign Teachers
-                        </label>
-                        <div class="border border-gray-300 rounded-md p-4 max-h-48 overflow-y-auto">
-                            <div th:if="${#lists.isEmpty(teachers)}" class="text-gray-500 text-center py-4">
+                    <div class="col-12 mb-3">
+                        <label class="form-label fw-bold">Assign Teachers</label>
+                        <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                            <div th:if="${#lists.isEmpty(teachers)}" class="text-muted text-center py-3">
                                 No teachers available for assignment
                             </div>
-                            <div th:if="${!#lists.isEmpty(teachers)}" class="space-y-2">
-                                <div th:each="teacher : ${teachers}" class="flex items-center">
+                            <div th:if="${!#lists.isEmpty(teachers)}">
+                                <div th:each="teacher : ${teachers}" class="form-check mb-2">
                                     <input type="checkbox" th:id="'teacher_' + ${teacher.id}" name="teacherIds"
-                                        th:value="${teacher.id}"
-                                        th:checked="${#lists.contains(assignedTeachers, teacher)}"
-                                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                                    <label th:for="'teacher_' + ${teacher.id}"
-                                        class="ml-2 block text-sm text-gray-900 cursor-pointer">
+                                        th:value="${teacher.id}" class="form-check-input"
+                                        th:checked="${#lists.contains(assignedTeachers, teacher)}">
+                                    <label th:for="'teacher_' + ${teacher.id}" class="form-check-label">
                                         <span th:text="${teacher.firstName + ' ' + teacher.lastName}"></span>
-                                        <span class="text-gray-500" th:text="'(' + ${teacher.email} + ')'"></span>
-                                        <span th:if="${#lists.contains(assignedTeachers, teacher)}"
-                                            class="ml-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                            Currently Assigned
-                                        </span>
+                                        <span class="text-muted" th:text="'(' + ${teacher.email} + ')'"></span>
+                                        <span th:if="${#lists.contains(assignedTeachers, teacher)}" class="badge bg-success ms-2">Currently Assigned</span>
                                     </label>
                                 </div>
                             </div>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">Select teachers who will teach this subject</p>
+                        <small class="text-muted d-block mt-2">Select teachers who will teach this subject</small>
                     </div>
                 </div>
 
                 <!-- Current Status -->
-                <div class="mt-6 p-4 bg-gray-50 rounded-md">
-                    <h4 class="text-sm font-medium text-gray-700 mb-2">Current Status</h4>
-                    <div class="flex items-center space-x-4">
-                        <span class="text-sm text-gray-600">Status:</span>
-                        <span th:if="${subject.active}"
-                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                            Active
-                        </span>
-                        <span th:if="${!subject.active}"
-                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                            Inactive
-                        </span>
+                <div class="p-3 bg-light rounded mb-3">
+                    <h6 class="fw-bold mb-2"><i class="bi bi-info-circle"></i> Current Status</h6>
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="text-muted">Status:</span>
+                        <span th:if="${subject.active}" class="badge bg-success">Active</span>
+                        <span th:if="${!subject.active}" class="badge bg-danger">Inactive</span>
                     </div>
                 </div>
 
                 <!-- Form Actions -->
-                <div class="flex justify-between items-center mt-8 pt-6 border-t border-gray-200">
-                    <div class="flex space-x-2">
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <div class="btn-group" role="group">
                         <form th:if="${subject.active}" th:action="@{/admin/subjects/{id}/deactivate(id=${subject.id})}"
-                            method="post" class="inline"
+                            method="post" class="d-inline"
                             onsubmit="return confirm('Are you sure you want to deactivate this subject?')">
-                            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700">
-                                Deactivate Subject
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                <i class="bi bi-x-circle"></i> Deactivate
                             </button>
                         </form>
                         <form th:if="${!subject.active}" th:action="@{/admin/subjects/{id}/activate(id=${subject.id})}"
-                            method="post" class="inline">
-                            <button type="submit"
-                                class="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                                Activate Subject
+                            method="post" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-sm">
+                                <i class="bi bi-check-circle"></i> Activate
                             </button>
                         </form>
                     </div>
 
-                    <div class="flex space-x-4">
-                        <a href="/admin/subjects"
-                            class="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
-                            Cancel
+                    <div class="btn-group" role="group">
+                        <a th:href="@{/admin/subjects}" class="btn btn-outline-secondary">
+                            <i class="bi bi-x-circle"></i> Cancel
                         </a>
-                        <button type="submit"
-                            class="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            Update Subject
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-circle"></i> Update Subject
                         </button>
                     </div>
                 </div>
             </form>
         </div>
     </div>
-</body>
+</main>
 
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

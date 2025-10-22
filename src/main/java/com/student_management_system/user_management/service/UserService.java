@@ -94,6 +94,16 @@ public class UserService {
         if (userRepository.findByUsername(registrationDto.getUsername()).isPresent()) {
             throw new IllegalStateException("Username already exists.");
         }
+        
+        // Check if email already exists (using try-catch to handle duplicate emails in DB)
+        try {
+            if (userRepository.findByEmail(registrationDto.getEmail()).isPresent()) {
+                throw new IllegalStateException("Email already exists. Please use a different email address.");
+            }
+        } catch (org.springframework.dao.IncorrectResultSizeDataAccessException e) {
+            // This happens when there are duplicate emails in the database
+            throw new IllegalStateException("Email already exists. Please use a different email address.");
+        }
 
         User newUser = new User();
         newUser.setUsername(registrationDto.getUsername());

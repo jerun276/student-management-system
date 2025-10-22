@@ -3,143 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subject Management - Student Management System</title>
+    <title>Subject Management - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
-<div th:replace="~{fragments/header :: header}"></div>
+<body class="bg-light">
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-primary">Subject Management</h1>
-        <a th:href="@{/admin/subjects/create}" class="btn btn-primary">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-            </svg>
-            Add New Subject
-        </a>
-    </div>
-
-    <!-- Success/Error Messages -->
-    <div th:if="${success}" class="alert alert-success shadow-lg mb-4" th:text="${success}"></div>
-    <div th:if="${error}" class="alert alert-error shadow-lg mb-4" th:text="${error}"></div>
-
-    <!-- Filters -->
-    <div class="card bg-base-100 shadow-xl mb-6">
-        <div class="card-body">
-            <h3 class="card-title">Filter Subjects</h3>
-            <form method="get" class="flex flex-wrap gap-4 items-end">
-                <div class="form-control flex-1 min-w-48">
-                    <label class="label" for="gradeLevelId">
-                        <span class="label-text">Grade Level</span>
-                    </label>
-                    <select name="gradeLevelId" id="gradeLevelId" class="select select-bordered w-full">
-                        <option value="">All Grade Levels</option>
-                        <option th:each="grade : ${gradeLevels}" th:value="${grade.id}" th:text="${grade.name}"
-                            th:selected="${grade.id == selectedGradeLevelId}"></option>
-                    </select>
+    <main class="main-content p-4">
+        <!-- Breadcrumb Navigation -->
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+                <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-book"></i> Subjects</li>
+            </ol>
+        </nav>
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 text-primary fw-bold mb-0"><i class="bi bi-book"></i> Subject Management</h1>
+                    <p class="text-muted small">Create and manage subjects</p>
                 </div>
-                <div class="flex gap-2">
-                    <button type="submit" class="btn btn-primary">Filter</button>
-                    <a href="/admin/subjects" class="btn btn-outline">Clear</a>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Subjects Table -->
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <h3 class="card-title">
-                Subjects 
-                <span class="text-sm font-normal opacity-60">
-                    (<span th:text="${#lists.size(subjects)}"></span> total)
-                </span>
-            </h3>
-            
-            <div th:if="${#lists.isEmpty(subjects)}" class="text-center py-8">
-                <svg class="w-16 h-16 mx-auto mb-4 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
-                          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                </svg>
-                <p class="text-lg">No subjects found</p>
-                <p class="text-sm opacity-60">Create your first subject to get started</p>
+                <a th:href="@{/admin/subjects/create}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Add New Subject
+                </a>
             </div>
 
-            <div th:if="${!#lists.isEmpty(subjects)}" class="overflow-x-auto">
-                <table class="table w-full">
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Code</th>
-                            <th>Grade Level</th>
-                            <th>Teachers</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr th:each="subject : ${subjects}">
-                            <td>
-                                <div>
-                                    <div class="font-bold" th:text="${subject.name}"></div>
-                                    <div class="text-sm opacity-50" th:text="${subject.description}" th:if="${subject.description}"></div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="badge badge-primary" th:text="${subject.subjectCode}"></div>
-                            </td>
-                            <td th:text="${subject.gradeLevel.name}"></td>
-                            <td>
-                                <div th:if="${#lists.isEmpty(subject.teachers)}" class="text-sm opacity-50">
-                                    No teachers assigned
-                                </div>
-                                <div th:if="${!#lists.isEmpty(subject.teachers)}" class="flex flex-wrap gap-1">
-                                    <div th:each="teacher : ${subject.teachers}" class="badge badge-success badge-sm"
-                                         th:text="${teacher.firstName + ' ' + teacher.lastName}"></div>
-                                </div>
-                            </td>
-                            <td>
-                                <div th:if="${subject.active}" class="badge badge-success">Active</div>
-                                <div th:if="${!subject.active}" class="badge badge-error">Inactive</div>
-                            </td>
-                            <td>
-                                <div class="flex gap-2">
-                                    <a th:href="@{/admin/subjects/{id}(id=${subject.id})}" class="btn btn-ghost btn-xs" title="View">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
-                                        </svg>
-                                    </a>
-                                    <a th:href="@{/admin/subjects/{id}/edit(id=${subject.id})}" class="btn btn-ghost btn-xs" title="Edit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                                        </svg>
-                                    </a>
-                                    <form th:if="${subject.active}" th:action="@{/admin/subjects/{id}/deactivate(id=${subject.id})}" method="post" class="inline"
-                                          onsubmit="return confirm('Are you sure you want to deactivate this subject?')">
-                                        <button type="submit" class="btn btn-ghost btn-xs text-error" title="Deactivate">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728"></path>
-                                            </svg>
-                                        </button>
-                                    </form>
-                                    <form th:if="${!subject.active}" th:action="@{/admin/subjects/{id}/activate(id=${subject.id})}" method="post" class="inline">
-                                        <button type="submit" class="btn btn-ghost btn-xs text-success" title="Activate">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                            </svg>
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Success/Error Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        </div>
-    </div>
-</main>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
+        <!-- Filters -->
+        <div class="card shadow-sm mb-4">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-funnel"></i> Filter Subjects</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row g-3 align-items-end">
+                        <div class="col-md-6">
+                            <label for="gradeLevelId" class="form-label fw-bold">Grade Level</label>
+                            <select name="gradeLevelId" id="gradeLevelId" class="form-select">
+                                <option value="">All Grade Levels</option>
+                                <option th:each="grade : ${gradeLevels}" th:value="${grade.id}" th:text="${grade.name}" th:selected="${grade.id == selectedGradeLevelId}"></option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-search"></i> Filter
+                            </button>
+                            <a href="/admin/subjects" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        <!-- Subjects Table -->
+        <div class="card shadow-sm">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-table"></i> Subjects (<span th:text="${#lists.size(subjects)}"></span> total)</h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(subjects)}" class="text-center py-5">
+                        <i class="bi bi-book" style="font-size: 3rem; color: #ccc;"></i>
+                        <p class="mt-3 text-muted">No subjects found</p>
+                        <p class="text-muted small">Create your first subject to get started</p>
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(subjects)}" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="bi bi-book"></i> Subject</th>
+                                    <th>Code</th>
+                                    <th>Grade Level</th>
+                                    <th>Teachers</th>
+                                    <th><i class="bi bi-toggle2-on"></i> Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="subject : ${subjects}">
+                                    <td>
+                                        <div>
+                                            <strong th:text="${subject.name}"></strong>
+                                            <br>
+                                            <small class="text-muted" th:text="${subject.description}" th:if="${subject.description}"></small>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary" th:text="${subject.subjectCode}"></span>
+                                    </td>
+                                    <td th:text="${subject.gradeLevel.name}"></td>
+                                    <td>
+                                        <div th:if="${#lists.isEmpty(subject.teachers)}" class="text-muted small">
+                                            No teachers assigned
+                                        </div>
+                                        <div th:if="${!#lists.isEmpty(subject.teachers)}" class="d-flex flex-wrap gap-1">
+                                            <span th:each="teacher : ${subject.teachers}" class="badge bg-success" th:text="${teacher.firstName + ' ' + teacher.lastName}"></span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge" th:classappend="${subject.active} ? 'bg-success' : 'bg-danger'" th:text="${subject.active} ? 'Active' : 'Inactive'"></span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a th:href="@{/admin/subjects/{id}(id=${subject.id})}" class="btn btn-sm btn-outline-primary" title="View">
+                                                <i class="bi bi-eye"></i>
+                                            </a>
+                                            <a th:href="@{/admin/subjects/{id}/edit(id=${subject.id})}" class="btn btn-sm btn-outline-primary" title="Edit">
+                                                <i class="bi bi-pencil"></i>
+                                            </a>
+                                            <form th:if="${subject.active}" th:action="@{/admin/subjects/{id}/deactivate(id=${subject.id})}" method="post" class="d-inline" onsubmit="return confirm('Are you sure?')">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Deactivate">
+                                                    <i class="bi bi-x-circle"></i>
+                                                </button>
+                                            </form>
+                                            <form th:if="${!subject.active}" th:action="@{/admin/subjects/{id}/activate(id=${subject.id})}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-sm btn-outline-success" title="Activate">
+                                                    <i class="bi bi-check-circle"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>

@@ -51,4 +51,4 @@ build/
 .DS_Store
 
 # MD
-*.md
+# *.md

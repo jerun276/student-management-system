@@ -3,76 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Timetable Entry</title>
-    <link href="/css/style.css" rel="stylesheet">
+    <title>Edit Timetable Entry - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="bg-white shadow-sm border-b">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <a href="/admin/timetable" class="text-blue-600 hover:text-blue-800 mr-4">
-                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd"/>
-                        </svg>
-                    </a>
-                    <h1 class="text-xl font-semibold text-gray-900">Edit Timetable Entry</h1>
-                </div>
-            </div>
-        </div>
-    </nav>
+<body class="bg-light">
+<div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: sidebar}"></div>
 
-    <div class="max-w-4xl mx-auto py-6 sm:px-6 lg:px-8">
+<main class="main-content p-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/timetable}" class="text-decoration-none"><i class="bi bi-calendar"></i> Timetable</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-pencil"></i> Edit Entry</li>
+        </ol>
+    </nav>
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
         <!-- Current Entry Info -->
-        <div class="bg-white shadow rounded-lg mb-6">
-            <div class="px-4 py-5 sm:p-6">
-                <h2 class="text-lg font-medium text-gray-900 mb-4">Current Entry Details</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div>
-                        <div class="text-sm font-medium text-gray-500">Subject</div>
-                        <div class="text-sm text-gray-900" th:text="${entry.subject.name}">Mathematics</div>
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-gradient">
+                <h5 class="mb-0"><i class="bi bi-info-circle"></i> Current Entry Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="row g-3">
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Subject</small>
+                        <strong th:text="${entry.subject.name}">Mathematics</strong>
                     </div>
-                    <div>
-                        <div class="text-sm font-medium text-gray-500">Teacher</div>
-                        <div class="text-sm text-gray-900" th:text="${entry.teacher.firstName + ' ' + entry.teacher.lastName}">John Doe</div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Teacher</small>
+                        <strong th:text="${entry.teacher.firstName + ' ' + entry.teacher.lastName}">John Doe</strong>
                     </div>
-                    <div>
-                        <div class="text-sm font-medium text-gray-500">Classroom</div>
-                        <div class="text-sm text-gray-900" th:text="${entry.classroom.getFullName()}">Grade 10-A</div>
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Classroom</small>
+                        <strong th:text="${entry.classroom.getFullName()}">Grade 10-A</strong>
                     </div>
-                    <div>
-                        <div class="text-sm font-medium text-gray-500">Schedule</div>
-                        <div class="text-sm text-gray-900">
+                    <div class="col-md-3">
+                        <small class="text-muted d-block">Schedule</small>
+                        <strong>
                             <div th:text="${#strings.capitalize(#strings.toLowerCase(entry.dayOfWeek))}">Monday</div>
-                            <div class="text-xs text-gray-500" th:text="${entry.timeSlot.fullDisplayName}">08:00 - 08:45</div>
-                        </div>
+                            <small class="text-muted" th:text="${entry.timeSlot.fullDisplayName}">08:00 - 08:45</small>
+                        </strong>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Error/Success Messages -->
-        <div th:if="${errorMessage}" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mb-6">
-            <span th:text="${errorMessage}"></span>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" th:text="${errorMessage}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
         
-        <div th:if="${successMessage}" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded mb-6">
-            <span th:text="${successMessage}"></span>
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" th:text="${successMessage}">
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
 
         <!-- Edit Form -->
-        <div class="bg-white shadow rounded-lg">
-            <div class="px-4 py-5 sm:p-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-6">Edit Timetable Entry</h3>
-                
-                <form th:action="@{/admin/timetable/edit/{id}(id=${entry.id})}" method="post" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="card shadow-sm">
+            <div class="card-header bg-gradient">
+                <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Edit Timetable Entry</h5>
+            </div>
+            <div class="card-body">
+                <form th:action="@{/admin/timetable/edit/{id}(id=${entry.id})}" method="post">
+                    <div class="row g-3">
                         <!-- Subject Selection -->
-                        <div>
-                            <label for="subjectId" class="block text-sm font-medium text-gray-700 mb-2">Subject</label>
-                            <select name="subjectId" id="subjectId" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="col-md-6 mb-3">
+                            <label for="subjectId" class="form-label fw-bold">Subject <span class="text-danger">*</span></label>
+                            <select name="subjectId" id="subjectId" required class="form-select">
                                 <option value="">Select Subject</option>
                                 <option th:each="subject : ${subjects}" 
                                         th:value="${subject.id}" 
@@ -82,10 +82,9 @@
                         </div>
 
                         <!-- Classroom Selection -->
-                        <div>
-                            <label for="classroomId" class="block text-sm font-medium text-gray-700 mb-2">Classroom</label>
-                            <select name="classroomId" id="classroomId" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="col-md-6 mb-3">
+                            <label for="classroomId" class="form-label fw-bold">Classroom <span class="text-danger">*</span></label>
+                            <select name="classroomId" id="classroomId" required class="form-select">
                                 <option value="">Select Classroom</option>
                                 <option th:each="classroom : ${classrooms}" 
                                         th:value="${classroom.id}" 
@@ -95,10 +94,9 @@
                         </div>
 
                         <!-- Teacher Selection -->
-                        <div>
-                            <label for="teacherId" class="block text-sm font-medium text-gray-700 mb-2">Teacher</label>
-                            <select name="teacherId" id="teacherId" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="col-md-6 mb-3">
+                            <label for="teacherId" class="form-label fw-bold">Teacher <span class="text-danger">*</span></label>
+                            <select name="teacherId" id="teacherId" required class="form-select">
                                 <option value="">Select Teacher</option>
                                 <option th:each="teacher : ${teachers}" 
                                         th:value="${teacher.id}" 
@@ -108,10 +106,9 @@
                         </div>
 
                         <!-- Day of Week -->
-                        <div>
-                            <label for="dayOfWeek" class="block text-sm font-medium text-gray-700 mb-2">Day of Week</label>
-                            <select name="dayOfWeek" id="dayOfWeek" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="col-md-6 mb-3">
+                            <label for="dayOfWeek" class="form-label fw-bold">Day of Week <span class="text-danger">*</span></label>
+                            <select name="dayOfWeek" id="dayOfWeek" required class="form-select">
                                 <option value="">Select Day</option>
                                 <option th:each="day : ${weekDays}" 
                                         th:value="${day}" 
@@ -121,10 +118,9 @@
                         </div>
 
                         <!-- Time Slot -->
-                        <div>
-                            <label for="timeSlotId" class="block text-sm font-medium text-gray-700 mb-2">Time Slot</label>
-                            <select name="timeSlotId" id="timeSlotId" required 
-                                    class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="col-md-6 mb-3">
+                            <label for="timeSlotId" class="form-label fw-bold">Time Slot <span class="text-danger">*</span></label>
+                            <select name="timeSlotId" id="timeSlotId" required class="form-select">
                                 <option value="">Select Time Slot</option>
                                 <option th:each="timeSlot : ${timeSlots}" 
                                         th:value="${timeSlot.id}" 
@@ -135,34 +131,30 @@
                         </div>
 
                         <!-- Location (Optional) -->
-                        <div>
-                            <label for="location" class="block text-sm font-medium text-gray-700 mb-2">Location (Optional)</label>
+                        <div class="col-md-6 mb-3">
+                            <label for="location" class="form-label fw-bold">Location <small class="text-muted">(Optional)</small></label>
                             <input type="text" name="location" id="location" 
                                    th:value="${entry.location}"
                                    placeholder="e.g., Lab 1, Library, etc."
-                                   class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                   class="form-control">
                         </div>
                     </div>
 
                     <!-- Form Actions -->
-                    <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                        <div class="flex space-x-3">
-                            <!-- Delete Button -->
-                            <button type="button" 
-                                    onclick="if(confirm('Are you sure you want to delete this timetable entry?')) { document.getElementById('deleteForm').submit(); }"
-                                    class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 transition-colors">
-                                Delete Entry
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                        <div>
+                            <button type="button" class="btn btn-danger btn-sm"
+                                    onclick="if(confirm('Are you sure you want to delete this timetable entry?')) { document.getElementById('deleteForm').submit(); }">
+                                <i class="bi bi-trash"></i> Delete Entry
                             </button>
                         </div>
                         
-                        <div class="flex space-x-3">
-                            <a href="/admin/timetable" 
-                               class="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 transition-colors">
-                                Cancel
+                        <div class="btn-group" role="group">
+                            <a th:href="@{/admin/timetable}" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle"></i> Cancel
                             </a>
-                            <button type="submit" 
-                                    class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
-                                Update Entry
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle"></i> Update Entry
                             </button>
                         </div>
                     </div>
@@ -173,6 +165,14 @@
                 </form>
             </div>
         </div>
+    </div>
+</main>
+
+<div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
 
         <!-- Conflict Warning -->
         <div class="mt-6 bg-yellow-50 border border-yellow-200 rounded-lg p-4">

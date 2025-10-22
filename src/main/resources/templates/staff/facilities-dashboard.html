@@ -2,100 +2,162 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Facility Booking</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
+<body class="bg-light">
 <div th:replace="~{fragments/header :: header}"></div>
-<main class="container mx-auto p-4">
-    <h1 class="text-3xl font-bold text-primary mb-6">Facility Booking & Management</h1>
+<div th:replace="~{fragments/header :: sidebar}"></div>
+
+<main class="main-content p-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/staff/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-building"></i> Facility Booking</li>
+        </ol>
+    </nav>
+
+    <h1 class="h2 fw-bold text-primary mb-4"><i class="bi bi-building"></i> Facility Booking & Management</h1>
 
     <!-- Success/Error Messages -->
-    <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" th:text="${successMessage}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" th:text="${errorMessage}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Column 1: New Booking & Facility Forms -->
-        <div class="lg:col-span-1 space-y-6">
+    <div class="row g-4">
+        <!-- Column 1: Forms (3 columns) -->
+        <div class="col-lg-3">
             <!-- New Booking Card -->
-            <div class="card bg-base-100 shadow-xl">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-plus-circle"></i> Create New Booking</h5>
+                </div>
                 <div class="card-body">
-                    <h2 class="card-title">Create New Booking</h2>
-                    <form th:action="@{/staff/facilities/bookings/create}" th:object="${newBooking}" method="post"
-                          class="space-y-4">
-                        <div class="form-control">
-                            <label class="label"><span class="label-text">Facility</span></label>
-                            <select th:field="*{facility}" class="select select-bordered" required>
+                    <form th:action="@{/staff/facilities/bookings/create}" th:object="${newBooking}" method="post">
+                        <div class="mb-3">
+                            <label for="facilityId" class="form-label">Facility</label>
+                            <select name="facilityId" id="facilityId" class="form-select" required>
                                 <option value="">Select Facility</option>
-                                <option th:each="facility : ${facilities}" th:value="${facility.id}"
-                                        th:text="${facility.name}"></option>
+                                <option th:each="facility : ${facilities}" th:value="${facility.id}" th:text="${facility.name}"></option>
                             </select>
                         </div>
-                        <div class="form-control">
-                            <label class="label"><span class="label-text">Purpose</span></label>
-                            <input type="text" th:field="*{purpose}" class="input input-bordered" required/>
+                        <div class="mb-3">
+                            <label for="purpose" class="form-label">Purpose</label>
+                            <input type="text" th:field="*{purpose}" id="purpose" class="form-control" required/>
                         </div>
-                        <div class="form-control">
-                            <label class="label"><span class="label-text">Start Time</span></label>
-                            <input type="datetime-local" th:field="*{startTime}" class="input input-bordered" required/>
+                        <div class="mb-3">
+                            <label for="startTime" class="form-label">Start Time</label>
+                            <input type="datetime-local" th:field="*{startTime}" id="startTime" class="form-control" required th:attr="min=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"/>
+                            <small class="text-muted d-block mt-1">Select today or future dates</small>
                         </div>
-                        <div class="form-control">
-                            <label class="label"><span class="label-text">End Time</span></label>
-                            <input type="datetime-local" th:field="*{endTime}" class="input input-bordered" required/>
+                        <div class="mb-3">
+                            <label for="endTime" class="form-label">End Time</label>
+                            <input type="datetime-local" th:field="*{endTime}" id="endTime" class="form-control" required th:attr="min=${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"/>
+                            <small class="text-muted d-block mt-1">Must be after start time</small>
                         </div>
-                        <div class="card-actions justify-end">
-                            <button type="submit" class="btn btn-primary">Book Now</button>
-                        </div>
+                        <button type="submit" class="btn btn-primary w-100"><i class="bi bi-check-circle"></i> Book Now</button>
                     </form>
                 </div>
             </div>
+
             <!-- New Facility Card -->
-            <div class="card bg-base-100 shadow-xl">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-plus-circle"></i> Add New Facility</h5>
+                </div>
                 <div class="card-body">
-                    <h2 class="card-title">Add New Facility</h2>
-                    <form th:action="@{/staff/facilities/create}" method="post" class="space-y-4">
-                        <div class="form-control">
-                            <label class="label"><span class="label-text">Facility Name</span></label>
-                            <input type="text" name="name" class="input input-bordered" placeholder="e.g., Computer Lab"
-                                   required/>
+                    <form th:action="@{/staff/facilities/create}" method="post">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Facility Name</label>
+                            <input type="text" name="name" id="name" class="form-control" placeholder="e.g., Computer Lab" required/>
                         </div>
-                        <div class="card-actions justify-end">
-                            <button type="submit" class="btn btn-secondary">Create Facility</button>
-                        </div>
+                        <button type="submit" class="btn btn-secondary w-100"><i class="bi bi-plus-circle"></i> Create Facility</button>
                     </form>
                 </div>
             </div>
         </div>
-        <!-- Column 2: Bookings List -->
-        <div class="lg:col-span-2 card bg-base-100 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title">Upcoming Bookings</h2>
-                <div class="overflow-x-auto mt-4">
-                    <table class="table w-full">
-                        <thead>
-                        <tr>
-                            <th>Facility</th>
-                            <th>Purpose</th>
-                            <th>Start Time</th>
-                            <th>End Time</th>
-                            <th>Booked By</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        <tr th:each="booking : ${bookings}">
-                            <td th:text="${booking.facility.name}"></td>
-                            <td th:text="${booking.purpose}"></td>
-                            <td th:text="${#temporals.format(booking.startTime, 'dd-MMM HH:mm')}"></td>
-                            <td th:text="${#temporals.format(booking.endTime, 'dd-MMM HH:mm')}"></td>
-                            <td th:text="${booking.bookedBy.username}"></td>
-                        </tr>
-                        </tbody>
-                    </table>
+
+        <!-- Column 2: Bookings List (9 columns) -->
+        <div class="col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-calendar-event"></i> Upcoming Bookings</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Empty State -->
+                    <div th:if="${bookings == null or bookings.isEmpty()}" class="text-center py-5">
+                        <i class="bi bi-calendar-x" style="font-size: 2rem; color: #ccc;"></i>
+                        <p class="text-muted mt-3">No bookings available</p>
+                    </div>
+
+                    <!-- Bookings Table -->
+                    <div th:if="${bookings != null and !bookings.isEmpty()}" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-light">
+                                <tr>
+                                    <th><i class="bi bi-building"></i> Facility</th>
+                                    <th><i class="bi bi-file-earmark-text"></i> Purpose</th>
+                                    <th><i class="bi bi-calendar"></i> Start Time</th>
+                                    <th><i class="bi bi-calendar"></i> End Time</th>
+                                    <th><i class="bi bi-person"></i> Booked By</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="booking : ${bookings}">
+                                    <td th:text="${booking.facility.name}"></td>
+                                    <td th:text="${booking.purpose}"></td>
+                                    <td th:text="${#temporals.format(booking.startTime, 'dd-MMM HH:mm')}"></td>
+                                    <td th:text="${#temporals.format(booking.endTime, 'dd-MMM HH:mm')}"></td>
+                                    <td th:text="${booking.bookedBy.username}"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
+
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Prevent selecting past dates and validate end time
+    document.addEventListener('DOMContentLoaded', function() {
+        const startTimeInput = document.getElementById('startTime');
+        const endTimeInput = document.getElementById('endTime');
+        
+        if (startTimeInput && endTimeInput) {
+            // Set minimum date to today
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const hours = String(today.getHours()).padStart(2, '0');
+            const minutes = String(today.getMinutes()).padStart(2, '0');
+            const minDateTime = `${year}-${month}-${day}T${hours}:${minutes}`;
+            
+            startTimeInput.setAttribute('min', minDateTime);
+            endTimeInput.setAttribute('min', minDateTime);
+            
+            // Validate end time is after start time
+            startTimeInput.addEventListener('change', function() {
+                if (this.value) {
+                    endTimeInput.setAttribute('min', this.value);
+                    if (endTimeInput.value && endTimeInput.value <= this.value) {
+                        endTimeInput.value = '';
+                    }
+                }
+            });
+        }
+    });
+</script>
 </body>
 </html>

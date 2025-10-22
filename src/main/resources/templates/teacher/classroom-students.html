@@ -3,102 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <title>My Classroom Students</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
+<body class="bg-light">
 <div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
+<main class="main-content p-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/teacher/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-people"></i> Classroom Students</li>
+        </ol>
+    </nav>
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="text-3xl font-bold text-primary">My Classroom Students</h1>
-            <div class="text-xl font-bold text-primary mt-2">
-                <div th:text="${classroom.gradeLevel.name + '-' + classroom.name}">Grade 10-A</div>
-                <div class="text-lg" th:text="'(' + ${classroom.medium} + ' Medium)'">( ENGLISH Medium)</div>
-                <div class="text-sm font-normal text-primary/70" th:text="${classroom.academicYear?.name ?: '2024-2025'}">2024-2025</div>
+            <h1 class="h2 fw-bold text-primary mb-0"><i class="bi bi-people"></i> My Classroom Students</h1>
+            <div class="mt-2">
+                <div class="fw-bold text-primary" th:text="${classroom.gradeLevel.name + '-' + classroom.name}">Grade 10-A</div>
+                <small class="text-muted" th:text="'(' + ${classroom.medium} + ' Medium)'">( ENGLISH Medium)</small>
+                <br><small class="text-muted" th:text="${classroom.academicYear?.name ?: '2024-2025'}">2024-2025</small>
             </div>
         </div>
-        <a href="/teacher/dashboard" class="btn btn-outline">← Back to Dashboard</a>
+        <a th:href="@{/teacher/dashboard}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
     </div>
 
     <!-- Classroom Info -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <div class="card bg-primary/10 border border-primary/20 p-6">
-            <div class="flex items-center gap-4">
-                <div class="flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239" />
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-600 mb-1">Total Students</p>
-                    <p class="text-3xl font-bold text-primary" th:text="${students?.size() ?: 0}">25</p>
-                    <p class="text-sm text-gray-500">Enrolled students</p>
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-people" style="font-size: 2rem; color: #0d6efd;"></i>
+                    <h6 class="text-muted small mt-3 mb-2">Total Students</h6>
+                    <h3 class="fw-bold text-primary" th:text="${students?.size() ?: 0}">25</h3>
+                    <small class="text-muted">Enrolled students</small>
                 </div>
             </div>
         </div>
         
-        <div class="card bg-secondary/10 border border-secondary/20 p-6">
-            <div class="flex items-center gap-4">
-                <div class="flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-600 mb-1">Maximum Capacity</p>
-                    <p class="text-3xl font-bold text-secondary" th:text="${classroom.maxStudents}">35</p>
-                    <p class="text-sm text-gray-500">Class capacity</p>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-door-closed" style="font-size: 2rem; color: #6c757d;"></i>
+                    <h6 class="text-muted small mt-3 mb-2">Maximum Capacity</h6>
+                    <h3 class="fw-bold text-secondary" th:text="${classroom.maxStudents}">35</h3>
+                    <small class="text-muted">Class capacity</small>
                 </div>
             </div>
         </div>
         
-        <div class="card bg-accent/10 border border-accent/20 p-6">
-            <div class="flex items-center gap-4">
-                <div class="flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-gray-600 mb-1">Available Spots</p>
-                    <p class="text-3xl font-bold text-accent" th:text="${classroom.maxStudents - (students?.size() ?: 0)}">10</p>
-                    <p class="text-sm text-gray-500">Remaining capacity</p>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-check-circle" style="font-size: 2rem; color: #198754;"></i>
+                    <h6 class="text-muted small mt-3 mb-2">Available Spots</h6>
+                    <h3 class="fw-bold text-success" th:text="${classroom.maxStudents - (students?.size() ?: 0)}">10</h3>
+                    <small class="text-muted">Remaining capacity</small>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="flex flex-col sm:flex-row gap-4 mb-6">
-        <a th:href="@{/teacher/attendance}" class="btn btn-primary gap-3 flex-1 sm:flex-none min-h-16">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-            </svg>
-            Take Attendance
-        </a>
-        <a th:href="@{/teacher/assignments/create}" class="btn btn-secondary gap-3 flex-1 sm:flex-none min-h-16">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-            Create Assignment
-        </a>
-        <!-- <a th:href="@{/teacher/materials/upload}" class="btn btn-accent gap-3 flex-1 sm:flex-none min-h-16">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-            </svg>
-            Upload Material
-        </a> -->
+    <div class="d-flex flex-wrap gap-2 mb-4">
+        <a th:href="@{/teacher/attendance}" class="btn btn-primary"><i class="bi bi-clipboard-check"></i> Take Attendance</a>
+        <a th:href="@{/teacher/assignments/create}" class="btn btn-secondary"><i class="bi bi-plus-circle"></i> Create Assignment</a>
     </div>
 
     <!-- Students List -->
-    <div class="card bg-base-100 shadow-xl">
+    <div class="card shadow-sm">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0"><i class="bi bi-list"></i> Student List</h5>
+        </div>
         <div class="card-body">
-            <h2 class="card-title mb-4">Student List</h2>
-            
-            <div class="overflow-x-auto">
-                <table class="table w-full">
-                    <thead>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
                     <tr>
                         <th>#</th>
                         <th>Student ID</th>
@@ -112,19 +94,15 @@
                     <tbody>
                     <tr th:each="student, iterStat : ${students}">
                         <td th:text="${iterStat.count}">1</td>
+                        <td><code th:text="${student.username}">STU001</code></td>
                         <td>
-                            <div class="font-mono text-sm" th:text="${student.username}">STU001</div>
-                        </td>
-                        <td>
-                            <div class="flex items-center gap-3">
-                                <div class="avatar placeholder">
-                                    <div class="bg-neutral text-neutral-content rounded-full w-12">
-                                        <span class="text-xs" th:text="${student.firstName?.substring(0,1) + student.lastName?.substring(0,1)}">JD</span>
-                                    </div>
+                            <div class="d-flex align-items-center">
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
+                                    <small class="fw-bold" th:text="${student.firstName?.substring(0,1) + student.lastName?.substring(0,1)}">JD</small>
                                 </div>
                                 <div>
-                                    <div class="font-bold" th:text="${student.firstName + ' ' + student.lastName}">John Doe</div>
-                                    <div class="text-sm opacity-50">Student</div>
+                                    <strong class="small d-block" th:text="${student.firstName + ' ' + student.lastName}">John Doe</strong>
+                                    <small class="text-muted">Student</small>
                                 </div>
                             </div>
                         </td>
@@ -132,26 +110,19 @@
                         <td th:text="${#temporals.format(student.dateOfBirth, 'dd-MMM-yyyy')}">15-Jan-2008</td>
                         <td th:text="${student.phoneNumber}">+94 77 123 4567</td>
                         <td>
-                            <div class="dropdown dropdown-end">
-                                <label tabindex="0" class="btn btn-ghost btn-sm">Actions</label>
-                                <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                                    <li><a th:href="@{/teacher/student/{id}/profile(id=${student.id})}">View Profile</a></li>
-                                    <li><a th:href="@{/teacher/student/{id}/attendance(id=${student.id})}">View Attendance</a></li>
-                                    <li><a th:href="@{/teacher/student/{id}/assignments(id=${student.id})}">View Assignments</a></li>
-                                    <li><a th:href="@{/teacher/messages/compose?to={id}(id=${student.id})}">Send Message</a></li>
-                                </ul>
+                            <div class="btn-group btn-group-sm" role="group">
+                                <a th:href="@{/teacher/student/{id}/profile(id=${student.id})}" class="btn btn-outline-primary" title="View Profile"><i class="bi bi-person"></i></a>
+                                <a th:href="@{/teacher/student/{id}/attendance(id=${student.id})}" class="btn btn-outline-primary" title="Attendance"><i class="bi bi-check-circle"></i></a>
+                                <a th:href="@{/teacher/student/{id}/assignments(id=${student.id})}" class="btn btn-outline-primary" title="Assignments"><i class="bi bi-file-earmark-text"></i></a>
+                                <a th:href="@{/teacher/messages/compose?to={id}(id=${student.id})}" class="btn btn-outline-primary" title="Message"><i class="bi bi-chat"></i></a>
                             </div>
                         </td>
                     </tr>
                     <tr th:if="${#lists.isEmpty(students)}">
-                        <td colspan="7" class="text-center text-gray-500 py-8">
-                            <div class="flex flex-col items-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239" />
-                                </svg>
-                                <p>No students enrolled in this classroom</p>
-                                <p class="text-sm">Contact the administrator to enroll students</p>
-                            </div>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="bi bi-people" style="font-size: 2rem; color: #ccc;"></i>
+                            <p class="text-muted mt-3">No students enrolled in this classroom</p>
+                            <small class="text-muted">Contact the administrator to enroll students</small>
                         </td>
                     </tr>
                     </tbody>
@@ -162,5 +133,7 @@
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

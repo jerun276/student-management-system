@@ -3,48 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <title>Take Attendance</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
+<body class="bg-light">
 <div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-primary">Take Attendance</h1>
-        <a th:href="@{/teacher/dashboard}" class="btn btn-ghost">← Back to Dashboard</a>
+<main class="main-content p-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/teacher/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-clipboard-check"></i> Take Attendance</li>
+        </ol>
+    </nav>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-primary mb-0"><i class="bi bi-clipboard-check"></i> Take Attendance</h1>
+        <a th:href="@{/teacher/dashboard}" class="btn btn-outline-secondary"><i class="bi bi-arrow-left"></i> Back</a>
     </div>
 
     <!-- Error Message -->
-    <div th:if="${errorMessage}" class="alert alert-error mb-6">
-        <div>
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2 2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span th:text="${errorMessage}">Error message</span>
-        </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" th:text="${errorMessage}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 
     <!-- Classroom Information Card -->
-    <div th:if="${classroom}" class="card bg-base-100 shadow-xl mb-6">
+    <div th:if="${classroom}" class="card shadow-sm mb-4">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0"><i class="bi bi-door-closed"></i> Your Assigned Classroom</h5>
+        </div>
         <div class="card-body">
-            <h2 class="card-title">Your Assigned Classroom</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                    <div class="stat">
-                        <div class="stat-title">Classroom</div>
-                        <div class="stat-value text-primary">
-                            <div th:text="${classroom.gradeLevel.name + '-' + classroom.name}">Grade 10-A</div>
-                            <div class="text-lg" th:text="'(' + ${classroom.medium} + ' Medium)'">( ENGLISH Medium)</div>
-                            <div class="text-sm font-normal text-primary/70" th:text="${classroom.academicYear?.name ?: '2024-2025'}">2024-2025</div>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <small class="text-muted d-block">Classroom</small>
+                            <h5 class="fw-bold text-primary mb-1" th:text="${classroom.gradeLevel.name + '-' + classroom.name}">Grade 10-A</h5>
+                            <small class="text-muted d-block" th:text="'(' + ${classroom.medium} + ' Medium)'">( ENGLISH Medium)</small>
+                            <small class="text-muted d-block" th:text="${classroom.academicYear?.name ?: '2024-2025'}">2024-2025</small>
                         </div>
-                        <div class="stat-desc">Your assigned class</div>
                     </div>
                 </div>
-                <div>
-                    <div class="stat">
-                        <div class="stat-title">Total Students</div>
-                        <div class="stat-value text-secondary" th:text="${classroom.enrollments?.size() ?: 0}">25</div>
-                        <div class="stat-desc">Enrolled students</div>
+                <div class="col-md-6">
+                    <div class="card bg-light">
+                        <div class="card-body">
+                            <small class="text-muted d-block">Total Students</small>
+                            <h5 class="fw-bold text-success mb-0" th:text="${classroom.enrollments?.size() ?: 0}">25</h5>
+                            <small class="text-muted">Enrolled students</small>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -52,39 +59,41 @@
     </div>
 
     <!-- Date Selection Form -->
-    <div th:if="${classroom}" class="card bg-base-100 shadow-xl max-w-lg mx-auto">
+    <div th:if="${classroom}" class="card shadow-sm" style="max-width: 500px; margin: 0 auto;">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0"><i class="bi bi-calendar"></i> Select Date for Attendance</h5>
+        </div>
         <div class="card-body">
-            <h2 class="card-title">Select Date for Attendance</h2>
-            <form th:action="@{/teacher/attendance/mark}" method="get" class="space-y-4">
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Select Date</span>
-                    </label>
-                    <input type="date" name="date" class="input input-bordered"
+            <form th:action="@{/teacher/attendance/mark}" method="get">
+                <div class="mb-3">
+                    <label for="attendanceDate" class="form-label">Select Date</label>
+                    <input type="date" id="attendanceDate" name="date" class="form-control"
                            th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" 
                            th:max="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" 
                            required/>
                 </div>
-                <div class="card-actions justify-end">
-                    <button type="submit" class="btn btn-primary">Take Attendance</button>
+                <div class="d-flex gap-2 justify-content-end">
+                    <a th:href="@{/teacher/dashboard}" class="btn btn-outline-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Take Attendance</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- No Classroom Assigned Message -->
-    <div th:unless="${classroom}" class="card bg-base-100 shadow-xl max-w-lg mx-auto">
+    <div th:unless="${classroom}" class="card shadow-sm" style="max-width: 500px; margin: 0 auto;">
         <div class="card-body text-center">
-            <h2 class="card-title justify-center text-error">No Classroom Assigned</h2>
-            <p>You are not assigned as a class teacher to any classroom.</p>
-            <p class="text-sm opacity-70">Please contact the administration to get assigned to a classroom.</p>
-            <div class="card-actions justify-center mt-4">
-                <a th:href="@{/teacher/dashboard}" class="btn btn-primary">Back to Dashboard</a>
-            </div>
+            <i class="bi bi-exclamation-triangle" style="font-size: 2rem; color: #dc3545;"></i>
+            <h5 class="fw-bold mt-3 mb-2">No Classroom Assigned</h5>
+            <p class="text-muted mb-3">You are not assigned as a class teacher to any classroom.</p>
+            <small class="text-muted d-block mb-3">Please contact the administration to get assigned to a classroom.</small>
+            <a th:href="@{/teacher/dashboard}" class="btn btn-primary"><i class="bi bi-arrow-left"></i> Back to Dashboard</a>
         </div>
     </div>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

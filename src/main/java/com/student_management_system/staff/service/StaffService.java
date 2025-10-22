@@ -182,6 +182,11 @@ public class StaffService {
         return facilityRepository.save(facility);
     }
 
+    public Facility getFacilityById(Long facilityId) {
+        return facilityRepository.findById(facilityId)
+                .orElse(null);
+    }
+
     @Transactional
     public Booking createBooking(Booking booking, User bookedBy) {
         // 1. Check for scheduling conflicts

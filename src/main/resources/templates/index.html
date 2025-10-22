@@ -1,100 +1,310 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
-
 <head>
     <meta charset="UTF-8">
-    <title>Welcome to Student Management System</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to SchoolSys - Student Management System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <script src="https://unpkg.com/animejs@3.2.1/lib/anime.min.js"></script>
+    <style>
+        body {
+            overflow-x: hidden;
+            background-color: #f8f9fa;
+        }
+        .hero-section {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+            min-height: 50vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .hero-section h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .hero-section p {
+            font-size: 1.2rem;
+            margin-bottom: 25px;
+            opacity: 0.95;
+        }
+        .feature-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            height: 100%;
+        }
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+        .feature-card .card-header {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            border: none;
+            border-radius: 12px 12px 0 0;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        .feature-card .card-header h5 {
+            margin: 0;
+            font-weight: 600;
+            color: white;
+        }
+        .feature-card .card-body {
+            padding: 25px;
+        }
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: white;
+        }
+        .feature-list li:before {
+            color: #0066cc;
+        }
+        .announcement-banner {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .announcement-banner h4 {
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: white;
+        }
+        .announcement-banner p {
+            margin-bottom: 0;
+            color: rgba(255, 255, 255, 0.95);
+        }
+        .btn-primary {
+            background-color: #0066cc;
+            border-color: #0066cc;
+            font-weight: 600;
+            padding: 12px 30px;
+            border-radius: 8px;
+        }
+        .btn-primary:hover {
+            background-color: #0052a3;
+            border-color: #0052a3;
+        }
+        .btn-light {
+            background-color: white;
+            border-color: white;
+            color: #0066cc;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+        .btn-light:hover {
+            background-color: #f0f0f0;
+            border-color: #f0f0f0;
+            color: #0052a3;
+        }
+        .features-section {
+            padding: 80px 20px;
+            background-color: #f8f9fa;
+        }
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .section-title p {
+            font-size: 1.1rem;
+            color: #666;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .feature-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            color: #555;
+            font-size: 0.95rem;
+        }
+        .feature-list li:last-child {
+            border-bottom: none;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #667eea;
+            font-weight: bold;
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+        .navbar {
+            background-color: white !important;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+        .cta-section {
+            background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%);
+            color: white;
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .cta-section h3 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .cta-section p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+        footer {
+            width: 100% !important;
+            margin-left: 0 !important;
+            clear: both;
+            margin-top: auto;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        main, section {
+            flex: 1;
+        }
+    </style>
 </head>
-
-<body class="bg-surface">
-    <!-- 1. Replace this div with the header fragment -->
+<body>
+    <!-- Header/Navbar -->
     <div th:replace="~{fragments/header :: header}"></div>
 
-    <!-- NEW: Latest Announcement Section -->
-    <div th:if="${latestAnnouncement}" class="bg-primary text-primary-content">
-        <div class="container mx-auto p-4 text-center">
-            <h3 class="font-bold text-lg" th:text="${latestAnnouncement.title}"></h3>
-            <p th:text="${latestAnnouncement.content}"></p>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 mx-auto">
+                    <h1><i class="bi bi-mortarboard-fill"></i> SchoolSys</h1>
+                    <p class="lead mb-4">A Seamless Digital Campus Experience</p>
+                    <p class="mb-4" style="font-size: 1.1rem;">
+                        Empowering students, teachers, and administrators with a unified platform for learning, communication, and management.
+                    </p>
+                    <div th:if="${!isAuthenticated}">
+                        <a th:href="@{/login}" class="btn btn-primary btn-lg me-3">
+                            <i class="bi bi-box-arrow-in-right"></i> Get Started
+                        </a>
+                        <a th:href="@{/register}" class="btn btn-light btn-lg">
+                            <i class="bi bi-person-plus"></i> Create Account
+                        </a>
+                    </div>
+                    <div th:if="${isAuthenticated}">
+                        <p class="mb-3" style="font-size: 1.1rem;">Welcome back! You're already logged in.</p>
+                        <a th:href="${dashboardUrl}" class="btn btn-light btn-lg">
+                            <i class="bi bi-speedometer2"></i> Go to Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
+    </section>
 
-    <main class="container mx-auto p-4">
-
-        <!-- Hero Section -->
-        <section class="text-center my-12 md:my-20">
-            <h1 class="text-4xl md:text-6xl font-bold text-primary">A Seamless Digital Campus Experience</h1>
-            <p class="text-lg md:text-xl mt-4 max-w-3xl mx-auto text-gray-600">
-                Empowering students, teachers, and administrators with a unified platform for learning, communication,
-                and management.
-            </p>
-            <div class="mt-8" th:if="${!isAuthenticated}">
-                <a th:href="@{/login}" class="btn btn-primary btn-lg">Get Started</a>
+    <!-- Features Section -->
+    <section class="features-section bg-light">
+        <div class="container">
+            <div class="section-title">
+                <h2>Features For Everyone</h2>
+                <p>Comprehensive tools designed for every role in your school</p>
             </div>
-            <div class="mt-8" th:if="${isAuthenticated}">
-                <p class="text-lg text-gray-600 mb-4">Welcome back! You're already logged in.</p>
-                <a th:href="${dashboardUrl}" class="btn btn-primary btn-lg">Go to Dashboard</a>
-            </div>
-        </section>
 
-        <!-- Features Section -->
-        <section class="my-16">
-            <div class="text-center">
-                <h2 class="text-3xl font-bold mb-8">Features For Everyone</h2>
-            </div>
-            <!-- Add w-full to ensure the grid can use the full width of the container -->
-            <div class="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-
+            <div class="row g-4">
                 <!-- Card for Students -->
-                <div data-tilt data-tilt-scale="1.1" data-tilt-glare data-tilt-max-glare="0.8" class="reveal card bg-base-100 shadow-xl">
-                    <div class="card-body">
-                        <h3 class="card-title text-secondary">For Students</h3>
-                        <!-- Make sure the list has some top margin -->
-                        <ul class="list-disc list-inside space-y-2 mt-2">
-                            <li>View personalized timetables</li>
-                            <li>Submit assignments online</li>
-                            <li>Receive instant grade notifications</li>
-                            <li>Access study materials anytime</li>
-                        </ul>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-header text-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                            <h5>For Students</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">
+                                <li>View personalized timetables</li>
+                                <li>Submit assignments online</li>
+                                <li>Receive instant grade notifications</li>
+                                <li>Access study materials anytime</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Card for Teachers -->
-                <div data-tilt data-tilt-scale="1.1" data-tilt-glare data-tilt-max-glare="0.8" class="card bg-base-100 shadow-xl">
-                    <div class="card-body">
-                        <h3 class="card-title text-secondary">For Teachers</h3>
-                        <ul class="list-disc list-inside space-y-2 mt-2">
-                            <li>Mark student attendance digitally</li>
-                            <li>Enter and manage student marks</li>
-                            <li>Upload study materials and resources</li>
-                            <li>Communicate directly with parents</li>
-                        </ul>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-header text-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-book"></i>
+                            </div>
+                            <h5>For Teachers</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">
+                                <li>Mark student attendance digitally</li>
+                                <li>Enter and manage student marks</li>
+                                <li>Upload study materials and resources</li>
+                                <li>Communicate directly with parents</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Card for Admins & Staff -->
-                <div data-tilt data-tilt-scale="1.1" data-tilt-glare data-tilt-max-glare="0.8" class="card bg-base-100 shadow-xl">
-                    <div class="card-body">
-                        <h3 class="card-title text-secondary">For Administration</h3>
-                        <ul class="list-disc list-inside space-y-2 mt-2">
-                            <li>Manage all user accounts and roles</li>
-                            <li>Generate insightful school-wide reports</li>
-                            <li>Handle fee payments and send reminders</li>
-                            <li>Manage school events and facilities</li>
-                        </ul>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card feature-card h-100">
+                        <div class="card-header text-center">
+                            <div class="feature-icon">
+                                <i class="bi bi-shield-lock"></i>
+                            </div>
+                            <h5>For Administration</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="feature-list">
+                                <li>Manage all user accounts and roles</li>
+                                <li>Generate insightful school-wide reports</li>
+                                <li>Handle fee payments and send reminders</li>
+                                <li>Manage school events and facilities</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
-
             </div>
-        </section>
-    </main>
+        </div>
+    </section>
 
-    <!-- 2. Replace this div with the footer fragment -->
+    <!-- Call to Action Section -->
+    <section class="cta-section">
+        <div class="container text-center">
+            <h3 class="mb-3">Ready to Transform Your School?</h3>
+            <p class="mb-4">Join thousands of schools already using SchoolSys to streamline their operations.</p>
+            <div th:if="${!isAuthenticated}">
+                <a th:href="@{/register}" class="btn btn-light btn-lg">
+                    <i class="bi bi-person-plus"></i> Sign Up Today
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <div th:replace="~{fragments/footer :: footer}"></div>
-    <!-- Tilt effect script (local, no CDN) -->
-    <script th:src="@{/js/vanilla-tilt.js}"></script>
-    <script th:src="@{/node_modules/animejs/lib/anime.min.js}"></script>
-</body>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

@@ -2,37 +2,56 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Academic Structure Management</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
+<body class="bg-light">
 <div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-primary">Academic Structure Management</h1>
-        <div class="dropdown dropdown-end">
-            <label tabindex="0" class="btn btn-primary">Create New</label>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-                <li><a href="#academic-year-modal">Academic Year</a></li>
-                <li><a href="#grade-level-modal">Grade Level</a></li>
-                <li><a href="#classroom-modal">Classroom</a></li>
-                <li><a href="#course-modal">Course</a></li>
+<main class="main-content p-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-building"></i> Academic Structure</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 fw-bold text-primary"><i class="bi bi-building"></i> Academic Structure Management</h1>
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-plus-circle"></i> Create New
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="#academic-year-modal" data-bs-toggle="modal">Academic Year</a></li>
+                <li><a class="dropdown-item" href="#grade-level-modal" data-bs-toggle="modal">Grade Level</a></li>
+                <li><a class="dropdown-item" href="#classroom-modal" data-bs-toggle="modal">Classroom</a></li>
             </ul>
         </div>
     </div>
 
     <!-- Success/Error Messages -->
-    <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" th:text="${successMessage}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" th:text="${errorMessage}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
     <!-- Academic Years Section -->
-    <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0 fw-bold text-black"><i class="bi bi-calendar-event"></i> Academic Years</h5>
+        </div>
         <div class="card-body">
-            <h2 class="card-title">Academic Years</h2>
-            <div class="overflow-x-auto">
-                <table class="table w-full">
-                    <thead>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
                     <tr>
                         <th>Name</th>
                         <th>Start Date</th>
@@ -43,19 +62,19 @@
                     </thead>
                     <tbody>
                     <tr th:each="year : ${academicYears}">
-                        <td th:text="${year.name}">2024-2025</td>
+                        <td class="fw-bold" th:text="${year.name}">2024-2025</td>
                         <td th:text="${#temporals.format(year.startDate, 'dd-MMM-yyyy')}">01-Sep-2024</td>
                         <td th:text="${#temporals.format(year.endDate, 'dd-MMM-yyyy')}">31-Aug-2025</td>
                         <td>
-                            <span class="badge" th:classappend="${year.active} ? 'badge-success' : 'badge-neutral'"
+                            <span class="badge" th:classappend="${year.active} ? 'bg-success' : 'bg-secondary'"
                                   th:text="${year.active} ? 'Active' : 'Inactive'"></span>
                         </td>
                         <td>
                             <a th:href="@{/admin/academic-year/{id}/edit(id=${year.id})}" 
-                               class="btn btn-sm btn-ghost">Edit</a>
+                               class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
                             <form th:if="${!year.active}" method="post" 
-                                  th:action="@{/admin/academic-year/{id}/activate(id=${year.id})}" class="inline">
-                                <button type="submit" class="btn btn-sm btn-primary">Activate</button>
+                                  th:action="@{/admin/academic-year/{id}/activate(id=${year.id})}" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-success"><i class="bi bi-check-circle"></i> Activate</button>
                             </form>
                         </td>
                     </tr>
@@ -66,12 +85,14 @@
     </div>
 
     <!-- Grade Levels Section -->
-    <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0 fw-bold text-black"><i class="bi bi-layers"></i> Grade Levels</h5>
+        </div>
         <div class="card-body">
-            <h2 class="card-title">Grade Levels</h2>
-            <div class="overflow-x-auto">
-                <table class="table w-full">
-                    <thead>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
                     <tr>
                         <th>Level</th>
                         <th>Name</th>
@@ -82,17 +103,17 @@
                     </thead>
                     <tbody>
                     <tr th:each="grade : ${gradeLevels}">
-                        <td th:text="${grade.level}">10</td>
+                        <td class="fw-bold" th:text="${grade.level}">10</td>
                         <td th:text="${grade.name}">Grade 10</td>
                         <td th:text="${grade.description}">Senior secondary</td>
                         <td>
-                            <span class="badge badge-info" th:text="${classroomCounts[grade.id]} + ' classes'">0 classes</span>
+                            <span class="badge bg-info" th:text="${classroomCounts[grade.id]} + ' classes'">0 classes</span>
                         </td>
                         <td>
                             <a th:href="@{/admin/grade-level/{id}/edit(id=${grade.id})}" 
-                               class="btn btn-sm btn-ghost">Edit</a>
+                               class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
                             <a th:href="@{/admin/classrooms?gradeId={id}(id=${grade.id})}" 
-                               class="btn btn-sm btn-outline">View Classes</a>
+                               class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i> View</a>
                         </td>
                     </tr>
                     </tbody>
@@ -102,12 +123,14 @@
     </div>
 
     <!-- Classrooms Section -->
-    <div class="card bg-base-100 shadow-xl mb-6">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0 fw-bold text-black"><i class="bi bi-door-closed"></i> Current Academic Year Classrooms</h5>
+        </div>
         <div class="card-body">
-            <h2 class="card-title">Current Academic Year Classrooms</h2>
-            <div class="overflow-x-auto">
-                <table class="table w-full">
-                    <thead>
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead class="table-light">
                     <tr>
                         <th>Grade</th>
                         <th>Section</th>
@@ -119,29 +142,29 @@
                     </thead>
                     <tbody>
                     <tr th:each="classroom : ${classrooms}" th:if="${classroom.academicYear.active}">
-                        <td th:text="${classroom.gradeLevel.name}">Grade 10</td>
+                        <td class="fw-bold" th:text="${classroom.gradeLevel.name}">Grade 10</td>
                         <td th:text="${classroom.name}">A</td>
                         <td>
-                            <span class="badge badge-primary" th:text="${classroom.medium}">ENGLISH</span>
+                            <span class="badge bg-primary" th:text="${classroom.medium}">ENGLISH</span>
                         </td>
                         <td>
                             <span th:if="${classroom.classTeacher}" 
                                   th:text="${classroom.classTeacher.firstName + ' ' + classroom.classTeacher.lastName}">John Smith</span>
                             <span th:if="${classroom.classTeacher == null}" 
-                                  class="text-gray-500 italic">No teacher assigned</span>
+                                  class="text-muted fst-italic">No teacher assigned</span>
                         </td>
                         <td>
-                            <span class="badge badge-info" 
+                            <span class="badge bg-info" 
                                   th:text="${enrollmentCounts[classroom.id]} + '/' + ${classroom.maxStudents}">0/35</span>
                         </td>
                         <td>
                             <a th:href="@{/admin/classroom/{id}/students(id=${classroom.id})}" 
-                               class="btn btn-sm btn-outline">Students</a>
+                               class="btn btn-sm btn-outline-secondary"><i class="bi bi-people"></i> Students</a>
                             <a th:href="@{/admin/classroom/{id}/assign-teacher(id=${classroom.id})}" 
                                th:class="${classroom.classTeacher != null ? 'btn btn-sm btn-warning' : 'btn btn-sm btn-secondary'}"
-                               th:text="${classroom.classTeacher != null ? 'Change Teacher' : 'Assign Teacher'}">Assign Teacher</a>
+                               th:text="${classroom.classTeacher != null ? 'Change Teacher' : 'Assign Teacher'}"><i class="bi bi-person-check"></i> <span th:text="${classroom.classTeacher != null ? 'Change' : 'Assign'}"></span></a>
                             <a th:href="@{/admin/classroom/{id}/edit(id=${classroom.id})}" 
-                               class="btn btn-sm btn-ghost">Edit</a>
+                               class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i> Edit</a>
                         </td>
                     </tr>
                     </tbody>
@@ -151,137 +174,175 @@
     </div>
 
     <!-- Statistics Section -->
-    <div class="stats shadow mb-6">
-        <div class="stat">
-            <div class="stat-title">Enrolled Students</div>
-            <div class="stat-value" th:text="${totalStudents}">1,200</div>
-            <div class="stat-desc" th:text="'Out of ' + ${totalRegisteredStudents} + ' registered'">Out of 1,250 registered</div>
+    <div class="row g-3 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card card shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2"><i class="bi bi-people"></i> Enrolled Students</h6>
+                    <h3 class="fw-bold text-primary" th:text="${totalStudents}">1,200</h3>
+                    <small class="text-muted" th:text="'Out of ' + ${totalRegisteredStudents} + ' registered'">Out of 1,250 registered</small>
+                </div>
+            </div>
         </div>
-        <div class="stat">
-            <div class="stat-title">Total Teachers</div>
-            <div class="stat-value" th:text="${totalTeachers}">85</div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card card shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2"><i class="bi bi-person-badge"></i> Total Teachers</h6>
+                    <h3 class="fw-bold text-success" th:text="${totalTeachers}">85</h3>
+                </div>
+            </div>
         </div>
-        <div class="stat">
-            <div class="stat-title">Active Classrooms</div>
-            <div class="stat-value" th:text="${#lists.size(classrooms)}">24</div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card card shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2"><i class="bi bi-door-closed"></i> Active Classrooms</h6>
+                    <h3 class="fw-bold text-info" th:text="${#lists.size(classrooms)}">24</h3>
+                </div>
+            </div>
         </div>
-        <div class="stat">
-            <div class="stat-title">Current Academic Year</div>
-            <div class="stat-value text-lg" th:text="${currentYear?.name ?: 'None Set'}">2024-2025</div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card card shadow-sm">
+                <div class="card-body text-center">
+                    <h6 class="text-muted mb-2"><i class="bi bi-calendar-event"></i> Current Year</h6>
+                    <h3 class="fw-bold text-warning" th:text="${currentYear?.name ?: 'None Set'}">2024-2025</h3>
+                </div>
+            </div>
         </div>
     </div>
 </main>
 
 <!-- Academic Year Modal -->
-<div id="academic-year-modal" class="modal">
-    <div class="modal-box">
-        <h3 class="font-bold text-lg">Create Academic Year</h3>
-        <form method="post" th:action="@{/admin/academic-year/create}" class="space-y-4 py-4">
-            <div class="form-control">
-                <label class="label" for="academicYearName"><span class="label-text">Name (e.g., 2024-2025)</span></label>
-                <input id="academicYearName" type="text" name="name" class="input input-bordered" 
-                       autocomplete="off" required/>
+<div class="modal fade" id="academic-year-modal" tabindex="-1" aria-labelledby="academicYearModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient">
+                <h5 class="modal-title fw-bold" id="academicYearModalLabel"><i class="bi bi-calendar-event"></i> Create Academic Year</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="form-control">
-                <label class="label" for="academicYearStartDate"><span class="label-text">Start Date</span></label>
-                <input id="academicYearStartDate" type="date" name="startDate" class="input input-bordered" 
-                       autocomplete="off" required/>
-            </div>
-            <div class="form-control">
-                <label class="label" for="academicYearEndDate"><span class="label-text">End Date</span></label>
-                <input id="academicYearEndDate" type="date" name="endDate" class="input input-bordered" 
-                       autocomplete="off" required/>
-            </div>
-            <div class="modal-action">
-                <a href="#" class="btn btn-ghost">Cancel</a>
-                <button type="submit" class="btn btn-primary">Create</button>
-            </div>
-        </form>
+            <form method="post" th:action="@{/admin/academic-year/create}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="academicYearName">Name (e.g., 2024-2025)</label>
+                        <input id="academicYearName" type="text" name="name" class="form-control" 
+                               autocomplete="off" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="academicYearStartDate">Start Date</label>
+                        <input id="academicYearStartDate" type="date" name="startDate" class="form-control" 
+                               autocomplete="off" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="academicYearEndDate">End Date</label>
+                        <input id="academicYearEndDate" type="date" name="endDate" class="form-control" 
+                               autocomplete="off" required/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Create</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <!-- Grade Level Modal -->
-<div id="grade-level-modal" class="modal">
-    <div class="modal-box">
-        <h3 class="font-bold text-lg">Create Grade Level</h3>
-        <form method="post" th:action="@{/admin/grade-level/create}" class="space-y-4 py-4">
-            <div class="form-control">
-                <label class="label" for="gradeLevelNumber"><span class="label-text">Level (Numeric)</span></label>
-                <input id="gradeLevelNumber" type="number" name="level" class="input input-bordered" 
-                       min="1" max="13" autocomplete="off" required/>
+<div class="modal fade" id="grade-level-modal" tabindex="-1" aria-labelledby="gradeLevelModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient">
+                <h5 class="modal-title fw-bold" id="gradeLevelModalLabel"><i class="bi bi-layers"></i> Create Grade Level</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="form-control">
-                <label class="label" for="gradeLevelName"><span class="label-text">Name (e.g., Grade 10)</span></label>
-                <input id="gradeLevelName" type="text" name="name" class="input input-bordered" 
-                       autocomplete="off" required/>
-            </div>
-            <div class="form-control">
-                <label class="label" for="gradeLevelDescription"><span class="label-text">Description</span></label>
-                <textarea id="gradeLevelDescription" name="description" class="textarea textarea-bordered" 
-                          autocomplete="off"></textarea>
-            </div>
-            <div class="modal-action">
-                <a href="#" class="btn btn-ghost">Cancel</a>
-                <button type="submit" class="btn btn-primary">Create</button>
-            </div>
-        </form>
+            <form method="post" th:action="@{/admin/grade-level/create}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="gradeLevelNumber">Level (Numeric)</label>
+                        <input id="gradeLevelNumber" type="number" name="level" class="form-control" 
+                               min="1" max="13" autocomplete="off" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="gradeLevelName">Name (e.g., Grade 10)</label>
+                        <input id="gradeLevelName" type="text" name="name" class="form-control" 
+                               autocomplete="off" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="gradeLevelDescription">Description</label>
+                        <textarea id="gradeLevelDescription" name="description" class="form-control" 
+                                  autocomplete="off" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Create</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <!-- Classroom Modal -->
-<div id="classroom-modal" class="modal">
-    <div class="modal-box">
-        <h3 class="font-bold text-lg">Create Classroom</h3>
-        <form method="post" th:action="@{/admin/classroom/create}" class="space-y-4 py-4">
-            <div class="form-control">
-                <label class="label" for="classroomName"><span class="label-text">Section Name (e.g., A, B, C)</span></label>
-                <input id="classroomName" type="text" name="name" class="input input-bordered" 
-                       autocomplete="off" required/>
+<div class="modal fade" id="classroom-modal" tabindex="-1" aria-labelledby="classroomModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-gradient">
+                <h5 class="modal-title fw-bold" id="classroomModalLabel"><i class="bi bi-door-closed"></i> Create Classroom</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="form-control">
-                <label class="label" for="classroomGradeLevel"><span class="label-text">Grade Level</span></label>
-                <select id="classroomGradeLevel" name="gradeLevelId" class="select select-bordered" 
-                        autocomplete="off" required>
-                    <option value="">Select Grade Level</option>
-                    <option th:each="grade : ${gradeLevels}" 
-                            th:value="${grade.id}" 
-                            th:text="${grade.name}">Grade 10</option>
-                </select>
-            </div>
-            <div class="form-control">
-                <label class="label" for="classroomAcademicYear"><span class="label-text">Academic Year</span></label>
-                <select id="classroomAcademicYear" name="academicYearId" class="select select-bordered" 
-                        autocomplete="off" required>
-                    <option value="">Select Academic Year</option>
-                    <option th:each="year : ${academicYears}" 
-                            th:value="${year.id}" 
-                            th:text="${year.name}"
-                            th:selected="${year.active}">2024-2025</option>
-                </select>
-            </div>
-            <div class="form-control">
-                <label class="label" for="classroomMedium"><span class="label-text">Medium of Instruction</span></label>
-                <select id="classroomMedium" name="medium" class="select select-bordered" 
-                        autocomplete="off" required>
-                    <option value="">Select Medium</option>
-                    <option th:each="medium : ${mediumValues}" 
-                            th:value="${medium}" 
-                            th:text="${medium}">ENGLISH</option>
-                </select>
-            </div>
-            <div class="form-control">
-                <label class="label" for="classroomMaxStudents"><span class="label-text">Maximum Students</span></label>
-                <input id="classroomMaxStudents" type="number" name="maxStudents" class="input input-bordered" 
-                       min="1" max="50" value="35" autocomplete="off" required/>
-            </div>
-            <div class="modal-action">
-                <a href="#" class="btn btn-ghost">Cancel</a>
-                <button type="submit" class="btn btn-primary">Create</button>
-            </div>
-        </form>
+            <form method="post" th:action="@{/admin/classroom/create}">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="classroomName">Section Name (e.g., A, B, C)</label>
+                        <input id="classroomName" type="text" name="name" class="form-control" 
+                               autocomplete="off" required/>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="classroomGradeLevel">Grade Level</label>
+                        <select id="classroomGradeLevel" name="gradeLevelId" class="form-select" 
+                                autocomplete="off" required>
+                            <option value="">Select Grade Level</option>
+                            <option th:each="grade : ${gradeLevels}" 
+                                    th:value="${grade.id}" 
+                                    th:text="${grade.name}">Grade 10</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="classroomAcademicYear">Academic Year</label>
+                        <select id="classroomAcademicYear" name="academicYearId" class="form-select" 
+                                autocomplete="off" required>
+                            <option value="">Select Academic Year</option>
+                            <option th:each="year : ${academicYears}" 
+                                    th:value="${year.id}" 
+                                    th:text="${year.name}"
+                                    th:selected="${year.active}">2024-2025</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="classroomMedium">Medium of Instruction</label>
+                        <select id="classroomMedium" name="medium" class="form-select" 
+                                autocomplete="off" required>
+                            <option value="">Select Medium</option>
+                            <option th:each="medium : ${mediumValues}" 
+                                    th:value="${medium}" 
+                                    th:text="${medium}">ENGLISH</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold" for="classroomMaxStudents">Maximum Students</label>
+                        <input id="classroomMaxStudents" type="number" name="maxStudents" class="form-control" 
+                               min="1" max="50" value="35" autocomplete="off" required/>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary"><i class="bi bi-check-circle"></i> Create</button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
 function setActiveYear(yearId) {
     if (confirm('Are you sure you want to set this as the active academic year?')) {

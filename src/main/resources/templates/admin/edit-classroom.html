@@ -2,96 +2,112 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Edit Classroom</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Classroom - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
+<body class="bg-light">
 <div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
+<main class="main-content p-4">
+    <!-- Breadcrumb Navigation -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a th:href="@{/admin/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+            <li class="breadcrumb-item"><a th:href="@{/admin/academic-structure}" class="text-decoration-none"><i class="bi bi-building"></i> Academic Structure</a></li>
+            <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-pencil"></i> Edit Classroom</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h1 class="text-3xl font-bold text-primary">Edit Classroom</h1>
-            <p class="text-lg text-gray-600" th:text="'Editing: ' + ${classroom.fullName}">Editing: Grade 10-A (English Medium) - 2024-2025</p>
+            <h1 class="h2 fw-bold text-primary mb-0"><i class="bi bi-door-closed"></i> Edit Classroom</h1>
+            <p class="text-muted small mt-2" th:text="'Editing: ' + ${classroom.fullName}">Editing: Grade 10-A (English Medium) - 2024-2025</p>
         </div>
-        <a href="javascript:history.back()" class="btn btn-outline">← Back</a>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back
+        </a>
     </div>
 
     <!-- Success/Error Messages -->
-    <div th:if="${successMessage}" class="alert alert-success shadow-lg mb-4" th:text="${successMessage}"></div>
-    <div th:if="${errorMessage}" class="alert alert-error shadow-lg mb-4" th:text="${errorMessage}"></div>
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert" th:text="${successMessage}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert" th:text="${errorMessage}">
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
 
     <!-- Edit Form -->
-    <div class="card bg-base-100 shadow-xl">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0"><i class="bi bi-pencil-square"></i> Classroom Details</h5>
+        </div>
         <div class="card-body">
-            <h2 class="card-title">Classroom Details</h2>
-            
-            <form method="post" th:action="@{/admin/classroom/{id}/update(id=${classroom.id})}" class="space-y-4">
-                <div class="form-control">
-                    <label class="label" for="editClassroomName">
-                        <span class="label-text">Section Name (e.g., A, B, C)</span>
-                    </label>
+            <form method="post" th:action="@{/admin/classroom/{id}/update(id=${classroom.id})}">
+                <div class="mb-3">
+                    <label for="editClassroomName" class="form-label fw-bold">Section Name (e.g., A, B, C) <span class="text-danger">*</span></label>
                     <input id="editClassroomName" type="text" name="name" 
                            th:value="${classroom.name}" 
-                           class="input input-bordered" autocomplete="off" required/>
+                           class="form-control" autocomplete="off" required/>
                 </div>
                 
-                <div class="form-control">
-                    <label class="label" for="editClassroomGradeLevel">
-                        <span class="label-text">Grade Level</span>
-                    </label>
-                    <select id="editClassroomGradeLevel" name="gradeLevelId" 
-                            class="select select-bordered" autocomplete="off" required>
-                        <option value="">Select Grade Level</option>
-                        <option th:each="grade : ${gradeLevels}" 
-                                th:value="${grade.id}" 
-                                th:text="${grade.name}"
-                                th:selected="${grade.id == classroom.gradeLevel.id}">Grade 10</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="editClassroomGradeLevel" class="form-label fw-bold">Grade Level <span class="text-danger">*</span></label>
+                        <select id="editClassroomGradeLevel" name="gradeLevelId" 
+                                class="form-select" autocomplete="off" required>
+                            <option value="">Select Grade Level</option>
+                            <option th:each="grade : ${gradeLevels}" 
+                                    th:value="${grade.id}" 
+                                    th:text="${grade.name}"
+                                    th:selected="${grade.id == classroom.gradeLevel.id}">Grade 10</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="editClassroomAcademicYear" class="form-label fw-bold">Academic Year <span class="text-danger">*</span></label>
+                        <select id="editClassroomAcademicYear" name="academicYearId" 
+                                class="form-select" autocomplete="off" required>
+                            <option value="">Select Academic Year</option>
+                            <option th:each="year : ${academicYears}" 
+                                    th:value="${year.id}" 
+                                    th:text="${year.name}"
+                                    th:selected="${year.id == classroom.academicYear.id}">2024-2025</option>
+                        </select>
+                    </div>
                 </div>
                 
-                <div class="form-control">
-                    <label class="label" for="editClassroomAcademicYear">
-                        <span class="label-text">Academic Year</span>
-                    </label>
-                    <select id="editClassroomAcademicYear" name="academicYearId" 
-                            class="select select-bordered" autocomplete="off" required>
-                        <option value="">Select Academic Year</option>
-                        <option th:each="year : ${academicYears}" 
-                                th:value="${year.id}" 
-                                th:text="${year.name}"
-                                th:selected="${year.id == classroom.academicYear.id}">2024-2025</option>
-                    </select>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="editClassroomMedium" class="form-label fw-bold">Medium of Instruction <span class="text-danger">*</span></label>
+                        <select id="editClassroomMedium" name="medium" 
+                                class="form-select" autocomplete="off" required>
+                            <option value="">Select Medium</option>
+                            <option th:each="medium : ${mediumValues}" 
+                                    th:value="${medium}" 
+                                    th:text="${medium}"
+                                    th:selected="${medium == classroom.medium}">ENGLISH</option>
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label for="editClassroomMaxStudents" class="form-label fw-bold">Maximum Students <span class="text-danger">*</span></label>
+                        <input id="editClassroomMaxStudents" type="number" name="maxStudents" 
+                               th:value="${classroom.maxStudents}" 
+                               class="form-control" min="1" max="50" autocomplete="off" required/>
+                    </div>
                 </div>
                 
-                <div class="form-control">
-                    <label class="label" for="editClassroomMedium">
-                        <span class="label-text">Medium of Instruction</span>
-                    </label>
-                    <select id="editClassroomMedium" name="medium" 
-                            class="select select-bordered" autocomplete="off" required>
-                        <option value="">Select Medium</option>
-                        <option th:each="medium : ${mediumValues}" 
-                                th:value="${medium}" 
-                                th:text="${medium}"
-                                th:selected="${medium == classroom.medium}">ENGLISH</option>
-                    </select>
-                </div>
-                
-                <div class="form-control">
-                    <label class="label" for="editClassroomMaxStudents">
-                        <span class="label-text">Maximum Students</span>
-                    </label>
-                    <input id="editClassroomMaxStudents" type="number" name="maxStudents" 
-                           th:value="${classroom.maxStudents}" 
-                           class="input input-bordered" min="1" max="50" autocomplete="off" required/>
-                </div>
-                
-                <div class="card-actions justify-end mt-6">
-                    <a href="javascript:history.back()" class="btn btn-ghost">Cancel</a>
+                <div class="d-flex gap-2 justify-content-end mt-4 pt-3 border-top">
+                    <a href="javascript:history.back()" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Cancel
+                    </a>
                     <button type="submit" class="btn btn-primary" 
                             onclick="return confirm('Are you sure you want to update this classroom? This may affect student enrollments.')">
-                        Update Classroom
+                        <i class="bi bi-check-circle"></i> Update Classroom
                     </button>
                 </div>
             </form>
@@ -99,38 +115,57 @@
     </div>
 
     <!-- Current Status -->
-    <div class="card bg-base-100 shadow-xl mt-6">
+    <div class="card shadow-sm">
+        <div class="card-header bg-gradient">
+            <h5 class="mb-0"><i class="bi bi-info-circle"></i> Current Status</h5>
+        </div>
         <div class="card-body">
-            <h2 class="card-title">Current Status</h2>
-            
-            <div class="stats stats-vertical lg:stats-horizontal shadow">
-                <div class="stat">
-                    <div class="stat-title">Current Enrollment</div>
-                    <div class="stat-value text-primary" th:text="${currentEnrollment}">0</div>
-                    <div class="stat-desc" th:text="'Out of ' + ${classroom.maxStudents} + ' maximum'">Out of 35 maximum</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-title">Class Teacher</div>
-                    <div class="stat-value text-sm" th:text="${classroom.classTeacher?.firstName + ' ' + classroom.classTeacher?.lastName ?: 'Not Assigned'}">
-                        Not Assigned
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2"><i class="bi bi-people"></i> Current Enrollment</h6>
+                            <h3 class="fw-bold text-primary" th:text="${currentEnrollment}">0</h3>
+                            <small class="text-muted" th:text="'Out of ' + ${classroom.maxStudents} + ' maximum'">Out of 35 maximum</small>
+                        </div>
                     </div>
                 </div>
-                <div class="stat">
-                    <div class="stat-title">Available Spots</div>
-                    <div class="stat-value text-success" th:text="${availableSpots}">35</div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2"><i class="bi bi-person-badge"></i> Class Teacher</h6>
+                            <h6 class="fw-bold" th:text="${classroom.classTeacher?.firstName + ' ' + classroom.classTeacher?.lastName ?: 'Not Assigned'}">
+                                Not Assigned
+                            </h6>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-light">
+                        <div class="card-body text-center">
+                            <h6 class="text-muted mb-2"><i class="bi bi-check-circle"></i> Available Spots</h6>
+                            <h3 class="fw-bold text-success" th:text="${availableSpots}">35</h3>
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="flex gap-2 mt-4">
+            <div class="d-flex gap-2">
                 <a th:href="@{/admin/classroom/{id}/students(id=${classroom.id})}" 
-                   class="btn btn-outline btn-sm">View Students</a>
+                   class="btn btn-outline-secondary btn-sm">
+                   <i class="bi bi-people"></i> View Students
+                </a>
                 <a th:href="@{/admin/classroom/{id}/assign-teacher(id=${classroom.id})}" 
-                   class="btn btn-secondary btn-sm">Assign Teacher</a>
+                   class="btn btn-outline-primary btn-sm">
+                   <i class="bi bi-person-check"></i> Assign Teacher
+                </a>
             </div>
         </div>
     </div>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

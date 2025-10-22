@@ -7,61 +7,348 @@
 
 <body>
 
-<!--
-th:fragment="header" defines this block as a reusable component named "header".
-We will add the xmlns:sec namespace to enable security tags.
--->
-<header th:fragment="header" class="bg-base-100 shadow-md">
-    <div class="navbar container mx-auto">
+<!-- Bootstrap Navbar Header -->
+<nav th:fragment="header" class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <div class="container-fluid">
+        <!-- Toggle Sidebar Button -->
+        <button class="toggle-sidebar-btn" id="sidebarToggle" type="button">
+            <i class="bi bi-list"></i>
+        </button>
 
-        <!-- Left Side: Brand/Logo -->
-        <div class="navbar-start">
-            <a th:href="@{/}" class="btn btn-ghost text-xl">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                     stroke="currentColor" class="w-6 h-6 text-primary">
-                    <path stroke-linecap="round" stroke-linejoin="round"
-                          d="M4.26 10.147a60.438 60.438 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.906 59.906 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0l-2.072-1.036A48.222 48.222 0 0112 2.25c4.142 0 8.132.663 11.758 1.86l-2.072 1.036m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5z"/>
-                </svg>
-                <span class="font-bold">SchoolSys</span>
-            </a>
-        </div>
+        <!-- Brand/Logo -->
+        <a class="navbar-brand" th:href="@{/}">
+            <i class="bi bi-mortarboard-fill text-primary"></i>
+            <span>SchoolSys</span>
+        </a>
 
-        <!-- Right Side: Dynamic Links based on Authentication -->
-        <div class="navbar-end gap-2">
+        <!-- Navbar Toggler for Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
 
-            <!-- === ANONYMOUS (LOGGED OUT) USERS === -->
-            <div sec:authorize="isAnonymous()">
-                <a th:href="@{/login}" class="btn btn-outline btn-primary">Login</a>
-                <a th:href="@{/register}" class="btn btn-primary">Register</a>
-            </div>
+        <!-- Navbar Content -->
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <!-- Left Side: Empty for now -->
+            <ul class="navbar-nav me-auto">
+            </ul>
 
-            <!-- === AUTHENTICATED (LOGGED IN) USERS === -->
-            <div sec:authorize="isAuthenticated()" class="flex items-center gap-4">
-                    <span class="font-semibold">Welcome, <span sec:authentication="name"
-                                                               class="text-primary">user</span>!</span>
+            <!-- Right Side: Dynamic Links based on Authentication -->
+            <div class="d-flex align-items-center gap-3">
+                <!-- === ANONYMOUS (LOGGED OUT) USERS === -->
+                <div sec:authorize="isAnonymous()" class="d-flex gap-2">
+                    <a th:href="@{/login}" class="btn btn-outline-primary btn-sm">Login</a>
+                    <a th:href="@{/register}" class="btn btn-primary btn-sm">Register</a>
+                </div>
 
-                    <a th:href="@{/profile}" class="btn btn-ghost">My Profile</a>
+                <!-- === AUTHENTICATED (LOGGED IN) USERS === -->
+                <div sec:authorize="isAuthenticated()" class="d-flex align-items-center gap-3">
+                    <!-- Notifications Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary position-relative" type="button"
+                                id="notificationsDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+                                  style="font-size: 0.65rem; padding: 0.25rem 0.4rem;" th:if="${latestAnnouncement}">1</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" style="min-width: 320px;">
+                            <li><h6 class="dropdown-header"><i class="bi bi-megaphone"></i> Announcements</h6></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li th:if="${latestAnnouncement}">
+                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#announcementModal">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div style="flex: 1;">
+                                            <p class="mb-1 fw-bold" th:text="${latestAnnouncement.title}">Announcement Title</p>
+                                            <small class="text-muted d-block text-truncate" th:text="${latestAnnouncement.content}">Announcement content preview</small>
+                                            <small class="text-muted d-block mt-1" th:text="${latestAnnouncement.publishedDate != null ? #temporals.format(latestAnnouncement.publishedDate, 'MMM dd, yyyy') : 'N/A'}">Date</small>
+                                        </div>
+                                        <span class="badge bg-primary ms-2">New</span>
+                                    </div>
+                                </a>
+                            </li>
+                            <li th:unless="${latestAnnouncement}">
+                                <a class="dropdown-item text-muted text-center py-3">
+                                    <i class="bi bi-info-circle"></i> No announcements
+                                </a>
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-center small" href="#"><i class="bi bi-arrow-right"></i> View All</a></li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Announcement Modal -->
+                    <div class="modal fade" id="announcementModal" tabindex="-1" aria-labelledby="announcementModalLabel" aria-hidden="true" th:if="${latestAnnouncement}">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title" id="announcementModalLabel" th:text="${latestAnnouncement.title}">Announcement</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p th:text="${latestAnnouncement.content}">Announcement content goes here</p>
+                                    <small class="text-muted" th:text="'Posted on: ' + ${latestAnnouncement.publishedDate != null ? #temporals.format(latestAnnouncement.publishedDate, 'MMM dd, yyyy HH:mm') : 'N/A'}">Posted on date</small>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="text-muted d-none d-md-inline">
+                        <small>Welcome, <span sec:authentication="name" class="text-primary fw-bold">user</span>!</small>
+                    </span>
 
-                <!-- Dynamic Dashboard Link based on Role -->
-                <a th:href="@{/student/dashboard}" sec:authorize="hasRole('STUDENT')" class="btn btn-ghost">My
-                    Dashboard</a>
-                <a th:href="@{/teacher/dashboard}" sec:authorize="hasRole('TEACHER')" class="btn btn-ghost">My
-                    Dashboard</a>
-                <a th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMIN')" class="btn btn-ghost">My
-                    Dashboard</a>
-                <a th:href="@{/staff/dashboard}" sec:authorize="hasRole('STAFF')" class="btn btn-ghost">My
-                    Dashboard</a>
-                <a th:href="@{/principal/dashboard}" sec:authorize="hasRole('PRINCIPAL')" class="btn btn-ghost">My
-                    Dashboard</a>
-                <a th:href="@{/teacher/assignments}" sec:authorize="hasRole('TEACHER')" class="btn btn-ghost">Assignments</a>
-                <a th:href="@{/teacher/messages}" sec:authorize="hasRole('TEACHER')" class="btn btn-ghost">Messages</a>
-                <a th:href="@{/parent/messages}" sec:authorize="hasRole('PARENT')" class="btn btn-ghost">Messages</a>
+                    <!-- Profile Dropdown -->
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-person-circle"></i> Profile
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
+                            <li><a class="dropdown-item" th:href="@{/profile}"><i class="bi bi-person"></i> My Profile</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" th:href="@{/logout}"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                        </ul>
+                    </div>
 
-                <!-- Logout Button -->
-                <a th:href="@{/logout}" class="btn btn-outline">Logout</a>
+                    <!-- Dashboard Link based on Role -->
+                    <a th:href="@{/student/dashboard}" sec:authorize="hasRole('STUDENT')"
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a th:href="@{/teacher/dashboard}" sec:authorize="hasRole('TEACHER')"
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a th:href="@{/admin/dashboard}" sec:authorize="hasRole('ADMIN')"
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a th:href="@{/staff/dashboard}" sec:authorize="hasRole('STAFF')"
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a th:href="@{/principal/dashboard}" sec:authorize="hasRole('PRINCIPAL')"
+                       class="btn btn-sm btn-primary">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                </div>
             </div>
         </div>
     </div>
-</header>
+</nav>
+
+<!-- Sidebar Navigation -->
+<aside th:fragment="sidebar" class="sidebar" id="sidebar">
+    <div class="sidebar-title">Main Menu</div>
+    <ul class="sidebar-menu">
+        <!-- Student Menu -->
+        <li sec:authorize="hasRole('STUDENT')">
+            <a th:href="@{/student/dashboard}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('STUDENT')">
+            <a th:href="@{/student/profile}">
+                <i class="bi bi-person"></i>
+                <span>My Profile</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('STUDENT')">
+            <a th:href="@{/student/subjects}">
+                <i class="bi bi-book"></i>
+                <span>My Subjects</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('STUDENT')">
+            <a th:href="@{/student/attendance}">
+                <i class="bi bi-check-circle"></i>
+                <span>Attendance</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('STUDENT')">
+            <a th:href="@{/student/materials}">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Materials</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('STUDENT')">
+            <a th:href="@{/student/assignments}">
+                <i class="bi bi-file-earmark-text"></i>
+                <span>My Assignments</span>
+            </a>
+        </li>
+
+        <!-- Teacher Menu -->
+        <li sec:authorize="hasRole('TEACHER')">
+            <a th:href="@{/teacher/dashboard}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('TEACHER')">
+            <a th:href="@{/teacher/subjects}">
+                <i class="bi bi-book"></i>
+                <span>My Subjects</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('TEACHER')">
+            <a th:href="@{/teacher/attendance}">
+                <i class="bi bi-check-circle"></i>
+                <span>Attendance</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('TEACHER')">
+            <a th:href="@{/teacher/assignments}">
+                <i class="bi bi-file-earmark-text"></i>
+                <span>Assignments</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('TEACHER')">
+            <a th:href="@{/teacher/materials}">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Materials</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('TEACHER')">
+            <a th:href="@{/teacher/timetable}">
+                <i class="bi bi-calendar-week"></i>
+                <span>My Timetable</span>
+            </a>
+        </li>
+
+        <!-- Parent Menu -->
+        <li sec:authorize="hasRole('PARENT')">
+            <a th:href="@{/parent/dashboard}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('PARENT')">
+            <a th:href="@{/parent/messages}">
+                <i class="bi bi-chat"></i>
+                <span>Messages</span>
+            </a>
+        </li>
+
+        <!-- Admin Menu -->
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/dashboard}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/users}">
+                <i class="bi bi-people"></i>
+                <span>Users</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/classrooms}">
+                <i class="bi bi-door-closed"></i>
+                <span>Classrooms</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/subjects}">
+                <i class="bi bi-book"></i>
+                <span>Subjects</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/academic-structure}">
+                <i class="bi bi-building"></i>
+                <span>Academic Structure</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('ADMIN')">
+            <a th:href="@{/admin/timetable}">
+                <i class="bi bi-calendar"></i>
+                <span>Timetable</span>
+            </a>
+        </li>
+
+        <!-- Principal Menu -->
+        <li sec:authorize="hasRole('PRINCIPAL')">
+            <a th:href="@{/principal/dashboard}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('PRINCIPAL')">
+            <a th:href="@{/principal/reports}">
+                <i class="bi bi-bar-chart"></i>
+                <span>Reports</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('PRINCIPAL')">
+            <a th:href="@{/principal/academic-overview}">
+                <i class="bi bi-graph-up"></i>
+                <span>Academic Overview</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('PRINCIPAL')">
+            <a th:href="@{/principal/announcements}">
+                <i class="bi bi-megaphone"></i>
+                <span>Announcements</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('PRINCIPAL')">
+            <a th:href="@{/principal/master-timetable}">
+                <i class="bi bi-calendar-week"></i>
+                <span>Master Timetable</span>
+            </a>
+        </li>
+
+        <!-- Staff Menu -->
+        <li sec:authorize="hasRole('STAFF')">
+            <a th:href="@{/staff/dashboard}">
+                <i class="bi bi-speedometer2"></i>
+                <span>Dashboard</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('STAFF')">
+            <a th:href="@{/staff/events}">
+                <i class="bi bi-calendar-event"></i>
+                <span>Events</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('STAFF')">
+            <a th:href="@{/staff/facilities}">
+                <i class="bi bi-building"></i>
+                <span>Facilities</span>
+            </a>
+        </li>
+    </ul>
+</aside>
+
+<!-- Sidebar Toggle Script -->
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.querySelector('.main-content');
+        const footer = document.querySelector('footer');
+
+        // Ensure sidebar is visible by default
+        if (sidebar) {
+            sidebar.classList.remove('collapsed');
+            if (mainContent) mainContent.classList.remove('expanded');
+            if (footer) footer.classList.remove('expanded');
+        }
+
+        if (sidebarToggle) {
+            sidebarToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                if (mainContent) mainContent.classList.toggle('expanded');
+                if (footer) footer.classList.toggle('expanded');
+                localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+            });
+        }
+
+    });
+</script>
 
 </html>

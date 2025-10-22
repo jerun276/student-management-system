@@ -18,10 +18,23 @@ public class PrincipalDashboardController {
 
     @GetMapping("/dashboard")
     public String showDashboard(Model model) {
+        // Add stats data
+        model.addAttribute("totalStudents", principalService.getTotalStudents());
+        model.addAttribute("totalTeachers", principalService.getTotalTeachers());
+        model.addAttribute("totalSubjects", principalService.getTotalSubjects());
+        model.addAttribute("currentAcademicYear", principalService.getCurrentAcademicYear());
+        
+        // Add reports and announcements
         model.addAttribute("announcements", principalService.getAllAnnouncements());
+        model.addAttribute("latestAnnouncement", principalService.getLatestAnnouncement());
         model.addAttribute("performanceReport", principalService.getSubjectPerformanceReport());
         model.addAttribute("teacherPerformanceReport", principalService.getTeacherPerformanceReport());
         model.addAttribute("pendingRequests", principalService.getPendingBudgetRequests());
+        
+        // Add master timetable and user details
+        model.addAttribute("masterTimetable", principalService.getMasterTimetable());
+        model.addAttribute("allUsers", principalService.getAllUsers());
+        
         return "principal/dashboard";
     }
 
@@ -51,5 +64,14 @@ public class PrincipalDashboardController {
         principalService.rejectBudgetRequest(id);
         redirectAttributes.addFlashAttribute("successMessage", "Request rejected.");
         return "redirect:/principal/dashboard";
+    }
+    
+    @GetMapping("/master-timetable")
+    public String viewMasterTimetable(Model model) {
+        model.addAttribute("masterTimetable", principalService.getMasterTimetable());
+        model.addAttribute("timeSlots", principalService.getTimeSlots());
+        model.addAttribute("weekDays", principalService.getWeekDays());
+        model.addAttribute("timetableGrid", principalService.getTimetableGrid());
+        return "principal/master-timetable";
     }
 }

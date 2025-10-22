@@ -2,280 +2,261 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Teacher Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher Dashboard - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
+<body>
 
 <div th:replace="~{fragments/header :: header}"></div>
+<div th:replace="~{fragments/header :: sidebar}"></div>
 
-<main class="container mx-auto p-4">
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold text-primary">Teacher Dashboard</h1>
-        <div class="flex gap-2">
-            <a th:href="@{/teacher/subjects}" class="btn btn-outline btn-primary">My Subjects</a>
-            <a th:href="@{/teacher/assignments/create}" class="btn btn-primary">Create Assignment</a>
-        </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="stat bg-base-100 shadow">
-            <div class="stat-title">My Subjects</div>
-            <div class="stat-value text-primary" th:text="${mySubjects?.size() ?: 0}">5</div>
-            <div class="stat-desc">Active subjects</div>
-        </div>
-        <div class="stat bg-base-100 shadow">
-            <div class="stat-title">Students</div>
-            <div class="stat-value text-secondary" th:text="${totalStudents ?: 0}">125</div>
-            <div class="stat-desc">Across all subjects</div>
-        </div>
-        <div class="stat bg-base-100 shadow">
-            <div class="stat-title">Pending Grades</div>
-            <div class="stat-value text-warning" th:text="${submittedAssignments?.size() ?: 0}">8</div>
-            <div class="stat-desc">Awaiting review</div>
-        </div>
-        <div class="stat bg-base-100 shadow">
-            <div class="stat-title">Academic Year</div>
-            <div class="stat-value text-info" th:text="${currentAcademicYear?.name ?: 'Not Set'}">2024-2025</div>
-            <div class="stat-desc">Current year</div>
-        </div>
-    </div>
-
-    <!-- Class Teacher Responsibilities -->
-    <div th:if="${assignedClassroom}" class="card bg-base-100 shadow-xl mb-8 min-h-fit">
-        <div class="card-body p-8 space-y-8">
-            <!-- Header Section -->
-            <div class="flex items-center gap-4">
-                <div class="avatar placeholder">
-                    <div class="bg-primary text-primary-content rounded-full w-16 h-16">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                        </svg>
-                    </div>
-                </div>
-                <div class="flex-1">
-                    <h2 class="text-3xl font-bold text-primary mb-2">Your Classroom - Class Teacher Duties</h2>
-                    <p class="text-lg text-base-content/70">Manage your assigned classroom and students</p>
-                </div>
-            </div>
-            
-            <!-- Classroom Info Stats -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="card bg-primary/10 border border-primary/20 p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-600 mb-1">Your Assigned Class</p>
-                            <div class="text-xl font-bold text-primary">
-                                <div th:text="${assignedClassroom.gradeLevel.name + '-' + assignedClassroom.name}">Grade 10-A</div>
-                                <div class="text-lg" th:text="'(' + ${assignedClassroom.medium} + ' Medium)'">( ENGLISH Medium)</div>
-                                <div class="text-sm font-normal text-primary/70" th:text="${assignedClassroom.academicYear?.name ?: '2024-2025'}">2024-2025</div>
-                            </div>
-                            <p class="text-sm text-gray-500">Class Teacher</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card bg-secondary/10 border border-secondary/20 p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239" />
-                            </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-600 mb-1">Total Students</p>
-                            <p class="text-3xl font-bold text-secondary" th:text="${assignedClassroom.enrollments?.size() ?: 0}">2</p>
-                            <p class="text-sm text-gray-500">Enrolled students</p>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card bg-accent/10 border border-accent/20 p-6">
-                    <div class="flex items-center gap-4">
-                        <div class="flex-shrink-0">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-accent" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                            </svg>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm font-medium text-gray-600 mb-1">Academic Year</p>
-                            <p class="text-2xl font-bold text-accent" th:text="${assignedClassroom.academicYear?.name ?: '2024-2025'}">2024-2025</p>
-                            <p class="text-sm text-gray-500">Current year</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Primary Actions -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                <a th:href="@{/teacher/attendance}" class="btn btn-primary btn-lg gap-3 flex-1 sm:flex-none min-h-16">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Take Attendance
-                </a>
-                <a th:href="@{/teacher/classroom/students}" class="btn btn-secondary btn-lg gap-3 flex-1 sm:flex-none min-h-16">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-2.239" />
-                    </svg>
-                    View Students
-                </a>
-                <a th:href="@{/teacher/timetable}" class="btn btn-accent btn-lg gap-3 flex-1 sm:flex-none min-h-16">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    Class Timetable
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- No Classroom Assigned Warning -->
-    <div th:unless="${assignedClassroom}" class="alert alert-warning mb-6">
-        <div>
-            <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-            </svg>
+<main class="main-content">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
-                <h3 class="font-bold">No Classroom Assigned</h3>
-                <div class="text-xs">You are not assigned as a class teacher to any classroom. Please contact administration.</div>
+                <h1 class="h2 text-primary fw-bold mb-0"><i class="bi bi-speedometer2"></i> Teacher Dashboard</h1>
+                <p class="text-muted small">Manage your subjects, students, and assignments</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a th:href="@{/teacher/subjects}" class="btn btn-outline-primary">
+                    <i class="bi bi-book"></i> My Subjects
+                </a>
+                <a th:href="@{/teacher/assignments/create}" class="btn btn-primary">
+                    <i class="bi bi-plus-circle"></i> Create Assignment
+                </a>
             </div>
         </div>
-    </div>
 
-    <!-- My Subjects (Secondary) -->
-    <div class="card bg-base-100 shadow-xl mb-6">
-        <div class="card-body">
-            <h2 class="card-title">My Teaching Subjects</h2>
-            <div class="overflow-x-auto">
-                <table class="table w-full">
-                    <thead>
-                    <tr>
-                        <th>Subject</th>
-                        <th>Grade Level</th>
-                        <th>Actions</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="subject : ${mySubjects}">
-                        <td>
-                            <div class="font-bold" th:text="${subject.name}">Mathematics</div>
-                            <div class="text-sm opacity-50" th:text="${subject.subjectCode}">MATH10</div>
-                        </td>
-                        <td th:text="${subject.gradeLevel.name}">Grade 10</td>
-                        <td>
-                            <div class="flex gap-1">
-                                <a th:href="@{/teacher/subjects/{id}/assignments(id=${subject.id})}" class="btn btn-sm btn-primary">Assignments</a>
-                                <a th:href="@{/teacher/subjects/{id}/materials(id=${subject.id})}" class="btn btn-sm btn-ghost">Materials</a>
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-card-icon text-primary">
+                        <i class="bi bi-book"></i>
+                    </div>
+                    <div class="stat-card-value" th:text="${mySubjects?.size() ?: 0}">5</div>
+                    <div class="stat-card-label">My Subjects</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-card-icon text-info">
+                        <i class="bi bi-people"></i>
+                    </div>
+                    <div class="stat-card-value" th:text="${totalStudents ?: 0}">125</div>
+                    <div class="stat-card-label">Total Students</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-card-icon text-warning">
+                        <i class="bi bi-hourglass-split"></i>
+                    </div>
+                    <div class="stat-card-value" th:text="${submittedAssignments?.size() ?: 0}">8</div>
+                    <div class="stat-card-label">Pending Grades</div>
+                </div>
+            </div>
+            <div class="col-md-6 col-lg-3">
+                <div class="stat-card">
+                    <div class="stat-card-icon text-success">
+                        <i class="bi bi-calendar"></i>
+                    </div>
+                    <div class="stat-card-value" th:text="${currentAcademicYear?.name ?: 'N/A'}">2024-2025</div>
+                    <div class="stat-card-label">Academic Year</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Class Teacher Responsibilities -->
+        <div th:if="${assignedClassroom}" class="card mb-4">
+            <div class="card-header bg-gradient">
+                <h5 class="mb-0"><i class="bi bi-door-closed"></i> Your Classroom - Class Teacher Duties</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-lg-4 mb-3">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-door-closed fs-3 text-primary"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <small class="text-muted d-block">Your Assigned Class</small>
+                                    <strong class="d-block" th:text="${assignedClassroom.gradeLevel.name + '-' + assignedClassroom.name}">Grade 10-A</strong>
+                                    <small th:text="'(' + ${assignedClassroom.medium} + ' Medium)'">( ENGLISH Medium)</small>
+                                </div>
                             </div>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Assignments to Grade Card -->
-    <div class="card bg-base-100 shadow-xl mt-6">
-        <div class="card-body">
-            <h2 class="card-title">Assignments Awaiting Grading</h2>
-
-            <div th:if="${submittedAssignments.isEmpty()}" class="alert alert-info mt-4">
-                <div><span>There are no assignments currently awaiting your review.</span></div>
-            </div>
-
-            <div th:if="${!submittedAssignments.isEmpty()}" class="overflow-x-auto mt-4">
-                <table class="table table-zebra w-full">
-                    <thead>
-                    <tr>
-                        <th>Student</th>
-                        <th>Subject</th>
-                        <th>Assignment</th>
-                        <th>Submitted On</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr th:each="assignment : ${submittedAssignments}">
-                        <td th:text="${assignment.user.username}">student_username</td>
-                        <td th:text="${assignment.subject.name}">Physics</td>
-                        <td th:text="${assignment.title}">Chapter 1 Problems</td>
-                        <td th:text="${#temporals.format(assignment.submissionDate, 'dd-MMM-yyyy HH:mm')}">28-Aug-2025
-                            14:30
-                        </td>
-                        <td>
-                            <a th:href="@{/teacher/assignments/{id}/grade(id=${assignment.id})}"
-                               class="btn btn-primary btn-sm">Grade</a>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    <div class="card bg-base-100 shadow-xl mt-6">
-        <div class="card-body">
-            <h2 class="card-title">Manage Study Materials</h2>
-            <p>Upload new resources like notes, worksheets, and presentations for your students.</p>
-                <a th:href="@{/teacher/materials/upload}" class="btn btn-primary">Upload Material</a>
-            </div>
-        </div>
-    </div>
-    <div class="card bg-base-100 shadow-xl mt-6">
-        <div class="card-body">
-            <h2 class="card-title">Mark Attendance</h2>
-            <p>Select a subject and date to take or update attendance records.</p>
-            <div class="card-actions justify-end">
-                <a th:href="@{/teacher/attendance}" class="btn btn-primary">Take Attendance</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Assignment Management Card -->
-    <div class="card bg-base-100 shadow-xl mt-6">
-        <div class="card-body">
-            <h2 class="card-title">Assignment Management</h2>
-            <p>Create, view, and manage assignments for your subjects.</p>
-            <div class="card-actions justify-end gap-2">
-                <a th:href="@{/teacher/assignments}" class="btn btn-secondary">View All Assignments</a>
-                <a th:href="@{/teacher/assignments/create}" class="btn btn-primary">Create Assignment</a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Budget Request Card -->
-    <div class="card bg-base-100 shadow-xl mt-6">
-        <div class="card-body">
-            <h2 class="card-title">Submit Budget Request</h2>
-            <form th:action="@{/teacher/budget/request}" method="post" class="space-y-4">
-                <div class="form-control">
-                    <label class="label"><span class="label-text">Request Title</span></label>
-                    <input type="text" name="title" class="input input-bordered" required/>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-3">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-people fs-3 text-info"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <small class="text-muted d-block">Total Students</small>
+                                    <strong class="d-block" th:text="${assignedClassroom.enrollments?.size() ?: 0}">25</strong>
+                                    <small>Enrolled students</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-3">
+                        <div class="p-3 border rounded-3 bg-light">
+                            <div class="d-flex align-items-center">
+                                <div class="flex-shrink-0">
+                                    <i class="bi bi-calendar fs-3 text-success"></i>
+                                </div>
+                                <div class="flex-grow-1 ms-3">
+                                    <small class="text-muted d-block">Academic Year</small>
+                                    <strong class="d-block" th:text="${assignedClassroom.academicYear?.name ?: '2024-2025'}">2024-2025</strong>
+                                    <small>Current year</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text">Description</span></label>
-{{ ... }}
+                <div class="d-flex flex-wrap gap-2">
+                    <a th:href="@{/teacher/attendance}" class="btn btn-primary">
+                        <i class="bi bi-clipboard-check"></i> Take Attendance
+                    </a>
+                    <a th:href="@{/teacher/classroom/students}" class="btn btn-info">
+                        <i class="bi bi-people"></i> View Students
+                    </a>
+                    <a th:href="@{/teacher/timetable}" class="btn btn-success">
+                        <i class="bi bi-calendar3"></i> Class Timetable
+                    </a>
                 </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text">Amount ($)</span></label>
-                    <input type="number" step="0.01" name="amount" class="input input-bordered" required/>
+            </div>
+        </div>
+
+        <!-- No Classroom Assigned Warning -->
+        <div th:unless="${assignedClassroom}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>No Classroom Assigned</strong> - You are not assigned as a class teacher to any classroom. Please contact administration.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <!-- My Teaching Subjects -->
+        <div class="card mb-4">
+            <div class="card-header bg-gradient">
+                <h5 class="mb-0"><i class="bi bi-book"></i> My Teaching Subjects</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th><i class="bi bi-book"></i> Subject</th>
+                                <th><i class="bi bi-mortarboard"></i> Grade Level</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="subject : ${mySubjects}">
+                                <td>
+                                    <strong th:text="${subject.name}">Mathematics</strong>
+                                    <br><small class="text-muted" th:text="${subject.subjectCode}">MATH10</small>
+                                </td>
+                                <td th:text="${subject.gradeLevel.name}">Grade 10</td>
+                                <td>
+                                    <a th:href="@{/teacher/subjects/{id}/assignments(id=${subject.id})}" class="btn btn-sm btn-primary">
+                                        <i class="bi bi-file-earmark-text"></i> Assignments
+                                    </a>
+                                    <a th:href="@{/teacher/subjects/{id}/materials(id=${subject.id})}" class="btn btn-sm btn-outline-secondary">
+                                        <i class="bi bi-file-earmark-pdf"></i> Materials
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
-                <div class="card-actions justify-end">
-                    <button type="submit" class="btn btn-primary">Submit Request</button>
+            </div>
+        </div>
+
+        <!-- Assignments Awaiting Grading -->
+        <div class="card mb-4">
+            <div class="card-header bg-gradient">
+                <h5 class="mb-0"><i class="bi bi-hourglass-split"></i> Assignments Awaiting Grading</h5>
+            </div>
+            <div class="card-body">
+                <div th:if="${submittedAssignments.isEmpty()}" class="alert alert-info" role="alert">
+                    <i class="bi bi-info-circle"></i>
+                    <span>There are no assignments currently awaiting your review.</span>
                 </div>
-            </form>
+                <div th:if="${!submittedAssignments.isEmpty()}" class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th><i class="bi bi-person"></i> Student</th>
+                                <th><i class="bi bi-book"></i> Subject</th>
+                                <th>Assignment</th>
+                                <th><i class="bi bi-calendar"></i> Submitted</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="assignment : ${submittedAssignments}">
+                                <td th:text="${assignment.user.username}">student_username</td>
+                                <td th:text="${assignment.subject.name}">Physics</td>
+                                <td th:text="${assignment.title}">Chapter 1 Problems</td>
+                                <td th:text="${#temporals.format(assignment.submissionDate, 'dd-MMM-yyyy HH:mm')}">28-Aug-2025 14:30</td>
+                                <td>
+                                    <a th:href="@{/teacher/assignments/{id}/grade(id=${assignment.id})}" class="btn btn-primary btn-sm">
+                                        <i class="bi bi-pencil"></i> Grade
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions Cards -->
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-gradient">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-pdf"></i> Manage Study Materials</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Upload new resources like notes, worksheets, and presentations for your students.</p>
+                        <a th:href="@{/teacher/materials/upload}" class="btn btn-primary">
+                            <i class="bi bi-cloud-upload"></i> Upload Material
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-gradient">
+                        <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Assignment Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="text-muted">Create, view, and manage assignments for your subjects.</p>
+                        <div class="d-flex gap-2">
+                            <a th:href="@{/teacher/assignments}" class="btn btn-secondary">
+                                <i class="bi bi-list"></i> View All
+                            </a>
+                            <a th:href="@{/teacher/assignments/create}" class="btn btn-primary">
+                                <i class="bi bi-plus-circle"></i> Create
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </main>
 
 <div th:replace="~{fragments/footer :: footer}"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
