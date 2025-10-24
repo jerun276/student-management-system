@@ -31,6 +31,16 @@
             </div>
         </div>
 
+        <!-- Alert Messages -->
+        <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+            <i class="bi bi-check-circle"></i> <span th:text="${successMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+            <i class="bi bi-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
         <!-- Quick Stats -->
         <div class="row mb-4">
             <div class="col-md-6 col-lg-3">
@@ -74,7 +84,7 @@
         <!-- Class Teacher Responsibilities -->
         <div th:if="${assignedClassroom}" class="card mb-4">
             <div class="card-header bg-gradient">
-                <h5 class="mb-0"><i class="bi bi-door-closed"></i> Your Classroom - Class Teacher Duties</h5>
+                <h5 class="mb-0 text-black"><i class="bi bi-door-closed"></i> Your Classroom - Class Teacher Duties</h5>
             </div>
             <div class="card-body">
                 <div class="row mb-4">
@@ -145,7 +155,7 @@
         <!-- My Teaching Subjects -->
         <div class="card mb-4">
             <div class="card-header bg-gradient">
-                <h5 class="mb-0"><i class="bi bi-book"></i> My Teaching Subjects</h5>
+                <h5 class="mb-0 text-black"><i class="bi bi-book"></i> My Teaching Subjects</h5>
             </div>
             <div class="card-body">
                 <div class="table-responsive">
@@ -182,7 +192,7 @@
         <!-- Assignments Awaiting Grading -->
         <div class="card mb-4">
             <div class="card-header bg-gradient">
-                <h5 class="mb-0"><i class="bi bi-hourglass-split"></i> Assignments Awaiting Grading</h5>
+                <h5 class="mb-0 text-black"><i class="bi bi-hourglass-split"></i> Assignments Awaiting Grading</h5>
             </div>
             <div class="card-body">
                 <div th:if="${submittedAssignments.isEmpty()}" class="alert alert-info" role="alert">
@@ -223,7 +233,7 @@
             <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-header bg-gradient">
-                        <h5 class="mb-0"><i class="bi bi-file-earmark-pdf"></i> Manage Study Materials</h5>
+                        <h5 class="mb-0 text-black"><i class="bi bi-file-earmark-pdf"></i> Manage Study Materials</h5>
                     </div>
                     <div class="card-body">
                         <p class="text-muted">Upload new resources like notes, worksheets, and presentations for your students.</p>
@@ -236,7 +246,7 @@
             <div class="col-md-6 mb-4">
                 <div class="card">
                     <div class="card-header bg-gradient">
-                        <h5 class="mb-0"><i class="bi bi-file-earmark-text"></i> Assignment Management</h5>
+                        <h5 class="mb-0 text-black"><i class="bi bi-file-earmark-text"></i> Assignment Management</h5>
                     </div>
                     <div class="card-body">
                         <p class="text-muted">Create, view, and manage assignments for your subjects.</p>

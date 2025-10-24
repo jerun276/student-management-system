@@ -80,8 +80,8 @@ public class StudentService {
         // Use the existing method to get the assignment securely
         Assignment assignment = getAssignmentByIdForStudent(assignmentId);
 
-        // Don't allow submission if it's not pending
-        if (assignment.getStatus() != AssignmentStatus.PENDING) {
+        // Don't allow submission if it's already submitted or graded
+        if (assignment.getStatus() == AssignmentStatus.SUBMITTED || assignment.getStatus() == AssignmentStatus.GRADED) {
             throw new IllegalStateException("This assignment has already been submitted or graded.");
         }
 

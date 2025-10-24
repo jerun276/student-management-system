@@ -2,56 +2,132 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Grade Assignment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grade Assignment - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
 
-<div th:replace="~{fragments/header :: header}"></div>
-
-<main class="container mx-auto p-4">
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <!-- Assignment and Submission Details -->
-            <h2 class="card-title text-2xl" th:text="${assignment.title}">Assignment Title</h2>
-            <p class="text-sm text-gray-500">
-                <strong>Student:</strong> <span th:text="${assignment.user.username}">Student</span> |
-                <strong>Subject:</strong> <span th:text="${assignment.subject.name}">Subject</span>
-            </p>
-            <div class="divider"></div>
-
-            <h3 class="font-bold mt-4">Student's Submission:</h3>
-            <div class="prose bg-gray-100 p-4 rounded-md mt-2 max-w-full">
-                <p th:text="${assignment.submissionText}">The student's submitted text will appear here.</p>
+    <main class="main-content">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 text-primary fw-bold mb-0" th:text="${assignment.title}">Assignment Title</h1>
+                    <p class="text-muted small mt-1">
+                        <strong>Student:</strong> <span th:text="${assignment.user.username}">Student</span> | 
+                        <strong>Subject:</strong> <span th:text="${assignment.subject.name}">Subject</span>
+                    </p>
+                </div>
+                <a th:href="@{/teacher/dashboard}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
             </div>
 
-            <!-- Grading Form -->
-            <form th:action="@{/teacher/assignments/{id}/grade(id=${assignment.id})}" method="post" class="mt-6">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <!-- Grade Input -->
-                    <div class="form-control md:col-span-1">
-                        <label class="label"><span class="label-text">Grade</span></label>
-                        <input type="text" name="grade" placeholder="e.g., A+ or 95/100" class="input input-bordered"
-                               required/>
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <!-- Student Submission Card -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0 text-black"><i class="bi bi-file-earmark-text"></i> Student's Submission</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="bg-light p-3 rounded">
+                                <p class="mb-0" th:text="${assignment.submissionText}">The student's submitted text will appear here.</p>
+                            </div>
+                        </div>
                     </div>
-                    <!-- Feedback Input -->
-                    <div class="form-control md:col-span-2">
-                        <label class="label"><span class="label-text">Feedback</span></label>
-                        <textarea name="feedback" class="textarea textarea-bordered h-24"
-                                  placeholder="Provide constructive feedback..."></textarea>
+
+                    <!-- Grading Form Card -->
+                    <div class="card">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0 text-black"><i class="bi bi-star"></i> Grade Assignment</h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/teacher/assignments/{id}/grade(id=${assignment.id})}" method="post">
+                                <div class="mb-3">
+                                    <label for="grade" class="form-label">Grade <span class="text-danger">*</span></label>
+                                    <input type="number" id="grade" name="grade" class="form-control" placeholder="Enter grade (0-100)" min="0" max="100" required>
+                                    <small class="text-muted d-block mt-1">Enter a numeric grade between 0 and 100</small>
+                                    <small class="text-danger d-none" id="gradeError">Grade must be between 0 and 100</small>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="feedback" class="form-label">Feedback</label>
+                                    <textarea id="feedback" name="feedback" class="form-control" rows="4" placeholder="Provide constructive feedback..."></textarea>
+                                </div>
+
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a th:href="@{/teacher/dashboard}" class="btn btn-outline-secondary">Cancel</a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-check-circle"></i> Submit Grade
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
-                <div class="card-actions justify-end mt-6">
-                    <a th:href="@{/teacher/dashboard}" class="btn btn-ghost">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Submit Grade</button>
+                <div class="col-lg-4">
+                    <!-- Assignment Info Card -->
+                    <div class="card">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0 text-black"><i class="bi bi-info-circle"></i> Assignment Info</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted small">Subject</label>
+                                <p class="mb-0" th:text="${assignment.subject.name}">Subject</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted small">Student</label>
+                                <p class="mb-0" th:text="${assignment.user.firstName + ' ' + assignment.user.lastName}">Student Name</p>
+                            </div>
+                            <div>
+                                <label class="fw-bold text-muted small">Status</label>
+                                <p class="mb-0">
+                                    <span class="badge bg-warning">Submitted</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </form>
+            </div>
         </div>
-    </div>
-</main>
+    </main>
 
-<div th:replace="~{fragments/footer :: footer}"></div>
+    <div th:replace="~{fragments/footer :: footer}"></div>
 
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gradeInput = document.getElementById('grade');
+            const gradeError = document.getElementById('gradeError');
+
+            if (gradeInput) {
+                gradeInput.addEventListener('change', function() {
+                    const grade = parseInt(this.value);
+                    if (isNaN(grade) || grade < 0 || grade > 100) {
+                        this.classList.add('is-invalid');
+                        gradeError.classList.remove('d-none');
+                    } else {
+                        this.classList.remove('is-invalid');
+                        gradeError.classList.add('d-none');
+                    }
+                });
+
+                gradeInput.addEventListener('blur', function() {
+                    const grade = parseInt(this.value);
+                    if (!isNaN(grade)) {
+                        if (grade < 0) this.value = 0;
+                        if (grade > 100) this.value = 100;
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

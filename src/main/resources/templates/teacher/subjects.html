@@ -26,39 +26,31 @@
         </div>
     </div>
 
-    <!-- Academic Year Filter -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-gradient">
-            <h5 class="mb-0"><i class="bi bi-funnel"></i> Filters</h5>
+    <!-- Statistics -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    <small class="text-muted d-block"><i class="bi bi-calendar"></i> Academic Year</small>
+                    <h5 class="text-secondary mb-0" th:text="${selectedAcademicYear?.name ?: 'Current Year'}">2024-2025</h5>
+                </div>
+            </div>
         </div>
-        <div class="card-body">
-            <form method="get" class="row g-3 align-items-end">
-                <div class="col-md-4">
-                    <label for="academicYear" class="form-label">Academic Year</label>
-                    <select id="academicYear" name="academicYear" class="form-select" onchange="this.form.submit()">
-                        <option th:each="year : ${academicYears}" 
-                                th:value="${year.id}" 
-                                th:text="${year.name}"
-                                th:selected="${selectedAcademicYear?.id == year.id}">2024-2025</option>
-                    </select>
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    <small class="text-muted d-block"><i class="bi bi-book"></i> Total Subjects</small>
+                    <h5 class="text-primary mb-0" th:text="${mySubjects?.size() ?: 0}">5</h5>
                 </div>
-                <div class="col-md-4">
-                    <div class="card bg-light">
-                        <div class="card-body p-3">
-                            <small class="text-muted d-block">Total Subjects</small>
-                            <h5 class="text-primary mb-0" th:text="${mySubjects?.size() ?: 0}">5</h5>
-                        </div>
-                    </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card bg-light">
+                <div class="card-body p-3">
+                    <small class="text-muted d-block"><i class="bi bi-people"></i> Total Students</small>
+                    <h5 class="text-info mb-0" th:text="${totalStudents ?: 0}">125</h5>
                 </div>
-                <div class="col-md-4">
-                    <div class="card bg-light">
-                        <div class="card-body p-3">
-                            <small class="text-muted d-block">Total Students</small>
-                            <h5 class="text-info mb-0" th:text="${totalStudents ?: 0}">125</h5>
-                        </div>
-                    </div>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 
@@ -67,7 +59,7 @@
         <div th:each="subject : ${mySubjects}" class="col-md-6 col-lg-4">
             <div class="card shadow-sm h-100">
                 <div class="card-header bg-gradient">
-                    <h5 class="mb-0" th:text="${subject.name}">Mathematics</h5>
+                    <h5 class="mb-0 text-black" th:text="${subject.name}">Mathematics</h5>
                     <small class="text-muted" th:text="${subject.subjectCode}">MATH10</small>
                 </div>
                 <div class="card-body">

@@ -54,17 +54,15 @@
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationsDropdown" style="min-width: 320px;">
                             <li><h6 class="dropdown-header"><i class="bi bi-megaphone"></i> Announcements</h6></li>
                             <li><hr class="dropdown-divider"></li>
-                            <li th:if="${latestAnnouncement}">
-                                <a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#announcementModal">
-                                    <div class="d-flex justify-content-between align-items-start">
-                                        <div style="flex: 1;">
-                                            <p class="mb-1 fw-bold" th:text="${latestAnnouncement.title}">Announcement Title</p>
-                                            <small class="text-muted d-block text-truncate" th:text="${latestAnnouncement.content}">Announcement content preview</small>
-                                            <small class="text-muted d-block mt-1" th:text="${latestAnnouncement.publishedDate != null ? #temporals.format(latestAnnouncement.publishedDate, 'MMM dd, yyyy') : 'N/A'}">Date</small>
-                                        </div>
-                                        <span class="badge bg-primary ms-2">New</span>
+                            <li th:if="${latestAnnouncement}" class="dropdown-item" style="cursor: default; padding: 0.5rem 1rem;">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div style="flex: 1;">
+                                        <p class="mb-1 fw-bold" th:text="${latestAnnouncement.title}">Announcement Title</p>
+                                        <small class="text-muted d-block text-truncate" th:text="${latestAnnouncement.content}">Announcement content preview</small>
+                                        <small class="text-muted d-block mt-1" th:text="${latestAnnouncement.publishedDate != null ? #temporals.format(latestAnnouncement.publishedDate, 'MMM dd, yyyy') : 'N/A'}">Date</small>
                                     </div>
-                                </a>
+                                    <span class="badge bg-primary ms-2">New</span>
+                                </div>
                             </li>
                             <li th:unless="${latestAnnouncement}">
                                 <a class="dropdown-item text-muted text-center py-3">
@@ -72,21 +70,20 @@
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item text-center small" href="#"><i class="bi bi-arrow-right"></i> View All</a></li>
                         </ul>
                     </div>
                     
                     <!-- Announcement Modal -->
-                    <div class="modal fade" id="announcementModal" tabindex="-1" aria-labelledby="announcementModalLabel" aria-hidden="true" th:if="${latestAnnouncement}">
+                    <div class="modal fade" id="announcementModal" tabindex="-1" aria-labelledby="announcementModalLabel" aria-hidden="true">
                         <div class="modal-dialog">
                             <div class="modal-content">
                                 <div class="modal-header bg-primary text-white">
-                                    <h5 class="modal-title" id="announcementModalLabel" th:text="${latestAnnouncement.title}">Announcement</h5>
+                                    <h5 class="modal-title" id="announcementModalLabel" th:text="${latestAnnouncement != null ? latestAnnouncement.title : 'Announcement'}">Announcement</h5>
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
                                 </div>
                                 <div class="modal-body">
-                                    <p th:text="${latestAnnouncement.content}">Announcement content goes here</p>
-                                    <small class="text-muted" th:text="'Posted on: ' + ${latestAnnouncement.publishedDate != null ? #temporals.format(latestAnnouncement.publishedDate, 'MMM dd, yyyy HH:mm') : 'N/A'}">Posted on date</small>
+                                    <p th:text="${latestAnnouncement != null ? latestAnnouncement.content : 'No announcement content'}">Announcement content goes here</p>
+                                    <small class="text-muted" th:text="${latestAnnouncement != null ? 'Posted on: ' + (#temporals.format(latestAnnouncement.publishedDate, 'MMM dd, yyyy HH:mm')) : 'N/A'}">Posted on date</small>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -217,6 +214,18 @@
                 <span>My Timetable</span>
             </a>
         </li>
+        <li sec:authorize="hasRole('TEACHER')">
+            <a th:href="@{/teacher/budget/request}">
+                <i class="bi bi-cash-coin"></i>
+                <span>Budget Request</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('TEACHER')">
+            <a th:href="@{/teacher/budget/history}">
+                <i class="bi bi-clock-history"></i>
+                <span>Budget History</span>
+            </a>
+        </li>
 
         <!-- Parent Menu -->
         <li sec:authorize="hasRole('PARENT')">
@@ -283,10 +292,16 @@
                 <span>Reports</span>
             </a>
         </li>
-        <li sec:authorize="hasRole('PRINCIPAL')">
+        <!-- <li sec:authorize="hasRole('PRINCIPAL')">
             <a th:href="@{/principal/academic-overview}">
                 <i class="bi bi-graph-up"></i>
                 <span>Academic Overview</span>
+            </a>
+        </li> -->
+        <li sec:authorize="hasRole('PRINCIPAL')">
+            <a th:href="@{/principal/master-timetable}">
+                <i class="bi bi-calendar-week"></i>
+                <span>Master Timetable</span>
             </a>
         </li>
         <li sec:authorize="hasRole('PRINCIPAL')">
@@ -296,9 +311,21 @@
             </a>
         </li>
         <li sec:authorize="hasRole('PRINCIPAL')">
-            <a th:href="@{/principal/master-timetable}">
-                <i class="bi bi-calendar-week"></i>
-                <span>Master Timetable</span>
+            <a th:href="@{/principal/reports}">
+                <i class="bi bi-file-earmark-pdf"></i>
+                <span>Reports</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('PRINCIPAL')">
+            <a th:href="@{/principal/users}">
+                <i class="bi bi-people"></i>
+                <span>Users</span>
+            </a>
+        </li>
+        <li sec:authorize="hasRole('PRINCIPAL')">
+            <a th:href="@{/principal/classrooms}">
+                <i class="bi bi-book"></i>
+                <span>Classrooms & Grades</span>
             </a>
         </li>
 

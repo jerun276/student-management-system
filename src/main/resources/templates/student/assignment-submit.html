@@ -2,93 +2,150 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Submit Assignment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Assignment - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
-<div th:replace="~{fragments/header :: header}"></div>
-<main class="container mx-auto p-4">
-    <div class="card bg-base-100 shadow-xl">
-        <div class="card-body">
-            <!-- Assignment Details -->
-            <h2 class="card-title text-2xl" th:text="${assignment.title}">Assignment Title</h2>
-            <p class="text-sm text-gray-500">
-                <strong>Subject:</strong> <span th:text="${assignment.subject.name}">Subject Name</span> |
-                <strong>Due Date:</strong> <span th:text="${#temporals.format(assignment.dueDate, 'dd-MMM-yyyy')}">Due Date</span>
-            </p>
-            <div class="divider"></div>
-            <p class="mt-2" th:text="${assignment.description}">Full assignment description goes here.</p>
-            <!-- Status Check -->
-            <div th:if="${assignment.status.name() == 'SUBMITTED'}" class="alert alert-info mt-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
+
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/student/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/student/assignments}" class="text-decoration-none"><i class="bi bi-file-earmark-text"></i> My Assignments</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-pencil-square"></i> Submit Assignment</li>
+                </ol>
+            </nav>
+
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
-                    <h3 class="font-bold">Already Submitted</h3>
-                    <div class="text-xs">You submitted this assignment on <span th:text="${#temporals.format(assignment.submissionDate, 'dd MMM yyyy HH:mm')}"></span></div>
+                    <h1 class="h2 text-primary fw-bold mb-0" th:text="${assignment.title}">Assignment Title</h1>
+                    <p class="text-muted small mt-1">
+                        <strong>Subject:</strong> <span th:text="${assignment.subject.name}">Subject Name</span> |
+                        <strong>Due Date:</strong> <span th:text="${#temporals.format(assignment.dueDate, 'dd-MMM-yyyy')}">Due Date</span>
+                    </p>
                 </div>
+                <a th:href="@{/student/assignments}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back
+                </a>
             </div>
 
-            <div th:if="${assignment.status.name() == 'GRADED'}" class="alert alert-success mt-4">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-                <div>
-                    <h3 class="font-bold">Assignment Graded</h3>
-                    <div class="text-xs">Grade: <span class="font-bold" th:text="${assignment.grade}"></span></div>
-                    <div th:if="${assignment.feedback}" class="text-xs mt-1">Feedback: <span th:text="${assignment.feedback}"></span></div>
-            <!-- Submission Form (only show if pending) -->
-            <div th:if="${assignment.status.name() == 'ASSIGNED'}">
-                <form th:action="@{/student/assignments/{id}/submit(id=${assignment.id})}" method="post" class="mt-6">
-                    
-                    <div class="form-control">
-                        <label class="label">
-                            <span class="label-text">Your Submission</span>
-                            <span class="label-text-alt">Required</span>
-{{ ... }}
-                        <textarea name="submissionContent" class="textarea textarea-bordered h-48"
-                                  placeholder="Type your assignment submission here. Be clear and detailed in your response..."
-                                  required></textarea>
-                        <label class="label">
-                            <span class="label-text-alt">Minimum 10 characters required</span>
-                        </label>
-                    </div>
+            <div class="row g-4">
+                <div class="col-lg-8">
+                    <div class="card">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0 text-black"><i class="bi bi-file-earmark-text"></i> Assignment Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-3" th:text="${assignment.description}">Full assignment description goes here.</p>
 
-                    <div class="alert alert-warning mt-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="stroke-current shrink-0 w-6 h-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                        </svg>
-                        <div>
-                            <h3 class="font-bold">Important</h3>
-                            <div class="text-xs">Once submitted, you cannot edit your assignment. Please review your work carefully.</div>
+                            <!-- Status Check - Already Submitted -->
+                            <div th:if="${assignment.status.name() == 'SUBMITTED'}" class="alert alert-info" role="alert">
+                                <i class="bi bi-info-circle"></i>
+                                <strong>Already Submitted</strong><br>
+                                <small>You submitted this assignment on <span th:text="${#temporals.format(assignment.submissionDate, 'dd MMM yyyy HH:mm')}"></span></small>
+                            </div>
+
+                            <!-- Status Check - Graded -->
+                            <div th:if="${assignment.status.name() == 'GRADED'}" class="alert alert-success" role="alert">
+                                <i class="bi bi-check-circle"></i>
+                                <strong>Assignment Graded</strong><br>
+                                <small>Grade: <span class="fw-bold" th:text="${assignment.grade}"></span></small>
+                                <div th:if="${assignment.feedback}" class="mt-2">
+                                    <small>Feedback: <span th:text="${assignment.feedback}"></span></small>
+                                </div>
+                            </div>
+
+                            <!-- Submission Form (only show if pending) -->
+                            <div th:if="${assignment.status.name() == 'ASSIGNED'}">
+                                <form th:action="@{/student/assignments/{id}/submit(id=${assignment.id})}" method="post" class="mt-4">
+                                    <div class="mb-3">
+                                        <label for="submissionContent" class="form-label">Your Submission <span class="text-danger">*</span></label>
+                                        <textarea id="submissionContent" name="submissionContent" class="form-control" rows="6" placeholder="Type your assignment submission here. Be clear and detailed in your response..." required></textarea>
+                                        <small class="text-muted d-block mt-1">Minimum 10 characters required</small>
+                                    </div>
+
+                                    <div class="alert alert-warning" role="alert">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                        <strong>Important</strong><br>
+                                        <small>Once submitted, you cannot edit your assignment. Please review your work carefully.</small>
+                                    </div>
+
+                                    <div class="d-flex gap-2 justify-content-end">
+                                        <a th:href="@{/student/assignments}" class="btn btn-outline-secondary">Cancel</a>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle"></i> Submit Assignment
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Already Submitted View -->
+                            <div th:if="${assignment.status.name() != 'ASSIGNED'}" class="mt-4">
+                                <h6 class="fw-bold mb-3"><i class="bi bi-file-earmark-check"></i> Your Submission</h6>
+                                <div class="bg-light p-3 rounded">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="fw-semibold">Submitted:</span>
+                                        <span th:text="${#temporals.format(assignment.submissionDate, 'dd MMM yyyy HH:mm')}">Submission Date</span>
+                                    </div>
+                                    <hr class="my-2">
+                                    <p class="mb-0" th:text="${assignment.submissionText}">Your submission content...</p>
+                                </div>
+                                
+                                <div class="d-flex gap-2 justify-content-end mt-4">
+                                    <a th:href="@{/student/assignments}" class="btn btn-primary">
+                                        <i class="bi bi-arrow-left"></i> Back to Assignments
+                                    </a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="card-actions justify-end mt-6">
-                        <a th:href="@{/student/dashboard}" class="btn btn-ghost">Cancel</a>
-                        <button type="submit" class="btn btn-primary">Submit Assignment</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Already Submitted View -->
-            <div th:if="${assignment.status.name() != 'ASSIGNED'}" class="mt-6">
-                <h3 class="font-bold mb-4">Your Submission</h3>
-                <div class="bg-base-200 p-4 rounded-lg">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="font-semibold">Submitted:</span>
-                        <span th:text="${#temporals.format(assignment.submissionDate, 'dd MMM yyyy HH:mm')}">Submission Date</span>
-                    </div>
-                    <div class="divider my-2"></div>
-                    <p th:text="${assignment.submissionText}">Your submission content...</p>
                 </div>
-                
-                <div class="card-actions justify-end mt-4">
-                    <a th:href="@{/student/dashboard}" class="btn btn-primary">Back to Dashboard</a>
+
+                <!-- Sidebar Info -->
+                <div class="col-lg-4">
+                    <div class="card">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0 text-black"><i class="bi bi-info-circle"></i> Assignment Info</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted small">Subject</label>
+                                <p class="mb-0" th:text="${assignment.subject.name}">Subject</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted small">Teacher</label>
+                                <p class="mb-0" th:text="${assignment.teacher?.firstName + ' ' + assignment.teacher?.lastName ?: 'No Teacher'}">Teacher Name</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted small">Due Date</label>
+                                <p class="mb-0" th:text="${#temporals.format(assignment.dueDate, 'dd MMM yyyy')}">Due Date</p>
+                            </div>
+                            <div class="mb-3">
+                                <label class="fw-bold text-muted small">Status</label>
+                                <p class="mb-0">
+                                    <span th:classappend="${assignment.status.name() == 'ASSIGNED'} ? 'bg-warning' : (${assignment.status.name() == 'SUBMITTED'} ? 'bg-info' : 'bg-success')" class="badge" th:text="${assignment.status}">Status</span>
+                                </p>
+                            </div>
+                            <div th:if="${assignment.grade != null}">
+                                <label class="fw-bold text-muted small">Grade</label>
+                                <p class="mb-0 fw-bold text-success" th:text="${assignment.grade}">A+</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</main>
-<div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+</html>

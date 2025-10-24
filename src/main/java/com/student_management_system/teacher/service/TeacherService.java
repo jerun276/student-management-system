@@ -34,6 +34,9 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import java.time.LocalDate;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -49,17 +52,17 @@ public class TeacherService {
     private final StudyMaterialRepository studyMaterialRepository;
     private final FileStorageService fileStorageService;
     private final BudgetRequestRepository budgetRequestRepository;
-    
+
     // NEW: Academic structure repositories
     private final EnrollmentRepository enrollmentRepository;
     private final ClassroomRepository classroomRepository;
 
     public TeacherService(AssignmentRepository assignmentRepository, SubjectRepository subjectRepository,
-                          UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository, 
-                          StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService, 
-                          BudgetRequestRepository budgetRequestRepository,
-                          EnrollmentRepository enrollmentRepository,
-                          ClassroomRepository classroomRepository) {
+            UserRepository userRepository, AttendanceRecordRepository attendanceRecordRepository,
+            StudyMaterialRepository studyMaterialRepository, FileStorageService fileStorageService,
+            BudgetRequestRepository budgetRequestRepository,
+            EnrollmentRepository enrollmentRepository,
+            ClassroomRepository classroomRepository) {
         this.assignmentRepository = assignmentRepository;
         this.subjectRepository = subjectRepository;
         this.userRepository = userRepository;
@@ -75,6 +78,7 @@ public class TeacherService {
     public List<Assignment> getAssignmentsToGrade() {
         return assignmentRepository.findByStatusOrderBySubmissionDateDesc(AssignmentStatus.SUBMITTED);
     }
+
     public Assignment getAssignmentToGradeById(Long assignmentId) {
         return assignmentRepository.findById(assignmentId)
                 .orElseThrow(() -> new RuntimeException("Assignment not found with id: " + assignmentId));
@@ -103,8 +107,7 @@ public class TeacherService {
                 .stream()
                 .collect(Collectors.toMap(
                         record -> record.getStudent().getId(),
-                        AttendanceRecord::getStatus
-                ));
+                        AttendanceRecord::getStatus));
     }
 
     @Transactional
@@ -141,7 +144,8 @@ public class TeacherService {
 
     // Handle the file upload and save the metadata
     @Transactional
-    public void uploadStudyMaterial(String title, String description, Long subjectId, MultipartFile file) {
+    public void uploadStudyMaterial(String title, String description, Long subjectId, Long classroomId,
+            MultipartFile file) {
         // 1. Store the file on disk
         String fileName = fileStorageService.storeFile(file);
 
@@ -155,12 +159,20 @@ public class TeacherService {
         Subject subject = subjectRepository.findById(subjectId)
                 .orElseThrow(() -> new RuntimeException("Subject not found"));
 
-        // 4. Create and save the StudyMaterial entity
+        // 4. Get the classroom
+        com.student_management_system.common.model.Classroom classroom = null;
+        if (classroomId != null) {
+            classroom = classroomRepository.findById(classroomId)
+                    .orElseThrow(() -> new RuntimeException("Classroom not found"));
+        }
+
+        // 5. Create and save the StudyMaterial entity
         StudyMaterial studyMaterial = new StudyMaterial();
         studyMaterial.setTitle(title);
         studyMaterial.setDescription(description);
         studyMaterial.setFileName(fileName);
         studyMaterial.setSubject(subject);
+        studyMaterial.setClassroom(classroom);
         studyMaterial.setUploadedBy(teacher);
         studyMaterial.setUploadDate(LocalDateTime.now());
 
@@ -179,12 +191,22 @@ public class TeacherService {
 
         BudgetRequest request = new BudgetRequest();
         request.setTitle(title);
+        request.setDescription(description);
         request.setAmount(amount);
         request.setRequester(teacher);
         request.setRequestDate(LocalDate.now());
         request.setStatus(RequestStatus.PENDING);
 
         budgetRequestRepository.save(request);
+    }
+    
+    // Get budget request history for current teacher
+    public List<BudgetRequest> getBudgetRequestHistory() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        User teacher = userRepository.findByUsername(authentication.getName())
+                .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+        
+        return budgetRequestRepository.findByRequesterOrderByRequestDateDesc(teacher);
     }
 
     @Transactional
@@ -204,14 +226,15 @@ public class TeacherService {
         // Get students enrolled in classrooms for this subject's grade level
         Set<User> students = new java.util.HashSet<>();
         List<Classroom> classrooms = enrollmentRepository.findClassroomsByGradeLevel(subject.getGradeLevel());
-        
+
         for (Classroom classroom : classrooms) {
             List<User> classroomStudents = enrollmentRepository.findStudentsByClassroom(classroom);
             students.addAll(classroomStudents);
         }
 
         if (students.isEmpty()) {
-            throw new IllegalStateException("No students are enrolled in classrooms for this subject's grade level. Cannot create assignments.");
+            throw new IllegalStateException(
+                    "No students are enrolled in classrooms for this subject's grade level. Cannot create assignments.");
         }
 
         // Create an assignment for each student
@@ -224,9 +247,10 @@ public class TeacherService {
             assignment.setUser(student);
             assignment.setTeacher(teacher);
             assignment.setStatus(AssignmentStatus.ASSIGNED);
-            
+
             // Set classroom - find the student's classroom for this grade level
-            Classroom studentClassroom = enrollmentRepository.findClassroomByStudentAndGradeLevel(student, subject.getGradeLevel());
+            Classroom studentClassroom = enrollmentRepository.findClassroomByStudentAndGradeLevel(student,
+                    subject.getGradeLevel());
             if (studentClassroom != null) {
                 assignment.setClassroom(studentClassroom);
             }
@@ -240,7 +264,7 @@ public class TeacherService {
         // Find classroom first, then get students
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found with id: " + classroomId));
-        
+
         return enrollmentRepository.findStudentsByClassroom(classroom);
     }
 
@@ -255,13 +279,14 @@ public class TeacherService {
         // Get the classroom and teacher information
         Classroom classroom = classroomRepository.findById(classroomId)
                 .orElseThrow(() -> new RuntimeException("Classroom not found"));
-        
+
         User teacher = classroom.getClassTeacher();
         if (teacher == null) {
             throw new RuntimeException("No class teacher assigned to this classroom");
         }
-        
-        // For classroom-based attendance, we'll use the first subject taught by the teacher
+
+        // For classroom-based attendance, we'll use the first subject taught by the
+        // teacher
         // or create a default "Homeroom" subject
         Subject defaultSubject = subjectRepository.findByTeachersContaining(teacher)
                 .stream()
@@ -275,7 +300,7 @@ public class TeacherService {
                     newHomeroom.setActive(true);
                     return subjectRepository.save(newHomeroom);
                 });
-        
+
         for (Map.Entry<String, String> entry : attendanceData.entrySet()) {
             if (!entry.getKey().matches("\\d+")) {
                 continue;
@@ -313,7 +338,8 @@ public class TeacherService {
     }
 
     public List<Assignment> getSubmissionsForAssignment(Assignment assignment) {
-        // Get all assignments for the same subject, classroom, and title (represents submissions)
+        // Get all assignments for the same subject, classroom, and title (represents
+        // submissions)
         return assignmentRepository.findBySubjectAndClassroomAndTitle(
                 assignment.getSubject(), assignment.getClassroom(), assignment.getTitle());
     }
@@ -346,7 +372,7 @@ public class TeacherService {
 
         // Get students in the specific classroom
         List<User> students = getStudentsInClassroom(classroom.getId());
-        
+
         // Create assignment for each student in the specific classroom
         for (User student : students) {
             Assignment assignment = new Assignment();
@@ -365,14 +391,15 @@ public class TeacherService {
     }
 
     @Transactional
-    public void updateAssignmentTemplate(User teacher, String originalTitle, Long originalSubjectId, Long originalClassroomId, AssignmentCreationDto assignmentDto) {
+    public void updateAssignmentTemplate(User teacher, String originalTitle, Long originalSubjectId,
+            Long originalClassroomId, AssignmentCreationDto assignmentDto) {
 
         // Find all assignments with the original title, subject, and classroom
         List<Assignment> assignments = assignmentRepository.findByTeacher(teacher);
         List<Assignment> templateAssignments = assignments.stream()
-                .filter(a -> a.getTitle().equals(originalTitle) && 
-                           a.getSubject().getId().equals(originalSubjectId) &&
-                           a.getClassroom().getId().equals(originalClassroomId))
+                .filter(a -> a.getTitle().equals(originalTitle) &&
+                        a.getSubject().getId().equals(originalSubjectId) &&
+                        a.getClassroom().getId().equals(originalClassroomId))
                 .collect(java.util.stream.Collectors.toList());
 
         if (templateAssignments.isEmpty()) {
@@ -407,9 +434,9 @@ public class TeacherService {
         // Find all assignments with this title, subject, and classroom
         List<Assignment> assignments = assignmentRepository.findByTeacher(teacher);
         List<Assignment> templateAssignments = assignments.stream()
-                .filter(a -> a.getTitle().equals(title) && 
-                           a.getSubject().getId().equals(subjectId) &&
-                           a.getClassroom().getId().equals(classroomId))
+                .filter(a -> a.getTitle().equals(title) &&
+                        a.getSubject().getId().equals(subjectId) &&
+                        a.getClassroom().getId().equals(classroomId))
                 .collect(java.util.stream.Collectors.toList());
 
         if (templateAssignments.isEmpty()) {
@@ -422,4 +449,21 @@ public class TeacherService {
         }
     }
 
+    @Transactional
+    public void deleteStudyMaterial(Long materialId) {
+        StudyMaterial material = studyMaterialRepository.findById(materialId)
+                .orElseThrow(() -> new RuntimeException("Material not found"));
+        
+        // Delete the file from storage
+        try {
+            Path filePath = Paths.get(System.getProperty("user.dir")).resolve("uploads").resolve(material.getFileName());
+            Files.deleteIfExists(filePath);
+        } catch (Exception e) {
+            // Log error but continue with database deletion
+            System.err.println("Could not delete file: " + e.getMessage());
+        }
+        
+        // Delete the database record
+        studyMaterialRepository.deleteById(materialId);
+    }
 }

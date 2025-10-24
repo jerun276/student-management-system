@@ -30,6 +30,16 @@
                 </div>
             </div>
 
+            <!-- Alert Messages -->
+            <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle"></i> <span th:text="${successMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+
             <!-- School Overview Stats -->
             <div class="row mb-4">
                 <div class="col-md-6 col-lg-3">
@@ -71,7 +81,7 @@
             </div>
 
             <!-- Quick Actions -->
-            <div class="row mb-4">
+            <!-- <div class="row mb-4">
                 <div class="col-md-6 col-lg-4 mb-3">
                     <div class="card h-100">
                         <div class="card-header bg-gradient">
@@ -111,7 +121,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Academic Performance Report -->
             <div class="card mb-4">
@@ -151,38 +161,34 @@
 
             <!-- Announcements Management Card -->
             <div class="card mb-4">
-                <div class="card-header bg-gradient">
-                    <h5 class="mb-0 text-black"><i class="bi bi-megaphone"></i> Manage Announcements</h5>
+                <div class="card-header bg-gradient d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 text-black"><i class="bi bi-megaphone"></i> Announcements</h5>
+                    <a th:href="@{/principal/announcements}" class="btn btn-sm btn-primary">
+                        <i class="bi bi-arrow-right"></i> Manage All
+                    </a>
                 </div>
                 <div class="card-body">
-                    <!-- Form to create a new announcement -->
-                    <form th:action="@{/principal/announcements/create}" method="post" class="mb-4">
-                        <div class="mb-3">
-                            <label for="title" class="form-label fw-bold">Title</label>
-                            <input type="text" id="title" name="title" class="form-control" placeholder="Announcement title" required/>
-                        </div>
-                        <div class="mb-3">
-                            <label for="content" class="form-label fw-bold">Content</label>
-                            <textarea id="content" name="content" class="form-control" rows="4" placeholder="Announcement content" required></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-send"></i> Publish Announcement
-                        </button>
-                    </form>
-
-                    <hr>
-
-                    <!-- List of past announcements -->
-                    <h6 class="fw-bold mb-3">Published Announcements</h6>
-                    <div th:if="${announcements == null or announcements.isEmpty()}" class="alert alert-light">
-                        <p class="mb-0">No announcements have been published yet.</p>
+                    <p class="text-muted small mb-3">Manage all school announcements in the dedicated announcements page.</p>
+                    
+                    <div th:if="${announcements == null or announcements.isEmpty()}" class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> No announcements have been published yet.
                     </div>
-                    <div th:if="${announcements != null and !announcements.isEmpty()}" class="space-y-3" style="max-height: 400px; overflow-y: auto;">
-                        <div th:each="announcement : ${announcements}" class="p-3 border rounded-3 bg-light">
+                    
+                    <div th:if="${announcements != null and !announcements.isEmpty()}" class="space-y-3" style="max-height: 300px; overflow-y: auto;">
+                        <div th:each="announcement : ${announcements.subList(0, T(java.lang.Math).min(3, announcements.size()))}" class="p-3 border rounded-3 bg-light">
                             <h6 class="fw-bold mb-1" th:text="${announcement.title}"></h6>
                             <small class="text-muted d-block mb-2" th:text="'Published on ' + ${#temporals.format(announcement.publishedDate, 'dd-MMM-yyyy HH:mm')}"></small>
-                            <p class="mb-0 small" th:text="${announcement.content}"></p>
+                            <p class="mb-0 small text-truncate" th:text="${announcement.content}"></p>
                         </div>
+                        <div th:if="${announcements.size() > 3}" class="text-center mt-3">
+                            <small class="text-muted" th:text="'and ' + ${announcements.size() - 3} + ' more...'"></small>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-3 text-center">
+                        <a th:href="@{/principal/announcements}" class="btn btn-outline-primary btn-sm">
+                            <i class="bi bi-arrow-right"></i> View All Announcements
+                        </a>
                     </div>
                 </div>
             </div>
@@ -255,9 +261,12 @@
                                 <tr th:each="req : ${pendingRequests}">
                                     <td th:text="${req.requester.username}"></td>
                                     <td th:text="${req.title}"></td>
-                                    <td class="fw-bold" th:text="'$' + ${#numbers.formatDecimal(req.amount, 1, 'COMMA', 2, 'POINT')}"></td>
+                                    <td class="fw-bold" th:text="'LKR ' + ${#numbers.formatDecimal(req.amount, 1, 'COMMA', 2, 'POINT')}"></td>
                                     <td th:text="${#temporals.format(req.requestDate, 'dd-MMM-yyyy')}"></td>
                                     <td>
+                                        <a th:href="@{/principal/budget/{id}(id=${req.id})}" class="btn btn-info btn-sm">
+                                            <i class="bi bi-eye"></i> View
+                                        </a>
                                         <form th:action="@{/principal/budget/{id}/approve(id=${req.id})}" method="post" class="d-inline">
                                             <button type="submit" class="btn btn-success btn-sm">
                                                 <i class="bi bi-check-circle"></i> Approve

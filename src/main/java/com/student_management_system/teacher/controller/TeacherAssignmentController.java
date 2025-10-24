@@ -78,6 +78,7 @@ public class TeacherAssignmentController {
         model.addAttribute("subjects", teacherSubjects);
         model.addAttribute("classrooms", allClassrooms);
         model.addAttribute("teacher", teacher);
+        model.addAttribute("isEdit", false);
         return "teacher/create-assignment";
     }
 
@@ -92,6 +93,7 @@ public class TeacherAssignmentController {
             model.addAttribute("subjects", teacherSubjects);
             model.addAttribute("classrooms", allClassrooms);
             model.addAttribute("teacher", teacher);
+            model.addAttribute("isEdit", false);
             return "teacher/create-assignment";
         }
         try {
@@ -114,7 +116,7 @@ public class TeacherAssignmentController {
     public String showGradeAssignmentForm(@PathVariable Long id, Model model) {
         Assignment assignment = teacherService.getAssignmentById(id);
         model.addAttribute("assignment", assignment);
-        return "teacher/grade-assignment";
+        return "teacher/assignment-grade";
     }
 
     @PostMapping("/{id}/grade")

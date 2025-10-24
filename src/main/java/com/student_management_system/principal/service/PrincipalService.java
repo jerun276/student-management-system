@@ -28,6 +28,16 @@ import com.student_management_system.common.model.AcademicYear;
 import com.student_management_system.common.service.AcademicYearService;
 import com.student_management_system.common.repository.TimeSlotRepository;
 
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
+import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.element.Cell;
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.layout.properties.UnitValue;
+import java.io.ByteArrayOutputStream;
+
 import java.util.ArrayList;
 
 import java.math.BigDecimal;
@@ -48,8 +58,10 @@ public class PrincipalService {
     private final AcademicYearService academicYearService;
     private final TimetableEntryRepository timetableEntryRepository;
     private final TimeSlotRepository timeSlotRepository;
+    private final com.student_management_system.common.repository.ClassroomRepository classroomRepository;
+    private final com.student_management_system.common.repository.EnrollmentRepository enrollmentRepository;
 
-    public PrincipalService(AssignmentRepository assignmentRepository, AnnouncementRepository announcementRepository, UserRepository userRepository, BudgetRequestRepository budgetRequestRepository, NotificationService notificationService, SubjectRepository subjectRepository, AcademicYearService academicYearService, TimetableEntryRepository timetableEntryRepository, TimeSlotRepository timeSlotRepository) {
+    public PrincipalService(AssignmentRepository assignmentRepository, AnnouncementRepository announcementRepository, UserRepository userRepository, BudgetRequestRepository budgetRequestRepository, NotificationService notificationService, SubjectRepository subjectRepository, AcademicYearService academicYearService, TimetableEntryRepository timetableEntryRepository, TimeSlotRepository timeSlotRepository, com.student_management_system.common.repository.ClassroomRepository classroomRepository, com.student_management_system.common.repository.EnrollmentRepository enrollmentRepository) {
         this.assignmentRepository = assignmentRepository;
         this.announcementRepository = announcementRepository;
         this.userRepository = userRepository;
@@ -59,6 +71,8 @@ public class PrincipalService {
         this.academicYearService = academicYearService;
         this.timetableEntryRepository = timetableEntryRepository;
         this.timeSlotRepository = timeSlotRepository;
+        this.classroomRepository = classroomRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     public List<SubjectPerformanceDto> getSubjectPerformanceReport() {
@@ -129,6 +143,13 @@ public class PrincipalService {
         announcementRepository.save(announcement);
         
         sendAnnouncementNotifications(title, content);
+    }
+    
+    @Transactional
+    public void deleteAnnouncement(Long id) {
+        Announcement announcement = announcementRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Announcement not found"));
+        announcementRepository.delete(announcement);
     }
     
     private void sendAnnouncementNotifications(String title, String content) {
@@ -276,6 +297,23 @@ public class PrincipalService {
         return userRepository.findAll();
     }
     
+    // Get all users except admin
+    public List<User> getAllUsersExceptAdmin() {
+        return userRepository.findAll().stream()
+                .filter(user -> !user.getRole().toString().equals("ROLE_ADMIN"))
+                .collect(Collectors.toList());
+    }
+    
+    // Get user by ID
+    public java.util.Optional<User> getUserById(Long id) {
+        return userRepository.findById(id);
+    }
+    
+    // Get budget request by ID
+    public java.util.Optional<BudgetRequest> getBudgetRequestById(Long id) {
+        return budgetRequestRepository.findById(id);
+    }
+    
     // Get time slots for grid display
     public List<Object> getTimeSlots() {
         // Get all time slots from database
@@ -297,14 +335,347 @@ public class PrincipalService {
     // Get timetable grid organized by day and time slot
     public Map<String, Object> getTimetableGrid() {
         Map<String, Object> grid = new java.util.HashMap<>();
-        List<Object> allEntries = getMasterTimetable();
+        // List<Object> allEntries = getMasterTimetable();
         
         // Organize entries by day_timeslot key
-        for (Object entry : allEntries) {
-            // This would need proper casting and organization
-            // For now, return empty grid
-        }
+        // for (Object entry : allEntries) {
+        //     // This would need proper casting and organization
+        //     // For now, return empty grid
+        // }
         
         return grid;
+    }
+    
+    // Export reports as CSV
+    public String exportReportsAsCSV() {
+        StringBuilder csv = new StringBuilder();
+        
+        // Header
+        csv.append("SUBJECT PERFORMANCE REPORT\n");
+        csv.append("Subject,Graded Assignments,Average Grade\n");
+        
+        // Subject Performance Data
+        List<SubjectPerformanceDto> performanceReport = getSubjectPerformanceReport();
+        for (SubjectPerformanceDto report : performanceReport) {
+            csv.append(report.getSubjectName()).append(",")
+               .append(report.getGradedAssignmentsCount()).append(",")
+               .append(report.getAverageGrade()).append("\n");
+        }
+        
+        csv.append("\n\nTEACHER PERFORMANCE REPORT\n");
+        csv.append("Teacher Name,Total Assignments,Graded,Completion Rate\n");
+        
+        // Teacher Performance Data
+        List<TeacherPerformanceDto> teacherReport = getTeacherPerformanceReport();
+        for (TeacherPerformanceDto report : teacherReport) {
+            csv.append(report.getTeacherName()).append(",")
+               .append(report.getTotalAssignmentsAssigned()).append(",")
+               .append(report.getAssignmentsGraded()).append(",")
+               .append(report.getGradingCompletionRate()).append("%\n");
+        }
+        
+        return csv.toString();
+    }
+    
+    // Export reports as JSON
+    public String exportReportsAsJSON() {
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"reportGeneratedAt\": \"").append(LocalDateTime.now()).append("\",\n");
+        
+        json.append("  \"subjectPerformance\": [\n");
+        List<SubjectPerformanceDto> performanceReport = getSubjectPerformanceReport();
+        for (int i = 0; i < performanceReport.size(); i++) {
+            SubjectPerformanceDto report = performanceReport.get(i);
+            json.append("    {\n");
+            json.append("      \"subject\": \"").append(report.getSubjectName()).append("\",\n");
+            json.append("      \"gradedAssignments\": ").append(report.getGradedAssignmentsCount()).append(",\n");
+            json.append("      \"averageGrade\": ").append(report.getAverageGrade()).append("\n");
+            json.append("    }");
+            if (i < performanceReport.size() - 1) json.append(",");
+            json.append("\n");
+        }
+        json.append("  ],\n");
+        
+        json.append("  \"teacherPerformance\": [\n");
+        List<TeacherPerformanceDto> teacherReport = getTeacherPerformanceReport();
+        for (int i = 0; i < teacherReport.size(); i++) {
+            TeacherPerformanceDto report = teacherReport.get(i);
+            json.append("    {\n");
+            json.append("      \"teacher\": \"").append(report.getTeacherName()).append("\",\n");
+            json.append("      \"totalAssignments\": ").append(report.getTotalAssignmentsAssigned()).append(",\n");
+            json.append("      \"graded\": ").append(report.getAssignmentsGraded()).append(",\n");
+            json.append("      \"completionRate\": ").append(report.getGradingCompletionRate()).append("\n");
+            json.append("    }");
+            if (i < teacherReport.size() - 1) json.append(",");
+            json.append("\n");
+        }
+        json.append("  ]\n");
+        json.append("}\n");
+        
+        return json.toString();
+    }
+    
+    // Export reports as PDF
+    public byte[] exportReportsAsPDF() throws Exception {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(outputStream);
+        PdfDocument pdfDoc = new PdfDocument(writer);
+        Document document = new Document(pdfDoc);
+        
+        // Title
+        Paragraph title = new Paragraph("School Reports")
+                .setFontSize(24)
+                .setBold()
+                .setTextAlignment(TextAlignment.CENTER);
+        document.add(title);
+        
+        // Generated date
+        Paragraph date = new Paragraph("Generated: " + LocalDateTime.now())
+                .setFontSize(10)
+                .setTextAlignment(TextAlignment.CENTER);
+        document.add(date);
+        
+        document.add(new Paragraph("\n"));
+        
+        // Subject Performance Section
+        Paragraph subjectTitle = new Paragraph("Subject Performance Report")
+                .setFontSize(14)
+                .setBold();
+        document.add(subjectTitle);
+        
+        // Subject Performance Table
+        Table subjectTable = new Table(UnitValue.createPercentArray(new float[]{3, 2, 2}))
+                .useAllAvailableWidth();
+        
+        subjectTable.addCell(new Cell().add(new Paragraph("Subject").setBold()));
+        subjectTable.addCell(new Cell().add(new Paragraph("Graded Assignments").setBold()));
+        subjectTable.addCell(new Cell().add(new Paragraph("Average Grade").setBold()));
+        
+        List<SubjectPerformanceDto> performanceReport = getSubjectPerformanceReport();
+        for (SubjectPerformanceDto report : performanceReport) {
+            subjectTable.addCell(new Cell().add(new Paragraph(report.getSubjectName())));
+            subjectTable.addCell(new Cell().add(new Paragraph(String.valueOf(report.getGradedAssignmentsCount()))));
+            subjectTable.addCell(new Cell().add(new Paragraph(report.getAverageGrade().toString())));
+        }
+        
+        document.add(subjectTable);
+        document.add(new Paragraph("\n"));
+        
+        // Teacher Performance Section
+        Paragraph teacherTitle = new Paragraph("Teacher Performance Report")
+                .setFontSize(14)
+                .setBold();
+        document.add(teacherTitle);
+        
+        // Teacher Performance Table
+        Table teacherTable = new Table(UnitValue.createPercentArray(new float[]{2, 2, 2, 2}))
+                .useAllAvailableWidth();
+        
+        teacherTable.addCell(new Cell().add(new Paragraph("Teacher Name").setBold()));
+        teacherTable.addCell(new Cell().add(new Paragraph("Total Assignments").setBold()));
+        teacherTable.addCell(new Cell().add(new Paragraph("Graded").setBold()));
+        teacherTable.addCell(new Cell().add(new Paragraph("Completion Rate").setBold()));
+        
+        List<TeacherPerformanceDto> teacherReport = getTeacherPerformanceReport();
+        for (TeacherPerformanceDto report : teacherReport) {
+            teacherTable.addCell(new Cell().add(new Paragraph(report.getTeacherName())));
+            teacherTable.addCell(new Cell().add(new Paragraph(String.valueOf(report.getTotalAssignmentsAssigned()))));
+            teacherTable.addCell(new Cell().add(new Paragraph(String.valueOf(report.getAssignmentsGraded()))));
+            teacherTable.addCell(new Cell().add(new Paragraph(report.getGradingCompletionRate() + "%")));
+        }
+        
+        document.add(teacherTable);
+        
+        document.close();
+        return outputStream.toByteArray();
+    }
+    
+    // Export all users data as CSV
+    public String exportUsersAsCSV() {
+        StringBuilder csv = new StringBuilder();
+        
+        // Header
+        csv.append("USERS DATA REPORT\n");
+        csv.append("ID,Username,Email,First Name,Last Name,Role,Status,Phone,Address\n");
+        
+        // Get all users
+        List<User> allUsers = userRepository.findAll();
+        for (User user : allUsers) {
+            csv.append(user.getId()).append(",")
+               .append(user.getUsername()).append(",")
+               .append(user.getEmail()).append(",")
+               .append(user.getFirstName() != null ? user.getFirstName() : "").append(",")
+               .append(user.getLastName() != null ? user.getLastName() : "").append(",")
+               .append(user.getRole()).append(",")
+               .append(user.isEnabled() ? "Active" : "Inactive").append(",")
+               .append(user.getPhoneNumber() != null ? user.getPhoneNumber() : "").append(",")
+               .append(user.getAddress() != null ? user.getAddress() : "").append("\n");
+        }
+        
+        return csv.toString();
+    }
+    
+    // Export all users data as JSON
+    public String exportUsersAsJSON() {
+        StringBuilder json = new StringBuilder();
+        json.append("{\n");
+        json.append("  \"reportGeneratedAt\": \"").append(LocalDateTime.now()).append("\",\n");
+        json.append("  \"users\": [\n");
+        
+        List<User> allUsers = userRepository.findAll();
+        for (int i = 0; i < allUsers.size(); i++) {
+            User user = allUsers.get(i);
+            json.append("    {\n");
+            json.append("      \"id\": ").append(user.getId()).append(",\n");
+            json.append("      \"username\": \"").append(user.getUsername()).append("\",\n");
+            json.append("      \"email\": \"").append(user.getEmail()).append("\",\n");
+            json.append("      \"firstName\": \"").append(user.getFirstName() != null ? user.getFirstName() : "").append("\",\n");
+            json.append("      \"lastName\": \"").append(user.getLastName() != null ? user.getLastName() : "").append("\",\n");
+            json.append("      \"role\": \"").append(user.getRole()).append("\",\n");
+            json.append("      \"status\": \"").append(user.isEnabled() ? "Active" : "Inactive").append("\",\n");
+            json.append("      \"phone\": \"").append(user.getPhoneNumber() != null ? user.getPhoneNumber() : "").append("\",\n");
+            json.append("      \"address\": \"").append(user.getAddress() != null ? user.getAddress() : "").append("\"\n");
+            json.append("    }");
+            if (i < allUsers.size() - 1) json.append(",");
+            json.append("\n");
+        }
+        
+        json.append("  ]\n");
+        json.append("}\n");
+        
+        return json.toString();
+    }
+    
+    // Export all users data as PDF
+    public byte[] exportUsersAsPDF() throws Exception {
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        PdfWriter writer = new PdfWriter(outputStream);
+        PdfDocument pdfDoc = new PdfDocument(writer);
+        Document document = new Document(pdfDoc);
+        
+        // Title
+        Paragraph title = new Paragraph("Users Data Report")
+                .setFontSize(24)
+                .setBold()
+                .setTextAlignment(TextAlignment.CENTER);
+        document.add(title);
+        
+        // Generated date
+        Paragraph date = new Paragraph("Generated: " + LocalDateTime.now())
+                .setFontSize(10)
+                .setTextAlignment(TextAlignment.CENTER);
+        document.add(date);
+        
+        document.add(new Paragraph("\n"));
+        
+        // Users Table
+        Table usersTable = new Table(UnitValue.createPercentArray(new float[]{1f, 2f, 2.5f, 1.5f, 1.5f, 1.5f, 1f, 1.5f}))
+                .useAllAvailableWidth();
+        
+        usersTable.addCell(new Cell().add(new Paragraph("ID").setBold()));
+        usersTable.addCell(new Cell().add(new Paragraph("Username").setBold()));
+        usersTable.addCell(new Cell().add(new Paragraph("Email").setBold()));
+        usersTable.addCell(new Cell().add(new Paragraph("First Name").setBold()));
+        usersTable.addCell(new Cell().add(new Paragraph("Last Name").setBold()));
+        usersTable.addCell(new Cell().add(new Paragraph("Role").setBold()));
+        usersTable.addCell(new Cell().add(new Paragraph("Status").setBold()));
+        usersTable.addCell(new Cell().add(new Paragraph("Phone").setBold()));
+        
+        List<User> allUsers = userRepository.findAll();
+        for (User user : allUsers) {
+            usersTable.addCell(new Cell().add(new Paragraph(String.valueOf(user.getId()))));
+            usersTable.addCell(new Cell().add(new Paragraph(user.getUsername())));
+            usersTable.addCell(new Cell().add(new Paragraph(user.getEmail())));
+            usersTable.addCell(new Cell().add(new Paragraph(user.getFirstName() != null ? user.getFirstName() : "")));
+            usersTable.addCell(new Cell().add(new Paragraph(user.getLastName() != null ? user.getLastName() : "")));
+            usersTable.addCell(new Cell().add(new Paragraph(user.getRole().toString())));
+            usersTable.addCell(new Cell().add(new Paragraph(user.isEnabled() ? "Active" : "Inactive")));
+            usersTable.addCell(new Cell().add(new Paragraph(user.getPhoneNumber() != null ? user.getPhoneNumber() : "")));
+        }
+        
+        document.add(usersTable);
+        
+        document.close();
+        return outputStream.toByteArray();
+    }
+    
+    // Get all classrooms with teacher and student details
+    public List<Map<String, Object>> getClassroomsWithDetails() {
+        List<Map<String, Object>> classroomDetails = new ArrayList<>();
+        
+        // Get all classrooms from database
+        List<com.student_management_system.common.model.Classroom> allClassrooms = classroomRepository.findAll();
+        
+        for (com.student_management_system.common.model.Classroom classroom : allClassrooms) {
+            Map<String, Object> classInfo = new java.util.HashMap<>();
+            classInfo.put("id", classroom.getId());
+            classInfo.put("name", classroom.getName());
+            classInfo.put("gradeLevel", classroom.getGradeLevel() != null ? classroom.getGradeLevel().getName() : "N/A");
+            classInfo.put("medium", classroom.getMedium() != null ? classroom.getMedium().toString() : "N/A");
+            classInfo.put("academicYear", classroom.getAcademicYear() != null ? classroom.getAcademicYear().getName() : "N/A");
+            
+            // Get class teacher
+            if (classroom.getClassTeacher() != null) {
+                classInfo.put("teacher", classroom.getClassTeacher().getUsername());
+                classInfo.put("teacherEmail", classroom.getClassTeacher().getEmail());
+            } else {
+                classInfo.put("teacher", "Not Assigned");
+                classInfo.put("teacherEmail", "N/A");
+            }
+            
+            // Get enrolled students from enrollments (not assignments)
+            List<User> enrolledStudents = enrollmentRepository.findStudentsByClassroom(classroom);
+            
+            classInfo.put("studentCount", enrolledStudents.size());
+            classInfo.put("students", enrolledStudents);
+            
+            classroomDetails.add(classInfo);
+        }
+        
+        return classroomDetails;
+    }
+    
+    // Get grades for a specific classroom
+    public List<Map<String, Object>> getGradesForClassroom(Long classroomId) {
+        List<Map<String, Object>> grades = new ArrayList<>();
+        
+        // Get all assignments for this classroom
+        List<Assignment> classroomAssignments = assignmentRepository.findAll().stream()
+                .filter(a -> a.getClassroom() != null && a.getClassroom().getId().equals(classroomId))
+                .collect(Collectors.toList());
+        
+        if (classroomAssignments.isEmpty()) {
+            return grades;
+        }
+        
+        // Get unique students from assignments
+        List<User> enrolledStudents = classroomAssignments.stream()
+                .map(Assignment::getUser)
+                .distinct()
+                .collect(Collectors.toList());
+        
+        for (User student : enrolledStudents) {
+            Map<String, Object> studentGrades = new java.util.HashMap<>();
+            studentGrades.put("studentId", student.getId());
+            studentGrades.put("studentName", student.getUsername());
+            studentGrades.put("studentEmail", student.getEmail());
+            
+            List<Map<String, String>> assignmentGrades = new ArrayList<>();
+            for (Assignment assignment : classroomAssignments) {
+                if (assignment.getUser() != null && assignment.getUser().getId().equals(student.getId())) {
+                    Map<String, String> assignmentGrade = new java.util.HashMap<>();
+                    assignmentGrade.put("assignmentTitle", assignment.getTitle());
+                    assignmentGrade.put("grade", assignment.getGrade() != null ? assignment.getGrade() : "Not Graded");
+                    assignmentGrade.put("status", assignment.getStatus().toString());
+                    assignmentGrades.add(assignmentGrade);
+                }
+            }
+            
+            studentGrades.put("assignments", assignmentGrades);
+            grades.add(studentGrades);
+        }
+        
+        return grades;
     }
 }

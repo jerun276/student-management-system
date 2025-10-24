@@ -26,7 +26,8 @@ import java.time.LocalDateTime;
 import java.time.LocalDate;
 
 import java.math.BigDecimal;
-
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -205,5 +206,49 @@ public class StaffService {
         // 3. Set the user who is booking and save
         booking.setBookedBy(bookedBy);
         return bookingRepository.save(booking);
+    }
+        
+    public List<User> getAllStudents() {
+        return userRepository.findByRole(com.student_management_system.user_management.model.Role.ROLE_STUDENT);
+    }
+    
+    public List<Object> getAllGradeLevels() {
+        // This would need GradeLevelRepository
+        return Collections.emptyList();
+    }
+    
+    @Transactional
+    public void assignFeeToStudent(Long studentId, String title, BigDecimal amount, LocalDate dueDate) {
+        User student = userRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+        
+        Fee fee = new Fee();
+        fee.setStudent(student);
+        fee.setTitle(title);
+        fee.setTotalAmount(amount);
+        fee.setAmountPaid(BigDecimal.ZERO);
+        fee.setDueDate(dueDate);
+        fee.setStatus(FeeStatus.UNPAID);
+        
+        feeRepository.save(fee);
+    }
+    
+    @Transactional
+    public void assignFeeToMultipleStudents(List<Long> studentIds, String title, BigDecimal amount, LocalDate dueDate) {
+        for (Long studentId : studentIds) {
+            assignFeeToStudent(studentId, title, amount, dueDate);
+        }
+    }
+    
+    @Transactional
+    public void assignFeeToGradeLevel(Long gradeLevelId, String title, BigDecimal amount, LocalDate dueDate) {
+        // Get all students in this grade level
+        // This would need to query students by grade level
+        // For now, just create a placeholder
+        List<User> studentsInGrade = new ArrayList<>();
+        
+        for (User student : studentsInGrade) {
+            assignFeeToStudent(student.getId(), title, amount, dueDate);
+        }
     }
 }

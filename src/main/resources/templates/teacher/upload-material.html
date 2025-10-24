@@ -2,48 +2,129 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Upload Study Material</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Study Material - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-<body class="bg-surface">
-<div th:replace="~{fragments/header :: header}"></div>
-<main class="container mx-auto p-4">
-    <div class="card bg-base-100 shadow-xl max-w-2xl mx-auto">
-        <div class="card-body">
-            <h2 class="card-title text-2xl">Upload New Study Material</h2>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
 
-            <form th:action="@{/teacher/materials/upload}" method="post" enctype="multipart/form-data"
-                  class="space-y-4 mt-4">
-                <div class="form-control">
-                    <label class="label"><span class="label-text">Title</span></label>
-                    <input type="text" name="title" class="input input-bordered" placeholder="e.g., Chapter 1 Notes"
-                           required/>
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Breadcrumb -->
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a th:href="@{/teacher/dashboard}" class="text-decoration-none"><i class="bi bi-house"></i> Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/teacher/materials}" class="text-decoration-none"><i class="bi bi-file-earmark-pdf"></i> Materials</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"><i class="bi bi-cloud-upload"></i> Upload Material</li>
+                </ol>
+            </nav>
+
+            <!-- Page Header -->
+            <div class="mb-4">
+                <h1 class="h2 text-primary fw-bold mb-0"><i class="bi bi-cloud-upload"></i> Upload New Study Material</h1>
+                <p class="text-muted small mt-1">Upload resources for your subjects</p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <div class="card">
+                        <div class="card-header bg-gradient">
+                            <h5 class="mb-0 text-black"><i class="bi bi-file-earmark-pdf"></i> Material Details</h5>
+                        </div>
+                        <div class="card-body">
+                            <form th:action="@{/teacher/materials/upload}" method="post" enctype="multipart/form-data" id="uploadForm">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                                    <input type="text" id="title" name="title" class="form-control" placeholder="e.g., Chapter 1 Notes" required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description</label>
+                                    <textarea id="description" name="description" class="form-control" rows="3" placeholder="A brief description of the material"></textarea>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="subjectId" class="form-label">Subject <span class="text-danger">*</span></label>
+                                    <select id="subjectId" name="subjectId" class="form-select" required>
+                                        <option value="">-- Select a Subject --</option>
+                                        <option th:each="subject : ${subjects}" th:value="${subject.id}" th:text="${subject.name}" th:data-grade-id="${subject.gradeLevel.id}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="classroomId" class="form-label">Classroom <span class="text-danger">*</span></label>
+                                    <select id="classroomId" name="classroomId" class="form-select" disabled required>
+                                        <option value="">-- Select Subject First --</option>
+                                        <option th:each="classroom : ${classrooms}" th:value="${classroom.id}" th:text="${classroom.gradeLevel.name + '-' + classroom.name + ' (' + classroom.medium + ')'}" th:data-grade-id="${classroom.gradeLevel.id}"></option>
+                                    </select>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="file" class="form-label">File <span class="text-danger">*</span></label>
+                                    <input type="file" id="file" name="file" class="form-control" required>
+                                    <small class="text-muted d-block mt-1">Supported formats: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX</small>
+                                </div>
+
+                                <div class="alert alert-info" role="alert">
+                                    <i class="bi bi-info-circle"></i>
+                                    <small>Make sure the file is properly formatted and relevant to the subject.</small>
+                                </div>
+
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a th:href="@{/teacher/materials}" class="btn btn-outline-secondary">Cancel</a>
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="bi bi-cloud-upload"></i> Upload Material
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text">Description</span></label>
-                    <textarea name="description" class="textarea textarea-bordered"
-                              placeholder="A brief description of the material"></textarea>
-                </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text">Subject</span></label>
-                    <select name="subjectId" class="select select-bordered" required>
-                        <option value="">Select a Subject</option>
-                        <option th:each="subject : ${subjects}" th:value="${subject.id}"
-                                th:text="${subject.name}"></option>
-                    </select>
-                </div>
-                <div class="form-control">
-                    <label class="label"><span class="label-text">File</span></label>
-                    <input type="file" name="file" class="file-input file-input-bordered w-full" required/>
-                </div>
-                <div class="card-actions justify-end mt-6">
-                    <a th:href="@{/teacher/dashboard}" class="btn btn-ghost">Cancel</a>
-                    <button type="submit" class="btn btn-primary">Upload</button>
-                </div>
-            </form>
+            </div>
         </div>
-    </div>
-</main>
-<div th:replace="~{fragments/footer :: footer}"></div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const subjectSelect = document.getElementById('subjectId');
+            const classroomSelect = document.getElementById('classroomId');
+
+            if (subjectSelect && classroomSelect) {
+                // Store all classroom options
+                const allClassroomOptions = Array.from(classroomSelect.options).slice(1);
+
+                subjectSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const selectedGradeId = selectedOption.getAttribute('data-grade-id');
+
+                    // Clear and reset
+                    classroomSelect.innerHTML = '<option value="">-- Select Classroom --</option>';
+
+                    if (selectedGradeId) {
+                        // Filter classrooms by grade level
+                        const filteredClassrooms = allClassroomOptions.filter(option => 
+                            option.getAttribute('data-grade-id') === selectedGradeId
+                        );
+
+                        // Add filtered classrooms to dropdown
+                        filteredClassrooms.forEach(option => {
+                            classroomSelect.appendChild(option.cloneNode(true));
+                        });
+
+                        classroomSelect.disabled = false;
+                    } else {
+                        classroomSelect.disabled = true;
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html>

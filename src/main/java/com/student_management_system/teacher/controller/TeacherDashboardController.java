@@ -12,7 +12,6 @@ import com.student_management_system.common.model.Classroom;
 import com.student_management_system.common.service.AcademicYearService;
 import com.student_management_system.common.service.TimetableService;
 import com.student_management_system.common.service.TimeSlotService;
-import com.student_management_system.common.repository.EnrollmentRepository;
 import com.student_management_system.common.repository.ClassroomRepository;
 import com.student_management_system.user_management.model.User;
 import com.student_management_system.user_management.repository.UserRepository;
@@ -42,7 +41,6 @@ public class TeacherDashboardController {
     private final TimeSlotService timeSlotService;
     private final UserRepository userRepository;
     private final SubjectRepository subjectRepository;
-    private final EnrollmentRepository enrollmentRepository;
     private final ClassroomRepository classroomRepository;
 
     public TeacherDashboardController(TeacherService teacherService, 
@@ -51,7 +49,6 @@ public class TeacherDashboardController {
                                     TimeSlotService timeSlotService,
                                     UserRepository userRepository,
                                     SubjectRepository subjectRepository,
-                                    EnrollmentRepository enrollmentRepository,
                                     ClassroomRepository classroomRepository) {
         this.teacherService = teacherService;
         this.academicYearService = academicYearService;
@@ -59,7 +56,6 @@ public class TeacherDashboardController {
         this.timeSlotService = timeSlotService;
         this.userRepository = userRepository;
         this.subjectRepository = subjectRepository;
-        this.enrollmentRepository = enrollmentRepository;
         this.classroomRepository = classroomRepository;
     }
 
@@ -133,6 +129,10 @@ public class TeacherDashboardController {
         model.addAttribute("mySubjects", mySubjects);
         model.addAttribute("teacher", teacher);
 
+        // Get current academic year
+        Optional<AcademicYear> currentYear = academicYearService.getCurrentAcademicYear();
+        model.addAttribute("selectedAcademicYear", currentYear.orElse(null));
+
         // Calculate total students for all subjects
         int totalStudents = mySubjects.stream()
             .mapToInt(subject -> {
@@ -148,6 +148,34 @@ public class TeacherDashboardController {
         return "teacher/subjects";
     }
 
+
+    @GetMapping("/budget/request")
+    public String showBudgetRequestForm(Model model) {
+        // Get current teacher
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User teacher = userRepository.findByUsername(currentUsername)
+            .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+        
+        model.addAttribute("teacher", teacher);
+        return "teacher/budget-request";
+    }
+    
+    @GetMapping("/budget/history")
+    public String viewBudgetRequestHistory(Model model) {
+        // Get current teacher
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+        User teacher = userRepository.findByUsername(currentUsername)
+            .orElseThrow(() -> new RuntimeException("Current teacher not found"));
+        
+        // Get budget request history
+        var budgetRequests = teacherService.getBudgetRequestHistory();
+        
+        model.addAttribute("teacher", teacher);
+        model.addAttribute("budgetRequests", budgetRequests);
+        return "teacher/budget-history";
+    }
 
     @PostMapping("/budget/request")
     public String submitBudgetRequest(@RequestParam String title,

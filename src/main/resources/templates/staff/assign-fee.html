@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Assign New Fee - SchoolSys</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div th:replace="~{fragments/header :: sidebar}"></div>
+
+    <main class="main-content">
+        <div class="container-fluid">
+            <!-- Page Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h1 class="h2 text-primary fw-bold mb-0"><i class="bi bi-plus-circle"></i> Assign New Fee</h1>
+                    <p class="text-muted small">Create and assign fees to students</p>
+                </div>
+                <a th:href="@{/staff/dashboard}" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left"></i> Back to Dashboard
+                </a>
+            </div>
+
+            <!-- Tabs for Assignment Options -->
+            <div class="card">
+                <div class="card-header bg-gradient">
+                    <h5 class="mb-0 text-black"><i class="bi bi-sliders"></i> Select Assignment Type</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="assignmentTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="single-tab" data-bs-toggle="tab" data-bs-target="#single" type="button" role="tab">
+                                <i class="bi bi-person"></i> Single Student
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="multiple-tab" data-bs-toggle="tab" data-bs-target="#multiple" type="button" role="tab">
+                                <i class="bi bi-people"></i> Multiple Students
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="grade-tab" data-bs-toggle="tab" data-bs-target="#grade" type="button" role="tab">
+                                <i class="bi bi-building"></i> Grade Level
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content" id="assignmentTabContent">
+                        <!-- Single Student Tab -->
+                        <div class="tab-pane fade show active" id="single" role="tabpanel">
+                            <form th:action="@{/staff/fees/assign-single}" method="post" class="mt-4">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="singleStudent" class="form-label">Select Student</label>
+                                        <select id="singleStudent" name="studentId" class="form-select" required>
+                                            <option value="">-- Choose a student --</option>
+                                            <option th:each="student : ${students}" th:value="${student.id}" th:text="${student.firstName + ' ' + student.lastName + ' (' + student.username + ')'}">Student Name</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="singleTitle" class="form-label">Fee Title</label>
+                                        <input type="text" id="singleTitle" name="title" class="form-control" placeholder="e.g., Annual Tuition Fee 2025" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="singleAmount" class="form-label">Amount (LKR)</label>
+                                        <input type="number" id="singleAmount" name="amount" class="form-control" placeholder="0.00" step="0.01" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="singleDueDate" class="form-label">Due Date</label>
+                                        <input type="date" id="singleDueDate" name="dueDate" class="form-control" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle"></i> Assign Fee
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Multiple Students Tab -->
+                        <div class="tab-pane fade" id="multiple" role="tabpanel">
+                            <form th:action="@{/staff/fees/assign-multiple}" method="post" class="mt-4">
+                                <div class="row g-3">
+                                    <div class="col-12">
+                                        <label for="multipleStudents" class="form-label">Select Students</label>
+                                        <select id="multipleStudents" name="studentIds" class="form-select" multiple required size="8">
+                                            <option th:each="student : ${students}" th:value="${student.id}" th:text="${student.firstName + ' ' + student.lastName + ' (' + student.username + ')'}">Student Name</option>
+                                        </select>
+                                        <small class="text-muted d-block mt-2">Hold Ctrl (Cmd on Mac) to select multiple students</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="multiTitle" class="form-label">Fee Title</label>
+                                        <input type="text" id="multiTitle" name="title" class="form-control" placeholder="e.g., Annual Tuition Fee 2025" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="multiAmount" class="form-label">Amount (LKR)</label>
+                                        <input type="number" id="multiAmount" name="amount" class="form-control" placeholder="0.00" step="0.01" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="multiDueDate" class="form-label">Due Date</label>
+                                        <input type="date" id="multiDueDate" name="dueDate" class="form-control" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle"></i> Assign Fees to Selected Students
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Grade Level Tab -->
+                        <div class="tab-pane fade" id="grade" role="tabpanel">
+                            <form th:action="@{/staff/fees/assign-grade-level}" method="post" class="mt-4">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="gradeLevel" class="form-label">Select Grade Level</label>
+                                        <select id="gradeLevel" name="gradeLevelId" class="form-select" required>
+                                            <option value="">-- Choose a grade level --</option>
+                                            <option th:each="grade : ${gradeLevels}" th:value="${grade.id}" th:text="${grade.name}">Grade Level</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="gradeTitle" class="form-label">Fee Title</label>
+                                        <input type="text" id="gradeTitle" name="title" class="form-control" placeholder="e.g., Annual Tuition Fee 2025" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="gradeAmount" class="form-label">Amount (LKR)</label>
+                                        <input type="number" id="gradeAmount" name="amount" class="form-control" placeholder="0.00" step="0.01" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="gradeDueDate" class="form-label">Due Date</label>
+                                        <input type="date" id="gradeDueDate" name="dueDate" class="form-control" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="bi bi-check-circle"></i> Assign Fee to Grade Level
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div th:replace="~{fragments/footer :: footer}"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

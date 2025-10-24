@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.List;
 import com.student_management_system.staff.dto.RecordPaymentDto;
 import com.student_management_system.staff.model.Fee;
 import com.student_management_system.staff.model.PaymentMethod;
@@ -70,6 +71,58 @@ public class StaffDashboardController {
             redirectAttributes.addFlashAttribute("successMessage", "Reminder sent successfully!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("errorMessage", "Failed to send reminder: " + e.getMessage());
+        }
+        return "redirect:/staff/dashboard";
+    }
+
+    @GetMapping("/fees/assign")
+    public String showAssignFeeForm(Model model) {
+        model.addAttribute("students", staffService.getAllStudents());
+        model.addAttribute("gradeLevels", staffService.getAllGradeLevels());
+        return "staff/assign-fee";
+    }
+
+    @PostMapping("/fees/assign-single")
+    public String assignFeeToStudent(@RequestParam Long studentId,
+                                     @RequestParam String title,
+                                     @RequestParam java.math.BigDecimal amount,
+                                     @RequestParam String dueDate,
+                                     RedirectAttributes redirectAttributes) {
+        try {
+            staffService.assignFeeToStudent(studentId, title, amount, java.time.LocalDate.parse(dueDate));
+            redirectAttributes.addFlashAttribute("successMessage", "Fee assigned to student successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to assign fee: " + e.getMessage());
+        }
+        return "redirect:/staff/dashboard";
+    }
+
+    @PostMapping("/fees/assign-multiple")
+    public String assignFeeToMultipleStudents(@RequestParam List<Long> studentIds,
+                                              @RequestParam String title,
+                                              @RequestParam java.math.BigDecimal amount,
+                                              @RequestParam String dueDate,
+                                              RedirectAttributes redirectAttributes) {
+        try {
+            staffService.assignFeeToMultipleStudents(studentIds, title, amount, java.time.LocalDate.parse(dueDate));
+            redirectAttributes.addFlashAttribute("successMessage", "Fee assigned to " + studentIds.size() + " students successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to assign fee: " + e.getMessage());
+        }
+        return "redirect:/staff/dashboard";
+    }
+
+    @PostMapping("/fees/assign-grade-level")
+    public String assignFeeToGradeLevel(@RequestParam Long gradeLevelId,
+                                        @RequestParam String title,
+                                        @RequestParam java.math.BigDecimal amount,
+                                        @RequestParam String dueDate,
+                                        RedirectAttributes redirectAttributes) {
+        try {
+            staffService.assignFeeToGradeLevel(gradeLevelId, title, amount, java.time.LocalDate.parse(dueDate));
+            redirectAttributes.addFlashAttribute("successMessage", "Fee assigned to grade level successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to assign fee: " + e.getMessage());
         }
         return "redirect:/staff/dashboard";
     }
